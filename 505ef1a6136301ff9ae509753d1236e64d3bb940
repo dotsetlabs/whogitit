@@ -1,0 +1,6960 @@
+{
+  "version": 2,
+  "session": {
+    "session_id": "5671a07d-b667-4f88-9864-d0c43d9063af",
+    "model": {
+      "id": "claude-opus-4-5-20251101",
+      "provider": "anthropic"
+    },
+    "started_at": "2026-01-31T16:43:28.732459+00:00",
+    "prompt_count": 8
+  },
+  "prompts": [
+    {
+      "index": 0,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T16:43:28.732496+00:00",
+      "affected_files": [
+        "src/capture/threeway.rs"
+      ]
+    },
+    {
+      "index": 1,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T16:43:33.720825+00:00",
+      "affected_files": [
+        "src/capture/threeway.rs"
+      ]
+    },
+    {
+      "index": 2,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T16:43:43.491615+00:00",
+      "affected_files": [
+        "src/capture/threeway.rs"
+      ]
+    },
+    {
+      "index": 3,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T16:43:47.792109+00:00",
+      "affected_files": [
+        "src/capture/threeway.rs"
+      ]
+    },
+    {
+      "index": 4,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T16:44:03.914787+00:00",
+      "affected_files": [
+        "src/capture/threeway.rs"
+      ]
+    },
+    {
+      "index": 5,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T16:44:14.080261+00:00",
+      "affected_files": [
+        "src/capture/threeway.rs"
+      ]
+    },
+    {
+      "index": 6,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T16:44:22.725836+00:00",
+      "affected_files": [
+        "src/capture/threeway.rs"
+      ]
+    },
+    {
+      "index": 7,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T16:44:39.408410+00:00",
+      "affected_files": [
+        "src/capture/threeway.rs"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "src/capture/threeway.rs",
+      "lines": [
+        {
+          "line_number": 1,
+          "content": "use std::collections::{HashMap, HashSet};",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 2,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 3,
+          "content": "use similar::{ChangeTag, TextDiff};",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 4,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 5,
+          "content": "use crate::capture::snapshot::{",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 6,
+          "content": "    FileAttributionResult, FileEditHistory, LineAttribution, LineSource,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 7,
+          "content": "};",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 8,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 9,
+          "content": "/// Normalize a line for comparison purposes.",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 10,
+          "content": "/// - Trims trailing whitespace (but preserves leading indentation)",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 11,
+          "content": "/// - Normalizes line endings",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 12,
+          "content": "fn normalize_line(line: &str) -> String {",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 13,
+          "content": "    line.trim_end().to_string()",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 14,
+          "content": "}",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 15,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 16,
+          "content": "/// Normalize a line for use as a hash key.",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 17,
+          "content": "/// Uses the same normalization as normalize_line.",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 18,
+          "content": "fn normalize_for_key(line: &str) -> String {",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 19,
+          "content": "    normalize_line(line)",
+          "source": {
+            "type": "AI",
+            "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0"
+          },
+          "edit_id": "601c5989-e03a-468c-a4d1-c119cdc481a0",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 20,
+          "content": "}",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 21,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 22,
+          "content": "/// Performs three-way attribution analysis",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 23,
+          "content": "///",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 24,
+          "content": "/// Given:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 25,
+          "content": "/// - Original content (before any AI edits)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 26,
+          "content": "/// - AI edit history (sequence of AI changes)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 27,
+          "content": "/// - Final content (what's being committed)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 28,
+          "content": "///",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 29,
+          "content": "/// Determines for each line in final content:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 30,
+          "content": "/// - Was it from the original file?",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 31,
+          "content": "/// - Was it added by AI (and which edit/prompt)?",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 32,
+          "content": "/// - Was it added by AI but modified by human?",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 33,
+          "content": "/// - Was it added by human after AI edits?",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 34,
+          "content": "pub struct ThreeWayAnalyzer;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 35,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 36,
+          "content": "impl ThreeWayAnalyzer {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 37,
+          "content": "    /// Analyze a file's final content against its edit history",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 38,
+          "content": "    pub fn analyze(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 39,
+          "content": "        history: &FileEditHistory,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 40,
+          "content": "        final_content: &str,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 41,
+          "content": "    ) -> FileAttributionResult {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 42,
+          "content": "        let final_lines: Vec<&str> = final_content.lines().collect();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 43,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 44,
+          "content": "        // Build lookup tables for efficient matching",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 45,
+          "content": "        let original_lines = build_line_set(&history.original.content);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 46,
+          "content": "        let ai_line_sources = build_ai_line_map(history);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 47,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 48,
+          "content": "        // Analyze each line in the final content",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 49,
+          "content": "        let mut attributions = Vec::with_capacity(final_lines.len());",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 50,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 51,
+          "content": "        for (idx, line) in final_lines.iter().enumerate() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 52,
+          "content": "            let line_number = (idx + 1) as u32;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 53,
+          "content": "            let attribution = attribute_line(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 54,
+          "content": "                line,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 55,
+          "content": "                line_number,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 56,
+          "content": "                &original_lines,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 57,
+          "content": "                &ai_line_sources,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 58,
+          "content": "                history,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 59,
+          "content": "            );",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 60,
+          "content": "            attributions.push(attribution);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 61,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 62,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 63,
+          "content": "        // Post-process: improve attribution using context",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 64,
+          "content": "        improve_attributions_with_context(&mut attributions, history, final_content);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 65,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 66,
+          "content": "        let summary = FileAttributionResult::compute_summary(&attributions);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 67,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 68,
+          "content": "        FileAttributionResult {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 69,
+          "content": "            path: history.path.clone(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 70,
+          "content": "            lines: attributions,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 71,
+          "content": "            summary,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 72,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 73,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 74,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 75,
+          "content": "    /// Analyze with position-aware diff for better accuracy",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 76,
+          "content": "    pub fn analyze_with_diff(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 77,
+          "content": "        history: &FileEditHistory,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 78,
+          "content": "        final_content: &str,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 79,
+          "content": "    ) -> FileAttributionResult {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 80,
+          "content": "        let final_lines: Vec<&str> = final_content.lines().collect();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 81,
+          "content": "        let mut attributions = Vec::with_capacity(final_lines.len());",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 82,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 83,
+          "content": "        // If no AI edits, everything is original or human",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 84,
+          "content": "        if history.edits.is_empty() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 85,
+          "content": "            for (idx, line) in final_lines.iter().enumerate() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 86,
+          "content": "                let line_number = (idx + 1) as u32;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 87,
+          "content": "                let source = if line_in_content(line, &history.original.content) {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 88,
+          "content": "                    LineSource::Original",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 89,
+          "content": "                } else {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 90,
+          "content": "                    LineSource::Human",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 91,
+          "content": "                };",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 92,
+          "content": "                attributions.push(LineAttribution {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 93,
+          "content": "                    line_number,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 94,
+          "content": "                    content: line.to_string(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 95,
+          "content": "                    source,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 96,
+          "content": "                    edit_id: None,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 97,
+          "content": "                    prompt_index: None,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 98,
+          "content": "                    confidence: 1.0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 99,
+          "content": "                });",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 100,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 101,
+          "content": "            let summary = FileAttributionResult::compute_summary(&attributions);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 102,
+          "content": "            return FileAttributionResult {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 103,
+          "content": "                path: history.path.clone(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 104,
+          "content": "                lines: attributions,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 105,
+          "content": "                summary,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 106,
+          "content": "            };",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 107,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 108,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 109,
+          "content": "        // Perform diff-based analysis",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 110,
+          "content": "        // Compare: original -> final, and latest_ai -> final",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 111,
+          "content": "        let latest_ai = history.latest_ai_content();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 112,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 113,
+          "content": "        // Track which final lines match AI content",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 114,
+          "content": "        let ai_to_final_mapping = diff_map_lines(&latest_ai.content, final_content);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 115,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 116,
+          "content": "        // Track which final lines match original content",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 117,
+          "content": "        let original_to_final_mapping = diff_map_lines(&history.original.content, final_content);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 118,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 119,
+          "content": "        // Build reverse map: final line index -> source",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 120,
+          "content": "        let mut final_line_sources: HashMap<usize, (LineSource, Option<String>, Option<u32>)> =",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 121,
+          "content": "            HashMap::new();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 122,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 123,
+          "content": "        // First pass: mark lines that came from AI edits (takes priority)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 124,
+          "content": "        let ai_line_map = build_ai_line_map(history);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 125,
+          "content": "        for (ai_idx, final_idx) in &ai_to_final_mapping {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 126,
+          "content": "            let ai_line = latest_ai.lines().get(*ai_idx).map(|s| *s).unwrap_or(\"\");",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 127,
+          "content": "            let normalized = normalize_for_key(ai_line);",
+          "source": {
+            "type": "AI",
+            "edit_id": "84d0691f-48eb-4c72-af7f-13fcc13a4556"
+          },
+          "edit_id": "84d0691f-48eb-4c72-af7f-13fcc13a4556",
+          "prompt_index": 6,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 128,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 129,
+          "content": "            // Check if this line came from an AI edit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 130,
+          "content": "            if let Some((edit_id, prompt_idx)) = ai_line_map.get(&normalized) {",
+          "source": {
+            "type": "AI",
+            "edit_id": "84d0691f-48eb-4c72-af7f-13fcc13a4556"
+          },
+          "edit_id": "84d0691f-48eb-4c72-af7f-13fcc13a4556",
+          "prompt_index": 6,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 131,
+          "content": "                final_line_sources.insert(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 132,
+          "content": "                    *final_idx,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 133,
+          "content": "                    (",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 134,
+          "content": "                        LineSource::AI {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 135,
+          "content": "                            edit_id: edit_id.clone(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 136,
+          "content": "                        },",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 137,
+          "content": "                        Some(edit_id.clone()),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 138,
+          "content": "                        Some(*prompt_idx),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 139,
+          "content": "                    ),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 140,
+          "content": "                );",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 141,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 142,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 143,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 144,
+          "content": "        // Second pass: mark lines that exist in original (only if not already AI)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 145,
+          "content": "        for (_, final_idx) in &original_to_final_mapping {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 146,
+          "content": "            if !final_line_sources.contains_key(final_idx) {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 147,
+          "content": "                final_line_sources.insert(*final_idx, (LineSource::Original, None, None));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 148,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 149,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 150,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 151,
+          "content": "        // Third pass: check for AI-modified lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 152,
+          "content": "        for (idx, line) in final_lines.iter().enumerate() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 153,
+          "content": "            if final_line_sources.contains_key(&idx) {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 154,
+          "content": "                continue;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 155,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 156,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 157,
+          "content": "            // Check if this is similar to an AI line (modified)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 158,
+          "content": "            if let Some((edit_id, prompt_idx, similarity)) =",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 159,
+          "content": "                find_similar_ai_line(line, &ai_line_map, 0.6)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 160,
+          "content": "            {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 161,
+          "content": "                final_line_sources.insert(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 162,
+          "content": "                    idx,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 163,
+          "content": "                    (",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 164,
+          "content": "                        LineSource::AIModified {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 165,
+          "content": "                            edit_id: edit_id.clone(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 166,
+          "content": "                            similarity,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 167,
+          "content": "                        },",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 168,
+          "content": "                        Some(edit_id),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 169,
+          "content": "                        Some(prompt_idx),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 170,
+          "content": "                    ),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 171,
+          "content": "                );",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 172,
+          "content": "            } else {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 173,
+          "content": "                // New line added by human",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 174,
+          "content": "                final_line_sources.insert(idx, (LineSource::Human, None, None));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 175,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 176,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 177,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 178,
+          "content": "        // Build final attributions",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 179,
+          "content": "        for (idx, line) in final_lines.iter().enumerate() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 180,
+          "content": "            let line_number = (idx + 1) as u32;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 181,
+          "content": "            let (source, edit_id, prompt_index) = final_line_sources",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 182,
+          "content": "                .get(&idx)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 183,
+          "content": "                .cloned()",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 184,
+          "content": "                .unwrap_or((LineSource::Unknown, None, None));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 185,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 186,
+          "content": "            let confidence = match &source {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 187,
+          "content": "                LineSource::Original => 1.0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 188,
+          "content": "                LineSource::AI { .. } => 1.0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 189,
+          "content": "                LineSource::AIModified { similarity, .. } => *similarity,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 190,
+          "content": "                LineSource::Human => 0.9,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 191,
+          "content": "                LineSource::Unknown => 0.5,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 192,
+          "content": "            };",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 193,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 194,
+          "content": "            attributions.push(LineAttribution {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 195,
+          "content": "                line_number,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 196,
+          "content": "                content: line.to_string(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 197,
+          "content": "                source,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 198,
+          "content": "                edit_id,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 199,
+          "content": "                prompt_index,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 200,
+          "content": "                confidence,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 201,
+          "content": "            });",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 202,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 203,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 204,
+          "content": "        let summary = FileAttributionResult::compute_summary(&attributions);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 205,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 206,
+          "content": "        FileAttributionResult {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 207,
+          "content": "            path: history.path.clone(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 208,
+          "content": "            lines: attributions,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 209,
+          "content": "            summary,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 210,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 211,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 212,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 213,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 214,
+          "content": "/// Build a set of normalized lines from content for fast lookup",
+          "source": {
+            "type": "AI",
+            "edit_id": "5c307628-88b0-48d5-b73f-d001e1ff35dc"
+          },
+          "edit_id": "5c307628-88b0-48d5-b73f-d001e1ff35dc",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 215,
+          "content": "fn build_line_set(content: &str) -> HashSet<String> {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 216,
+          "content": "    content.lines().map(|l| normalize_for_key(l)).collect()",
+          "source": {
+            "type": "AI",
+            "edit_id": "5c307628-88b0-48d5-b73f-d001e1ff35dc"
+          },
+          "edit_id": "5c307628-88b0-48d5-b73f-d001e1ff35dc",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 217,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 218,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 219,
+          "content": "/// Build a map from normalized line content -> (edit_id, prompt_index) for all AI edits",
+          "source": {
+            "type": "AI",
+            "edit_id": "3df5d76c-358d-4cf1-8427-37b7f143c6fe"
+          },
+          "edit_id": "3df5d76c-358d-4cf1-8427-37b7f143c6fe",
+          "prompt_index": 2,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 220,
+          "content": "///",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 221,
+          "content": "/// IMPORTANT: All lines in an AI edit's `after` content are considered AI-generated,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 222,
+          "content": "/// not just lines that differ from `before`. This is because when AI writes/edits a file,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 223,
+          "content": "/// it produces the entire output - even if some lines coincidentally match the original,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 224,
+          "content": "/// the AI chose to include them.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 225,
+          "content": "///",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 226,
+          "content": "/// Lines are normalized (trailing whitespace trimmed) to handle git/editor differences.",
+          "source": {
+            "type": "AI",
+            "edit_id": "3df5d76c-358d-4cf1-8427-37b7f143c6fe"
+          },
+          "edit_id": "3df5d76c-358d-4cf1-8427-37b7f143c6fe",
+          "prompt_index": 2,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 227,
+          "content": "fn build_ai_line_map(history: &FileEditHistory) -> HashMap<String, (String, u32)> {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 228,
+          "content": "    let mut map = HashMap::new();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 229,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 230,
+          "content": "    // Process edits in order - later edits override earlier ones",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 231,
+          "content": "    for edit in &history.edits {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 232,
+          "content": "        // ALL lines in the AI's output are AI-generated",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 233,
+          "content": "        // This ensures complete file rewrites are properly attributed",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 234,
+          "content": "        for line in edit.after.content.lines() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 235,
+          "content": "            map.insert(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 236,
+          "content": "                normalize_for_key(line),",
+          "source": {
+            "type": "AI",
+            "edit_id": "3df5d76c-358d-4cf1-8427-37b7f143c6fe"
+          },
+          "edit_id": "3df5d76c-358d-4cf1-8427-37b7f143c6fe",
+          "prompt_index": 2,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 237,
+          "content": "                (edit.edit_id.clone(), edit.prompt_index),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 238,
+          "content": "            );",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 239,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 240,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 241,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 242,
+          "content": "    map",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 243,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 244,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 245,
+          "content": "/// Check if a normalized line exists in content",
+          "source": {
+            "type": "AI",
+            "edit_id": "15cdbd6a-73d2-483e-a4d1-603b73f6b5a9"
+          },
+          "edit_id": "15cdbd6a-73d2-483e-a4d1-603b73f6b5a9",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 246,
+          "content": "fn line_in_content(line: &str, content: &str) -> bool {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 247,
+          "content": "    let normalized = normalize_for_key(line);",
+          "source": {
+            "type": "AI",
+            "edit_id": "15cdbd6a-73d2-483e-a4d1-603b73f6b5a9"
+          },
+          "edit_id": "15cdbd6a-73d2-483e-a4d1-603b73f6b5a9",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 248,
+          "content": "    content.lines().any(|l| normalize_for_key(l) == normalized)",
+          "source": {
+            "type": "AI",
+            "edit_id": "15cdbd6a-73d2-483e-a4d1-603b73f6b5a9"
+          },
+          "edit_id": "15cdbd6a-73d2-483e-a4d1-603b73f6b5a9",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 249,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 250,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 251,
+          "content": "/// Map line indices from source to target using diff",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 252,
+          "content": "fn diff_map_lines(source: &str, target: &str) -> Vec<(usize, usize)> {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 253,
+          "content": "    let diff = TextDiff::from_lines(source, target);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 254,
+          "content": "    let mut mappings = Vec::new();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 255,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 256,
+          "content": "    let mut source_idx = 0usize;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 257,
+          "content": "    let mut target_idx = 0usize;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 258,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 259,
+          "content": "    for change in diff.iter_all_changes() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 260,
+          "content": "        match change.tag() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 261,
+          "content": "            ChangeTag::Equal => {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 262,
+          "content": "                mappings.push((source_idx, target_idx));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 263,
+          "content": "                source_idx += 1;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 264,
+          "content": "                target_idx += 1;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 265,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 266,
+          "content": "            ChangeTag::Delete => {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 267,
+          "content": "                source_idx += 1;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 268,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 269,
+          "content": "            ChangeTag::Insert => {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 270,
+          "content": "                target_idx += 1;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 271,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 272,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 273,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 274,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 275,
+          "content": "    mappings",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 276,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 277,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 278,
+          "content": "/// Attribute a single line",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 279,
+          "content": "///",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 280,
+          "content": "/// Priority order:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 281,
+          "content": "/// 1. AI - if line is in the AI edit output, it's AI-generated",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 282,
+          "content": "/// 2. AIModified - if line is similar to an AI line",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 283,
+          "content": "/// 3. Original - if line existed before AI edits and wasn't touched",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 284,
+          "content": "/// 4. Human - line was added after AI edits",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 285,
+          "content": "///",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 286,
+          "content": "/// All lookups use normalized line content to handle whitespace differences.",
+          "source": {
+            "type": "AI",
+            "edit_id": "d58846cf-b1d9-4bad-942a-4e866ac82caf"
+          },
+          "edit_id": "d58846cf-b1d9-4bad-942a-4e866ac82caf",
+          "prompt_index": 4,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 287,
+          "content": "fn attribute_line(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 288,
+          "content": "    line: &str,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 289,
+          "content": "    line_number: u32,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 290,
+          "content": "    original_lines: &HashSet<String>,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 291,
+          "content": "    ai_line_sources: &HashMap<String, (String, u32)>,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 292,
+          "content": "    _history: &FileEditHistory,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 293,
+          "content": ") -> LineAttribution {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 294,
+          "content": "    let normalized = normalize_for_key(line);",
+          "source": {
+            "type": "AI",
+            "edit_id": "15cdbd6a-73d2-483e-a4d1-603b73f6b5a9"
+          },
+          "edit_id": "15cdbd6a-73d2-483e-a4d1-603b73f6b5a9",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 295,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 296,
+          "content": "    // Check if line matches an AI edit exactly - AI takes priority",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 297,
+          "content": "    // because if the AI output contains this line, it's AI-generated",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 298,
+          "content": "    // (even if the same line existed in the original)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 299,
+          "content": "    if let Some((edit_id, prompt_idx)) = ai_line_sources.get(&normalized) {",
+          "source": {
+            "type": "AI",
+            "edit_id": "d58846cf-b1d9-4bad-942a-4e866ac82caf"
+          },
+          "edit_id": "d58846cf-b1d9-4bad-942a-4e866ac82caf",
+          "prompt_index": 4,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 300,
+          "content": "        return LineAttribution {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 301,
+          "content": "            line_number,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 302,
+          "content": "            content: line.to_string(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 303,
+          "content": "            source: LineSource::AI {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 304,
+          "content": "                edit_id: edit_id.clone(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 305,
+          "content": "            },",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 306,
+          "content": "            edit_id: Some(edit_id.clone()),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 307,
+          "content": "            prompt_index: Some(*prompt_idx),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 308,
+          "content": "            confidence: 1.0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 309,
+          "content": "        };",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 310,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 311,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 312,
+          "content": "    // Check if line is similar to an AI line (human modified AI output)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 313,
+          "content": "    if let Some((edit_id, prompt_idx, similarity)) =",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 314,
+          "content": "        find_similar_ai_line(line, ai_line_sources, 0.6)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 315,
+          "content": "    {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 316,
+          "content": "        return LineAttribution {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 317,
+          "content": "            line_number,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 318,
+          "content": "            content: line.to_string(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 319,
+          "content": "            source: LineSource::AIModified {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 320,
+          "content": "                edit_id: edit_id.clone(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 321,
+          "content": "                similarity,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 322,
+          "content": "            },",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 323,
+          "content": "            edit_id: Some(edit_id),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 324,
+          "content": "            prompt_index: Some(prompt_idx),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 325,
+          "content": "            confidence: similarity,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 326,
+          "content": "        };",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 327,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 328,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 329,
+          "content": "    // Check if line existed in original (and wasn't part of AI output)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 330,
+          "content": "    if original_lines.contains(&normalized) {",
+          "source": {
+            "type": "AI",
+            "edit_id": "d58846cf-b1d9-4bad-942a-4e866ac82caf"
+          },
+          "edit_id": "d58846cf-b1d9-4bad-942a-4e866ac82caf",
+          "prompt_index": 4,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 331,
+          "content": "        return LineAttribution {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 332,
+          "content": "            line_number,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 333,
+          "content": "            content: line.to_string(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 334,
+          "content": "            source: LineSource::Original,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 335,
+          "content": "            edit_id: None,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 336,
+          "content": "            prompt_index: None,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 337,
+          "content": "            confidence: 1.0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 338,
+          "content": "        };",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 339,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 340,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 341,
+          "content": "    // Line doesn't match original or AI - it's a human addition",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 342,
+          "content": "    LineAttribution {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 343,
+          "content": "        line_number,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 344,
+          "content": "        content: line.to_string(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 345,
+          "content": "        source: LineSource::Human,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 346,
+          "content": "        edit_id: None,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 347,
+          "content": "        prompt_index: None,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 348,
+          "content": "        confidence: 0.9,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 349,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 350,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 351,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 352,
+          "content": "/// Find a similar AI line using edit distance",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 353,
+          "content": "///",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 354,
+          "content": "/// Note: Empty/whitespace-only lines are handled by exact matching in attribute_line,",
+          "source": {
+            "type": "AI",
+            "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e"
+          },
+          "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e",
+          "prompt_index": 5,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 355,
+          "content": "/// so this function focuses on non-trivial content similarity.",
+          "source": {
+            "type": "AI",
+            "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e"
+          },
+          "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e",
+          "prompt_index": 5,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 356,
+          "content": "fn find_similar_ai_line(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 357,
+          "content": "    line: &str,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 358,
+          "content": "    ai_lines: &HashMap<String, (String, u32)>,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 359,
+          "content": "    threshold: f64,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 360,
+          "content": ") -> Option<(String, u32, f64)> {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 361,
+          "content": "    let line_trimmed = line.trim();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 362,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 363,
+          "content": "    // Empty lines should be handled by exact matching, not similarity",
+          "source": {
+            "type": "AI",
+            "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e"
+          },
+          "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e",
+          "prompt_index": 5,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 364,
+          "content": "    // (empty lines match other empty lines with 100% similarity via normalize_for_key)",
+          "source": {
+            "type": "AI",
+            "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e"
+          },
+          "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e",
+          "prompt_index": 5,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 365,
+          "content": "    if line_trimmed.is_empty() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 366,
+          "content": "        return None;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 367,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 368,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 369,
+          "content": "    let mut best_match: Option<(String, u32, f64)> = None;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 370,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 371,
+          "content": "    for (ai_line, (edit_id, prompt_idx)) in ai_lines {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 372,
+          "content": "        let ai_trimmed = ai_line.trim();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 373,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 374,
+          "content": "        // Skip empty AI lines in similarity comparison",
+          "source": {
+            "type": "AI",
+            "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e"
+          },
+          "edit_id": "05a5f145-f69b-42a9-8da7-5e19e153dc9e",
+          "prompt_index": 5,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 375,
+          "content": "        if ai_trimmed.is_empty() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 376,
+          "content": "            continue;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 377,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 378,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 379,
+          "content": "        let similarity = compute_similarity(line_trimmed, ai_trimmed);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 380,
+          "content": "        if similarity >= threshold {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 381,
+          "content": "            if best_match.is_none() || similarity > best_match.as_ref().unwrap().2 {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 382,
+          "content": "                best_match = Some((edit_id.clone(), *prompt_idx, similarity));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 383,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 384,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 385,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 386,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 387,
+          "content": "    best_match",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 388,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 389,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 390,
+          "content": "/// Compute similarity between two strings (0.0 - 1.0)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 391,
+          "content": "fn compute_similarity(a: &str, b: &str) -> f64 {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 392,
+          "content": "    if a == b {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 393,
+          "content": "        return 1.0;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 394,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 395,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 396,
+          "content": "    if a.is_empty() || b.is_empty() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 397,
+          "content": "        return 0.0;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 398,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 399,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 400,
+          "content": "    // Use longest common subsequence ratio",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 401,
+          "content": "    let lcs_len = longest_common_subsequence(a, b);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 402,
+          "content": "    let max_len = a.len().max(b.len()) as f64;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 403,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 404,
+          "content": "    lcs_len as f64 / max_len",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 405,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 406,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 407,
+          "content": "/// Compute length of longest common subsequence",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 408,
+          "content": "fn longest_common_subsequence(a: &str, b: &str) -> usize {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 409,
+          "content": "    let a_chars: Vec<char> = a.chars().collect();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 410,
+          "content": "    let b_chars: Vec<char> = b.chars().collect();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 411,
+          "content": "    let m = a_chars.len();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 412,
+          "content": "    let n = b_chars.len();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 413,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 414,
+          "content": "    // Optimization: if strings are very different in length, quick exit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 415,
+          "content": "    if (m as f64 / n as f64) < 0.5 || (n as f64 / m as f64) < 0.5 {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 416,
+          "content": "        return 0;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 417,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 418,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 419,
+          "content": "    let mut dp = vec![vec![0usize; n + 1]; m + 1];",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 420,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 421,
+          "content": "    for i in 1..=m {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 422,
+          "content": "        for j in 1..=n {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 423,
+          "content": "            if a_chars[i - 1] == b_chars[j - 1] {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 424,
+          "content": "                dp[i][j] = dp[i - 1][j - 1] + 1;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 425,
+          "content": "            } else {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 426,
+          "content": "                dp[i][j] = dp[i - 1][j].max(dp[i][j - 1]);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 427,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 428,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 429,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 430,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 431,
+          "content": "    dp[m][n]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 432,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 433,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 434,
+          "content": "/// Improve attributions using contextual information",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 435,
+          "content": "fn improve_attributions_with_context(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 436,
+          "content": "    attributions: &mut Vec<LineAttribution>,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 437,
+          "content": "    _history: &FileEditHistory,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 438,
+          "content": "    _final_content: &str,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 439,
+          "content": ") {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 440,
+          "content": "    // If we have unknown lines surrounded by AI lines from the same edit,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 441,
+          "content": "    // they might be AI lines that were modified",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 442,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 443,
+          "content": "    let len = attributions.len();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 444,
+          "content": "    if len < 3 {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 445,
+          "content": "        return;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 446,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 447,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 448,
+          "content": "    for i in 1..len - 1 {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 449,
+          "content": "        if attributions[i].source == LineSource::Unknown {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 450,
+          "content": "            // Check surrounding lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 451,
+          "content": "            let prev_edit = attributions[i - 1].edit_id.clone();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 452,
+          "content": "            let next_edit = attributions[i + 1].edit_id.clone();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 453,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 454,
+          "content": "            if prev_edit.is_some() && prev_edit == next_edit {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 455,
+          "content": "                // Likely an AI line that was modified",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 456,
+          "content": "                attributions[i].source = LineSource::AIModified {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 457,
+          "content": "                    edit_id: prev_edit.clone().unwrap(),",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 458,
+          "content": "                    similarity: 0.5,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 459,
+          "content": "                };",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 460,
+          "content": "                attributions[i].edit_id = prev_edit;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 461,
+          "content": "                attributions[i].prompt_index = attributions[i - 1].prompt_index;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 462,
+          "content": "                attributions[i].confidence = 0.5;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 463,
+          "content": "            }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 464,
+          "content": "        }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 465,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 466,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 467,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 468,
+          "content": "#[cfg(test)]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 469,
+          "content": "mod tests {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 470,
+          "content": "    use super::*;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 471,
+          "content": "    use crate::capture::snapshot::AIEdit;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 472,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 473,
+          "content": "    #[test]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 474,
+          "content": "    fn test_simple_ai_addition() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 475,
+          "content": "        let mut history = FileEditHistory::new(\"test.rs\", Some(\"line1\\nline2\\n\"));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 476,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 477,
+          "content": "        history.add_edit(AIEdit::new(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 478,
+          "content": "            \"Add line3\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 479,
+          "content": "            0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 480,
+          "content": "            \"Edit\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 481,
+          "content": "            \"line1\\nline2\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 482,
+          "content": "            \"line1\\nline2\\nline3\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 483,
+          "content": "        ));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 484,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 485,
+          "content": "        let result = ThreeWayAnalyzer::analyze(&history, \"line1\\nline2\\nline3\\n\");",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 486,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 487,
+          "content": "        // All 3 lines are in the AI's output, so all 3 are AI-generated",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 488,
+          "content": "        // (even though line1 and line2 also existed in original)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 489,
+          "content": "        assert_eq!(result.summary.ai_lines, 3);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 490,
+          "content": "        assert_eq!(result.summary.original_lines, 0);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 491,
+          "content": "        assert_eq!(result.summary.human_lines, 0);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 492,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 493,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 494,
+          "content": "    #[test]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 495,
+          "content": "    fn test_human_modification_after_ai() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 496,
+          "content": "        let mut history = FileEditHistory::new(\"test.rs\", Some(\"line1\\n\"));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 497,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 498,
+          "content": "        history.add_edit(AIEdit::new(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 499,
+          "content": "            \"Add lines\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 500,
+          "content": "            0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 501,
+          "content": "            \"Edit\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 502,
+          "content": "            \"line1\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 503,
+          "content": "            \"line1\\nAI line\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 504,
+          "content": "        ));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 505,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 506,
+          "content": "        // Human adds a line and modifies AI line",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 507,
+          "content": "        let final_content = \"line1\\nAI line modified\\nhuman line\\n\";",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 508,
+          "content": "        let result = ThreeWayAnalyzer::analyze(&history, final_content);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 509,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 510,
+          "content": "        // \"line1\" is in AI output, so it's AI",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 511,
+          "content": "        assert_eq!(result.summary.ai_lines, 1);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 512,
+          "content": "        // \"AI line modified\" should be detected as AIModified",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 513,
+          "content": "        // \"human line\" should be detected as Human",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 514,
+          "content": "        assert_eq!(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 515,
+          "content": "            result.summary.ai_modified_lines + result.summary.human_lines,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 516,
+          "content": "            2,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 517,
+          "content": "            \"Should have 2 non-AI lines (modified + human)\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 518,
+          "content": "        );",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 519,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 520,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 521,
+          "content": "    #[test]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 522,
+          "content": "    fn test_line_shift() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 523,
+          "content": "        let mut history = FileEditHistory::new(\"test.rs\", Some(\"line1\\nline2\\n\"));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 524,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 525,
+          "content": "        history.add_edit(AIEdit::new(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 526,
+          "content": "            \"Add AI content\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 527,
+          "content": "            0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 528,
+          "content": "            \"Edit\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 529,
+          "content": "            \"line1\\nline2\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 530,
+          "content": "            \"line1\\nline2\\nAI added\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 531,
+          "content": "        ));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 532,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 533,
+          "content": "        // Human inserts line at beginning",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 534,
+          "content": "        let final_content = \"new first line\\nline1\\nline2\\nAI added\\n\";",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 535,
+          "content": "        let result = ThreeWayAnalyzer::analyze_with_diff(&history, final_content);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 536,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 537,
+          "content": "        // \"new first line\" is Human (not in AI output)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 538,
+          "content": "        // \"line1\", \"line2\", \"AI added\" are all in AI output, so AI",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 539,
+          "content": "        assert_eq!(result.summary.human_lines, 1);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 540,
+          "content": "        assert_eq!(result.summary.ai_lines, 3);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 541,
+          "content": "        assert_eq!(result.summary.original_lines, 0);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 542,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 543,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 544,
+          "content": "    #[test]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 545,
+          "content": "    fn test_similarity_computation() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 546,
+          "content": "        assert_eq!(compute_similarity(\"hello\", \"hello\"), 1.0);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 547,
+          "content": "        // Completely different strings",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 548,
+          "content": "        assert!(compute_similarity(\"abc\", \"xyz\") < 0.3);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 549,
+          "content": "        // Similar strings with comparable length should have high similarity",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 550,
+          "content": "        assert!(compute_similarity(\"println(hello)\", \"println(world)\") > 0.6);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 551,
+          "content": "        // Modified line detection",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 552,
+          "content": "        assert!(compute_similarity(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 553,
+          "content": "            \"    println!(\\\"hello\\\");\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 554,
+          "content": "            \"    println!(\\\"hello, world!\\\");\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 555,
+          "content": "        ) > 0.6);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 556,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 557,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 558,
+          "content": "    #[test]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 559,
+          "content": "    fn test_multiple_ai_edits() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 560,
+          "content": "        let mut history = FileEditHistory::new(\"test.rs\", Some(\"original\\n\"));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 561,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 562,
+          "content": "        history.add_edit(AIEdit::new(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 563,
+          "content": "            \"First prompt\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 564,
+          "content": "            0,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 565,
+          "content": "            \"Edit\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 566,
+          "content": "            \"original\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 567,
+          "content": "            \"original\\nfirst AI\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 568,
+          "content": "        ));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 569,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 570,
+          "content": "        history.add_edit(AIEdit::new(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 571,
+          "content": "            \"Second prompt\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 572,
+          "content": "            1,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 573,
+          "content": "            \"Edit\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 574,
+          "content": "            \"original\\nfirst AI\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 575,
+          "content": "            \"original\\nfirst AI\\nsecond AI\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 576,
+          "content": "        ));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 577,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 578,
+          "content": "        let result = ThreeWayAnalyzer::analyze(",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 579,
+          "content": "            &history,",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 580,
+          "content": "            \"original\\nfirst AI\\nsecond AI\\n\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 581,
+          "content": "        );",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 582,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 583,
+          "content": "        // All lines are in the AI output from the second edit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 584,
+          "content": "        // \"original\" gets attributed to edit 1 (first appearance in AI output)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 585,
+          "content": "        // \"first AI\" gets attributed to edit 0 (first added)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 586,
+          "content": "        // \"second AI\" gets attributed to edit 1 (first added)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 587,
+          "content": "        assert_eq!(result.summary.ai_lines, 3);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 588,
+          "content": "        assert_eq!(result.summary.original_lines, 0);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 589,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 590,
+          "content": "        // Check prompt indices - later edits override, so \"original\" is from edit 1",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 591,
+          "content": "        let first_ai = result.lines.iter().find(|l| l.content == \"first AI\").unwrap();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 592,
+          "content": "        // first AI appears in edit 0's output and edit 1's output, later wins",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 593,
+          "content": "        assert_eq!(first_ai.prompt_index, Some(1));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 594,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 595,
+          "content": "        let second_ai = result.lines.iter().find(|l| l.content == \"second AI\").unwrap();",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 596,
+          "content": "        assert_eq!(second_ai.prompt_index, Some(1));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 597,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 598,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 599,
+          "content": "    #[test]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 600,
+          "content": "    fn test_only_original_no_ai_edits() {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 601,
+          "content": "        // Test that without AI edits, original lines stay original",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 602,
+          "content": "        let history = FileEditHistory::new(\"test.rs\", Some(\"line1\\nline2\\n\"));",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 603,
+          "content": "        // No AI edits added",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 604,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 605,
+          "content": "        let result = ThreeWayAnalyzer::analyze(&history, \"line1\\nline2\\nline3\\n\");",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 606,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 607,
+          "content": "        // line1, line2 are original (no AI touched them)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 608,
+          "content": "        // line3 is human (added without AI)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 609,
+          "content": "        assert_eq!(result.summary.original_lines, 2);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 610,
+          "content": "        assert_eq!(result.summary.human_lines, 1);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 611,
+          "content": "        assert_eq!(result.summary.ai_lines, 0);",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 612,
+          "content": "    }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 613,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 614,
+          "content": "    #[test]",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 615,
+          "content": "    fn test_whitespace_normalization() {",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 616,
+          "content": "        // Test that trailing whitespace differences don't affect attribution",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 617,
+          "content": "        let mut history = FileEditHistory::new(\"test.rs\", Some(\"\"));",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 618,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 619,
+          "content": "        // AI generates lines with trailing spaces",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 620,
+          "content": "        history.add_edit(AIEdit::new(",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 621,
+          "content": "            \"Generate code\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 622,
+          "content": "            0,",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 623,
+          "content": "            \"Write\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 624,
+          "content": "            \"\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 625,
+          "content": "            \"fn main() {  \\n    println!(\\\"hello\\\");  \\n}\\n\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 626,
+          "content": "        ));",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 627,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 628,
+          "content": "        // Final commit has trailing spaces stripped (common git behavior)",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 629,
+          "content": "        let final_content = \"fn main() {\\n    println!(\\\"hello\\\");\\n}\\n\";",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 630,
+          "content": "        let result = ThreeWayAnalyzer::analyze(&history, final_content);",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 631,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 632,
+          "content": "        // All lines should be AI despite whitespace differences",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 633,
+          "content": "        assert_eq!(result.summary.ai_lines, 3, \"All lines should be AI\");",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 634,
+          "content": "        assert_eq!(result.summary.human_lines, 0, \"No human lines expected\");",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 635,
+          "content": "    }",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 636,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 637,
+          "content": "    #[test]",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 638,
+          "content": "    fn test_empty_line_attribution() {",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 639,
+          "content": "        // Test that empty lines in AI output are properly attributed",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 640,
+          "content": "        let mut history = FileEditHistory::new(\"test.rs\", Some(\"\"));",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 641,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 642,
+          "content": "        // AI generates code with empty lines",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 643,
+          "content": "        history.add_edit(AIEdit::new(",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 644,
+          "content": "            \"Generate code with spacing\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 645,
+          "content": "            0,",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 646,
+          "content": "            \"Write\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 647,
+          "content": "            \"\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 648,
+          "content": "            \"fn main() {\\n\\n    println!(\\\"hello\\\");\\n\\n}\\n\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 649,
+          "content": "        ));",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 650,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 651,
+          "content": "        let final_content = \"fn main() {\\n\\n    println!(\\\"hello\\\");\\n\\n}\\n\";",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 652,
+          "content": "        let result = ThreeWayAnalyzer::analyze(&history, final_content);",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 653,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 654,
+          "content": "        // All lines including empty ones should be AI",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 655,
+          "content": "        assert_eq!(result.summary.ai_lines, 5, \"All 5 lines should be AI\");",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 656,
+          "content": "        assert_eq!(result.summary.human_lines, 0, \"No human lines expected\");",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 657,
+          "content": "    }",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 658,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 659,
+          "content": "    #[test]",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 660,
+          "content": "    fn test_tabs_vs_spaces() {",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 661,
+          "content": "        // Test that different indentation styles still match",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 662,
+          "content": "        let mut history = FileEditHistory::new(\"test.rs\", Some(\"\"));",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 663,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 664,
+          "content": "        // AI generates with spaces",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 665,
+          "content": "        history.add_edit(AIEdit::new(",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 666,
+          "content": "            \"Generate code\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 667,
+          "content": "            0,",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 668,
+          "content": "            \"Write\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 669,
+          "content": "            \"\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 670,
+          "content": "            \"fn main() {\\n    code();\\n}\\n\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 671,
+          "content": "        ));",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 672,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 673,
+          "content": "        // Final uses same content (tabs would need different handling)",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 674,
+          "content": "        let final_content = \"fn main() {\\n    code();\\n}\\n\";",
+          "source": {
+            "type": "AI",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653"
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 675,
+          "content": "        let result = ThreeWayAnalyzer::analyze(&history, final_content);",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 676,
+          "content": "",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 677,
+          "content": "        assert_eq!(result.summary.ai_lines, 3);",
+          "source": {
+            "type": "AIModified",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+            "similarity": 0.6
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 0.6
+        },
+        {
+          "line_number": 678,
+          "content": "        assert_eq!(result.summary.human_lines, 0);",
+          "source": {
+            "type": "AIModified",
+            "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+            "similarity": 0.6086956521739131
+          },
+          "edit_id": "28c4a0c4-ec5c-4d9e-98df-53fbb3bd4653",
+          "prompt_index": 7,
+          "confidence": 0.6086956521739131
+        },
+        {
+          "line_number": 679,
+          "content": "    }",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        },
+        {
+          "line_number": 680,
+          "content": "}",
+          "source": {
+            "type": "Human"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 0.9
+        }
+      ],
+      "summary": {
+        "total_lines": 680,
+        "ai_lines": 63,
+        "ai_modified_lines": 2,
+        "human_lines": 41,
+        "original_lines": 574,
+        "unknown_lines": 0
+      }
+    }
+  ]
+}
