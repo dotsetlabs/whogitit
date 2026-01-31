@@ -12,6 +12,8 @@ whogitit summary [OPTIONS]
 
 The `summary` command aggregates AI attribution data across multiple commits, producing a comprehensive report suitable for pull request descriptions or compliance documentation.
 
+The output focuses on **additions** (lines added in the commit range), making it directly comparable to what you see in a PR diff.
+
 ## Options
 
 | Option | Description |
@@ -36,25 +38,21 @@ AI Attribution Summary
 
 Commits analyzed: 5 (3 with AI attribution)
 
-Overview:
-  AI-generated lines:     145 (58.0%)
-  AI-modified by human:    12 (4.8%)
-  Human-added lines:       43 (17.2%)
-  Original/unchanged:      50 (20.0%)
-  ─────────────────────────────────
-  Total:                  250
+Lines Added:
+  +145 AI-generated (72.5%)
+  +12 AI-modified by human (6.0%)
+  +43 Human-written (21.5%)
+  +200 Total additions
 
-AI involvement: 62.8% of changed lines
+AI involvement: 78.5% of additions are AI-generated
 
-Commits with AI Attribution:
-  abc1234 Add user authentication     (45 AI, 3 mod, 10 human)
-  def5678 Implement JWT tokens        (100 AI, 9 mod, 33 human)
-  ghi9012 Add password hashing        (0 AI - no attribution)
+Files Changed:
+  src/auth.rs +80 (90% AI) (new)
+  src/main.rs +45 (70% AI)
+  src/jwt.rs +75 (80% AI) (new)
 
-Prompts Used: 5
-  #0: "Add user authentication with bcrypt..."
-  #1: "Create a User struct with email and..."
-  #2: "Implement JWT token generation..."
+Models used:
+  - claude-opus-4-5-20251101
 ```
 
 ### Markdown Output (for PRs)
@@ -66,37 +64,32 @@ whogitit summary --base main --format markdown
 Output:
 
 ```markdown
-## AI Attribution Summary
+## 🤖🤖 AI Attribution Summary
 
-This PR contains **3** of **5** commits with AI-assisted changes.
+This PR adds **+200** lines with AI attribution across **3** files.
 
-### Overview
+### Additions Breakdown
 
-| Metric | Lines | Percentage |
-|--------|------:|----------:|
-| AI-generated | 145 | 58.0% |
-| AI-modified by human | 12 | 4.8% |
-| Human-added | 43 | 17.2% |
-| Original/unchanged | 50 | 20.0% |
-| **Total** | **250** | **100%** |
+| Metric | Lines | % of Additions |
+|--------|------:|--------------:|
+| 🟢 AI-generated | +145 | 72.5% |
+| 🟡 AI-modified by human | +12 | 6.0% |
+| 🔵 Human-written | +43 | 21.5% |
+| **Total additions** | **+200** | **100%** |
 
-**AI involvement: 62.8%** of changed lines
+**AI involvement: 78.5%** of additions are AI-generated
 
-### Commits with AI Attribution
+### Files Changed
 
-| Commit | Message | AI | Modified | Human |
-|--------|---------|---:|--------:|------:|
-| `abc1234` | Add user authentication | 45 | 3 | 10 |
-| `def5678` | Implement JWT tokens | 100 | 9 | 33 |
+| File | +Added | AI | Human | AI % | Status |
+|------|-------:|---:|------:|-----:|--------|
+| `src/auth.rs` | +80 | 72 | 8 | 90% | New |
+| `src/main.rs` | +45 | 32 | 13 | 71% | Modified |
+| `src/jwt.rs` | +75 | 53 | 22 | 71% | New |
 
-### Prompts Used (5)
+### Models Used
 
-<details>
-<summary>Add user authentication with bcrypt...</summary>
-
-Add user authentication with bcrypt password hashing. Create a User struct
-with email and password_hash fields.
-</details>
+- claude-opus-4-5-20251101
 ```
 
 ### JSON Output
@@ -107,22 +100,29 @@ whogitit summary --base main --format json
 
 ```json
 {
-  "base": "main",
-  "head": "HEAD",
-  "commits": {
-    "total": 5,
-    "with_attribution": 3
+  "commits_analyzed": 5,
+  "commits_with_ai": 3,
+  "additions": {
+    "total": 200,
+    "ai": 145,
+    "ai_modified": 12,
+    "human": 43
   },
-  "summary": {
-    "ai_lines": 145,
-    "ai_modified_lines": 12,
-    "human_lines": 43,
-    "original_lines": 50,
-    "total_lines": 250,
-    "ai_percentage": 62.8
-  },
-  "commit_details": [...],
-  "prompts": [...]
+  "ai_percentage": 78.5,
+  "files": [
+    {
+      "path": "src/auth.rs",
+      "additions": 80,
+      "ai_additions": 72,
+      "ai_lines": 70,
+      "ai_modified_lines": 2,
+      "human_lines": 8,
+      "ai_percent": 90.0,
+      "is_new_file": true
+    },
+    ...
+  ],
+  "models": ["claude-opus-4-5-20251101"]
 }
 ```
 
@@ -138,30 +138,36 @@ whogitit summary --base abc1234 --head def5678
 
 ## Output Details
 
-### Overview Section
+### Additions Breakdown
 
-Aggregate statistics for all commits in the range:
+The summary focuses on lines **added** in the commit range:
 
 | Metric | Description |
 |--------|-------------|
-| AI-generated lines | Lines written by AI, unchanged |
-| AI-modified by human | Lines written by AI, then edited |
-| Human-added lines | Lines written by humans (after AI session) |
-| Original/unchanged | Lines that existed before AI sessions |
-| AI involvement | (AI + AI-modified) / (AI + AI-modified + Human) |
+| AI-generated | Lines written by AI, unchanged at commit time |
+| AI-modified by human | Lines written by AI, then edited before commit |
+| Human-written | Lines added by humans (not from AI) |
+| Total additions | Sum of all added lines (maps to `+` in git diff) |
+| AI involvement | (AI + AI-modified) / Total additions × 100% |
 
-### Commits Section
+### Files Changed
 
-Per-commit breakdown showing:
-- Commit SHA (short)
-- Commit message (first line)
-- Line counts by category
+Per-file breakdown showing:
+- File path
+- Lines added (`+Added`)
+- AI contributions (AI + AI-modified)
+- Human contributions
+- AI percentage for that file
+- Status: "New" (file created) or "Modified" (file existed)
 
-### Prompts Section
+### Why Diff-Focused?
 
-All unique prompts used across the commit range, with:
-- Prompt text (truncated in pretty format, full in markdown)
-- Files affected
+Previous versions showed "Original/unchanged" lines, which included lines that existed before the PR. This was confusing because:
+- It didn't map to what reviewers see in the PR diff
+- Percentages didn't reflect the actual changes being reviewed
+- Large existing files would dilute the AI percentage
+
+The new format shows only additions, making it directly comparable to `git diff --stat`.
 
 ## Use Cases
 
@@ -190,6 +196,7 @@ whogitit summary --base main --format json > pr-attribution.json
 - Commits without AI attribution are counted but contribute 0 to AI metrics
 - The `--base` ref should be an ancestor of `--head`
 - Empty commit ranges produce a summary with all zeros
+- The output focuses on additions only; deleted lines are not attributed
 
 ## See Also
 

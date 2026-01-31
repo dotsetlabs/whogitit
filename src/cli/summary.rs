@@ -52,40 +52,75 @@ pub struct SummaryArgs {
     pub format: SummaryFormat,
 }
 
-/// Aggregated summary across multiple commits
+/// Per-file summary for diff-focused display
+#[derive(Debug, Clone)]
+struct FileSummary {
+    path: String,
+    ai_lines: usize,
+    ai_modified_lines: usize,
+    human_lines: usize,
+    original_lines: usize,
+    is_new_file: bool,
+}
+
+impl FileSummary {
+    /// Lines added in this file (AI + AI-modified + Human)
+    fn additions(&self) -> usize {
+        self.ai_lines + self.ai_modified_lines + self.human_lines
+    }
+
+    /// AI additions (AI + AI-modified)
+    fn ai_additions(&self) -> usize {
+        self.ai_lines + self.ai_modified_lines
+    }
+
+    /// Percentage of additions that are AI-generated
+    fn ai_percent(&self) -> f64 {
+        let adds = self.additions();
+        if adds == 0 {
+            0.0
+        } else {
+            (self.ai_additions() as f64 / adds as f64) * 100.0
+        }
+    }
+}
+
+/// Aggregated summary across multiple commits (diff-focused)
 #[derive(Debug, Default)]
 struct AggregateSummary {
     commits_analyzed: usize,
     commits_with_ai: usize,
+    /// AI-generated lines (additions)
     total_ai_lines: usize,
+    /// AI lines modified by human (additions)
     total_ai_modified_lines: usize,
+    /// Human-written lines (additions)
     total_human_lines: usize,
+    /// Original/unchanged lines (NOT additions - for context only)
     total_original_lines: usize,
-    files_touched: Vec<String>,
+    /// Per-file summaries for detailed breakdown
+    file_summaries: Vec<FileSummary>,
     models_used: Vec<String>,
 }
 
 impl AggregateSummary {
-    /// Total lines including unchanged (for showing full breakdown)
-    fn total_lines(&self) -> usize {
-        self.total_ai_lines
-            + self.total_ai_modified_lines
-            + self.total_human_lines
-            + self.total_original_lines
-    }
-
-    /// Only lines that were actually changed (not original/unchanged)
-    fn changed_lines(&self) -> usize {
+    /// Total additions (lines added in the diff)
+    fn total_additions(&self) -> usize {
         self.total_ai_lines + self.total_ai_modified_lines + self.total_human_lines
     }
 
-    /// AI involvement as percentage of CHANGED lines (not including original)
+    /// AI additions (AI + AI-modified)
+    fn ai_additions(&self) -> usize {
+        self.total_ai_lines + self.total_ai_modified_lines
+    }
+
+    /// AI involvement as percentage of additions
     fn ai_percentage(&self) -> f64 {
-        let changed = self.changed_lines();
-        if changed == 0 {
+        let additions = self.total_additions();
+        if additions == 0 {
             0.0
         } else {
-            ((self.total_ai_lines + self.total_ai_modified_lines) as f64 / changed as f64) * 100.0
+            (self.ai_additions() as f64 / additions as f64) * 100.0
         }
     }
 }
@@ -141,8 +176,33 @@ pub fn run(args: SummaryArgs) -> Result<()> {
                 summary.total_human_lines += file.summary.human_lines;
                 summary.total_original_lines += file.summary.original_lines;
 
-                if !summary.files_touched.contains(&file.path) {
-                    summary.files_touched.push(file.path.clone());
+                // Check if file already exists in summaries
+                let existing = summary
+                    .file_summaries
+                    .iter_mut()
+                    .find(|f| f.path == file.path);
+
+                if let Some(existing) = existing {
+                    // Aggregate with existing
+                    existing.ai_lines += file.summary.ai_lines;
+                    existing.ai_modified_lines += file.summary.ai_modified_lines;
+                    existing.human_lines += file.summary.human_lines;
+                    existing.original_lines += file.summary.original_lines;
+                } else {
+                    // Add new file summary
+                    let is_new = file.summary.original_lines == 0
+                        && (file.summary.ai_lines > 0
+                            || file.summary.ai_modified_lines > 0
+                            || file.summary.human_lines > 0);
+
+                    summary.file_summaries.push(FileSummary {
+                        path: file.path.clone(),
+                        ai_lines: file.summary.ai_lines,
+                        ai_modified_lines: file.summary.ai_modified_lines,
+                        human_lines: file.summary.human_lines,
+                        original_lines: file.summary.original_lines,
+                        is_new_file: is_new,
+                    });
                 }
             }
 
@@ -182,35 +242,60 @@ fn print_pretty(summary: &AggregateSummary) {
         return;
     }
 
-    println!("{}", "Line Attribution:".bold());
+    let total_additions = summary.total_additions();
+
+    println!("{}", "Lines Added:".bold());
     println!(
-        "  {} AI-generated lines",
-        summary.total_ai_lines.to_string().green()
+        "  {} AI-generated ({:.1}%)",
+        format!("+{}", summary.total_ai_lines).green(),
+        if total_additions > 0 {
+            (summary.total_ai_lines as f64 / total_additions as f64) * 100.0
+        } else {
+            0.0
+        }
     );
     println!(
-        "  {} AI lines modified by human",
-        summary.total_ai_modified_lines.to_string().yellow()
+        "  {} AI-modified by human ({:.1}%)",
+        format!("+{}", summary.total_ai_modified_lines).yellow(),
+        if total_additions > 0 {
+            (summary.total_ai_modified_lines as f64 / total_additions as f64) * 100.0
+        } else {
+            0.0
+        }
     );
     println!(
-        "  {} human-added lines",
-        summary.total_human_lines.to_string().blue()
+        "  {} Human-written ({:.1}%)",
+        format!("+{}", summary.total_human_lines).blue(),
+        if total_additions > 0 {
+            (summary.total_human_lines as f64 / total_additions as f64) * 100.0
+        } else {
+            0.0
+        }
     );
     println!(
-        "  {} original/unchanged lines",
-        summary.total_original_lines.to_string().dimmed()
+        "  {} Total additions",
+        format!("+{}", total_additions).bold()
     );
     println!();
 
     println!(
-        "{}: {:.1}%",
+        "{}: {:.1}% of additions are AI-generated",
         "AI involvement".bold(),
         summary.ai_percentage()
     );
     println!();
 
-    println!("{}", "Files with AI changes:".bold());
-    for file in &summary.files_touched {
-        println!("  - {}", file);
+    println!("{}", "Files Changed:".bold());
+    for file in &summary.file_summaries {
+        let status = if file.is_new_file { " (new)" } else { "" };
+        let ai_pct = file.ai_percent();
+        println!(
+            "  {} +{} ({:.0}% AI){}",
+            file.path,
+            file.additions(),
+            ai_pct,
+            status
+        );
     }
     println!();
 
@@ -226,18 +311,34 @@ fn print_pretty(summary: &AggregateSummary) {
 }
 
 fn print_json(summary: &AggregateSummary) {
+    let files_json: Vec<_> = summary
+        .file_summaries
+        .iter()
+        .map(|f| {
+            serde_json::json!({
+                "path": f.path,
+                "additions": f.additions(),
+                "ai_additions": f.ai_additions(),
+                "ai_lines": f.ai_lines,
+                "ai_modified_lines": f.ai_modified_lines,
+                "human_lines": f.human_lines,
+                "ai_percent": f.ai_percent(),
+                "is_new_file": f.is_new_file,
+            })
+        })
+        .collect();
+
     let output = serde_json::json!({
         "commits_analyzed": summary.commits_analyzed,
         "commits_with_ai": summary.commits_with_ai,
-        "lines": {
+        "additions": {
+            "total": summary.total_additions(),
             "ai": summary.total_ai_lines,
             "ai_modified": summary.total_ai_modified_lines,
             "human": summary.total_human_lines,
-            "original": summary.total_original_lines,
-            "total": summary.total_lines(),
         },
         "ai_percentage": summary.ai_percentage(),
-        "files": summary.files_touched,
+        "files": files_json,
         "models": summary.models_used,
     });
 
@@ -248,24 +349,19 @@ fn print_json(summary: &AggregateSummary) {
 }
 
 fn print_markdown(summary: &AggregateSummary) {
-    let total = summary.total_lines();
-    let ai_pct = if total > 0 {
-        (summary.total_ai_lines as f64 / total as f64) * 100.0
+    let total_additions = summary.total_additions();
+    let ai_pct = if total_additions > 0 {
+        (summary.total_ai_lines as f64 / total_additions as f64) * 100.0
     } else {
         0.0
     };
-    let mod_pct = if total > 0 {
-        (summary.total_ai_modified_lines as f64 / total as f64) * 100.0
+    let mod_pct = if total_additions > 0 {
+        (summary.total_ai_modified_lines as f64 / total_additions as f64) * 100.0
     } else {
         0.0
     };
-    let human_pct = if total > 0 {
-        (summary.total_human_lines as f64 / total as f64) * 100.0
-    } else {
-        0.0
-    };
-    let orig_pct = if total > 0 {
-        (summary.total_original_lines as f64 / total as f64) * 100.0
+    let human_pct = if total_additions > 0 {
+        (summary.total_human_lines as f64 / total_additions as f64) * 100.0
     } else {
         0.0
     };
@@ -283,43 +379,54 @@ fn print_markdown(summary: &AggregateSummary) {
     println!("## {} AI Attribution Summary", emoji);
     println!();
     println!(
-        "**{}** of **{}** commits contain AI-assisted changes.",
-        summary.commits_with_ai, summary.commits_analyzed
+        "This PR adds **+{}** lines with AI attribution across **{}** files.",
+        total_additions,
+        summary.file_summaries.len()
     );
     println!();
-    println!("### Overview");
+    println!("### Additions Breakdown");
     println!();
-    println!("| Metric | Lines | Percentage |");
-    println!("|--------|------:|----------:|");
+    println!("| Metric | Lines | % of Additions |");
+    println!("|--------|------:|--------------:|");
     println!(
-        "| 🟢 AI-generated | {} | {:.1}% |",
+        "| 🟢 AI-generated | +{} | {:.1}% |",
         summary.total_ai_lines, ai_pct
     );
     println!(
-        "| 🟡 AI-modified by human | {} | {:.1}% |",
+        "| 🟡 AI-modified by human | +{} | {:.1}% |",
         summary.total_ai_modified_lines, mod_pct
     );
     println!(
-        "| 🔵 Human-added | {} | {:.1}% |",
+        "| 🔵 Human-written | +{} | {:.1}% |",
         summary.total_human_lines, human_pct
     );
     println!(
-        "| ⚪ Original/unchanged | {} | {:.1}% |",
-        summary.total_original_lines, orig_pct
+        "| **Total additions** | **+{}** | **100%** |",
+        total_additions
     );
-    println!("| **Total** | **{}** | **100%** |", total);
     println!();
     println!(
-        "**AI involvement: {:.1}%** of changed lines",
+        "**AI involvement: {:.1}%** of additions are AI-generated",
         summary.ai_percentage()
     );
     println!();
 
-    if !summary.files_touched.is_empty() {
-        println!("### Files with AI Changes");
+    if !summary.file_summaries.is_empty() {
+        println!("### Files Changed");
         println!();
-        for file in &summary.files_touched {
-            println!("- `{}`", file);
+        println!("| File | +Added | AI | Human | AI % | Status |");
+        println!("|------|-------:|---:|------:|-----:|--------|");
+        for file in &summary.file_summaries {
+            let status = if file.is_new_file { "New" } else { "Modified" };
+            println!(
+                "| `{}` | +{} | {} | {} | {:.0}% | {} |",
+                file.path,
+                file.additions(),
+                file.ai_additions(),
+                file.human_lines,
+                file.ai_percent(),
+                status
+            );
         }
         println!();
     }
