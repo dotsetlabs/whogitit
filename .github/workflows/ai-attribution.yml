@@ -325,20 +325,15 @@ jobs:
             }
 
             if (parsedPrompts.length > 0) {
-              body += `### Prompts Used (${parsedPrompts.length})
-
-`;
+              body += '### Prompts Used (' + parsedPrompts.length + ')\n\n';
               for (const p of parsedPrompts) {
-                body += `**Prompt ${p.num}** (${p.files})
-<details>
-<summary>${p.preview}</summary>
-
-\`\`\`
-${p.full}
-\`\`\`
-</details>
-
-`;
+                body += '**Prompt ' + p.num + '** (' + p.files + ')\n';
+                body += '<details>\n';
+                body += '<summary>' + p.preview + '</summary>\n\n';
+                body += '```\n';
+                body += p.full + '\n';
+                body += '```\n';
+                body += '</details>\n\n';
               }
             }
 
