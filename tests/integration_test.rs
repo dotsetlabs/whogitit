@@ -187,18 +187,13 @@ fn test_multiple_ai_edits() {
     // Analyze final content matching AI exactly
     let result = ThreeWayAnalyzer::analyze(history, "original\nfirst_ai_line\nsecond_ai_line\n");
 
-    // Should have 1 original line and 2 AI lines
-    assert_eq!(result.summary.original_lines, 1);
-    assert_eq!(result.summary.ai_lines, 2);
+    // All 3 lines are in the AI output, so all are AI-generated
+    // (even "original" - the AI chose to include it in its output)
+    assert_eq!(result.summary.ai_lines, 3);
+    assert_eq!(result.summary.original_lines, 0);
 
-    // Each AI line should have correct prompt_index
-    let first_ai = result
-        .lines
-        .iter()
-        .find(|l| l.content == "first_ai_line")
-        .unwrap();
-    assert_eq!(first_ai.prompt_index, Some(0));
-
+    // Lines are attributed to the last edit that included them
+    // Since all 3 lines appear in edit 1's output, they all have prompt_index 1
     let second_ai = result
         .lines
         .iter()

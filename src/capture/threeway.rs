@@ -107,22 +107,10 @@ impl ThreeWayAnalyzer {
         let mut final_line_sources: HashMap<usize, (LineSource, Option<String>, Option<u32>)> =
             HashMap::new();
 
-        // First pass: mark lines that exist in original
-        for (_, final_idx) in &original_to_final_mapping {
-            if !final_line_sources.contains_key(final_idx) {
-                final_line_sources.insert(*final_idx, (LineSource::Original, None, None));
-            }
-        }
-
-        // Second pass: mark lines that were added by AI
+        // First pass: mark lines that came from AI edits (takes priority)
         let ai_line_map = build_ai_line_map(history);
         for (ai_idx, final_idx) in &ai_to_final_mapping {
             let ai_line = latest_ai.lines().get(*ai_idx).map(|s| *s).unwrap_or("");
-
-            // Check if this line was in original
-            if let Some((LineSource::Original, _, _)) = final_line_sources.get(final_idx) {
-                continue; // Keep as original
-            }
 
             // Check if this line came from an AI edit
             if let Some((edit_id, prompt_idx)) = ai_line_map.get(ai_line) {
@@ -136,6 +124,13 @@ impl ThreeWayAnalyzer {
                         Some(*prompt_idx),
                     ),
                 );
+            }
+        }
+
+        // Second pass: mark lines that exist in original (only if not already AI)
+        for (_, final_idx) in &original_to_final_mapping {
+            if !final_line_sources.contains_key(final_idx) {
+                final_line_sources.insert(*final_idx, (LineSource::Original, None, None));
             }
         }
 
@@ -208,22 +203,23 @@ fn build_line_set(content: &str) -> HashSet<String> {
 }
 
 /// Build a map from line content -> (edit_id, prompt_index) for all AI edits
+///
+/// IMPORTANT: All lines in an AI edit's `after` content are considered AI-generated,
+/// not just lines that differ from `before`. This is because when AI writes/edits a file,
+/// it produces the entire output - even if some lines coincidentally match the original,
+/// the AI chose to include them.
 fn build_ai_line_map(history: &FileEditHistory) -> HashMap<String, (String, u32)> {
     let mut map = HashMap::new();
 
     // Process edits in order - later edits override earlier ones
     for edit in &history.edits {
-        // Find lines that were added by this edit
-        let before_lines: HashSet<_> = edit.before.content.lines().collect();
-
+        // ALL lines in the AI's output are AI-generated
+        // This ensures complete file rewrites are properly attributed
         for line in edit.after.content.lines() {
-            if !before_lines.contains(line) {
-                // This line was added by this edit
-                map.insert(
-                    line.to_string(),
-                    (edit.edit_id.clone(), edit.prompt_index),
-                );
-            }
+            map.insert(
+                line.to_string(),
+                (edit.edit_id.clone(), edit.prompt_index),
+            );
         }
     }
 
@@ -263,6 +259,12 @@ fn diff_map_lines(source: &str, target: &str) -> Vec<(usize, usize)> {
 }
 
 /// Attribute a single line
+///
+/// Priority order:
+/// 1. AI - if line is in the AI edit output, it's AI-generated
+/// 2. AIModified - if line is similar to an AI line
+/// 3. Original - if line existed before AI edits and wasn't touched
+/// 4. Human - line was added after AI edits
 fn attribute_line(
     line: &str,
     line_number: u32,
@@ -270,19 +272,9 @@ fn attribute_line(
     ai_line_sources: &HashMap<String, (String, u32)>,
     _history: &FileEditHistory,
 ) -> LineAttribution {
-    // Check if line is in original
-    if original_lines.contains(line) {
-        return LineAttribution {
-            line_number,
-            content: line.to_string(),
-            source: LineSource::Original,
-            edit_id: None,
-            prompt_index: None,
-            confidence: 1.0,
-        };
-    }
-
-    // Check if line matches an AI edit exactly
+    // Check if line matches an AI edit exactly - AI takes priority
+    // because if the AI output contains this line, it's AI-generated
+    // (even if the same line existed in the original)
     if let Some((edit_id, prompt_idx)) = ai_line_sources.get(line) {
         return LineAttribution {
             line_number,
@@ -310,6 +302,18 @@ fn attribute_line(
             edit_id: Some(edit_id),
             prompt_index: Some(prompt_idx),
             confidence: similarity,
+        };
+    }
+
+    // Check if line existed in original (and wasn't part of AI output)
+    if original_lines.contains(line) {
+        return LineAttribution {
+            line_number,
+            content: line.to_string(),
+            source: LineSource::Original,
+            edit_id: None,
+            prompt_index: None,
+            confidence: 1.0,
         };
     }
 
@@ -451,8 +455,10 @@ mod tests {
 
         let result = ThreeWayAnalyzer::analyze(&history, "line1\nline2\nline3\n");
 
-        assert_eq!(result.summary.original_lines, 2);
-        assert_eq!(result.summary.ai_lines, 1);
+        // All 3 lines are in the AI's output, so all 3 are AI-generated
+        // (even though line1 and line2 also existed in original)
+        assert_eq!(result.summary.ai_lines, 3);
+        assert_eq!(result.summary.original_lines, 0);
         assert_eq!(result.summary.human_lines, 0);
     }
 
@@ -472,14 +478,14 @@ mod tests {
         let final_content = "line1\nAI line modified\nhuman line\n";
         let result = ThreeWayAnalyzer::analyze(&history, final_content);
 
-        assert_eq!(result.summary.original_lines, 1);
-        // "AI line modified" may be detected as AIModified or Human depending on similarity
+        // "line1" is in AI output, so it's AI
+        assert_eq!(result.summary.ai_lines, 1);
+        // "AI line modified" should be detected as AIModified
         // "human line" should be detected as Human
-        // Total of AIModified + Human should be 2
         assert_eq!(
             result.summary.ai_modified_lines + result.summary.human_lines,
             2,
-            "Should have 2 non-original, non-AI lines"
+            "Should have 2 non-AI lines (modified + human)"
         );
     }
 
@@ -499,13 +505,11 @@ mod tests {
         let final_content = "new first line\nline1\nline2\nAI added\n";
         let result = ThreeWayAnalyzer::analyze_with_diff(&history, final_content);
 
-        // Should correctly identify:
-        // - "new first line" as Human
-        // - "line1", "line2" as Original
-        // - "AI added" as AI
+        // "new first line" is Human (not in AI output)
+        // "line1", "line2", "AI added" are all in AI output, so AI
         assert_eq!(result.summary.human_lines, 1);
-        assert_eq!(result.summary.original_lines, 2);
-        assert_eq!(result.summary.ai_lines, 1);
+        assert_eq!(result.summary.ai_lines, 3);
+        assert_eq!(result.summary.original_lines, 0);
     }
 
     #[test]
@@ -547,14 +551,34 @@ mod tests {
             "original\nfirst AI\nsecond AI\n",
         );
 
-        assert_eq!(result.summary.original_lines, 1);
-        assert_eq!(result.summary.ai_lines, 2);
+        // All lines are in the AI output from the second edit
+        // "original" gets attributed to edit 1 (first appearance in AI output)
+        // "first AI" gets attributed to edit 0 (first added)
+        // "second AI" gets attributed to edit 1 (first added)
+        assert_eq!(result.summary.ai_lines, 3);
+        assert_eq!(result.summary.original_lines, 0);
 
-        // Check prompt indices
+        // Check prompt indices - later edits override, so "original" is from edit 1
         let first_ai = result.lines.iter().find(|l| l.content == "first AI").unwrap();
-        assert_eq!(first_ai.prompt_index, Some(0));
+        // first AI appears in edit 0's output and edit 1's output, later wins
+        assert_eq!(first_ai.prompt_index, Some(1));
 
         let second_ai = result.lines.iter().find(|l| l.content == "second AI").unwrap();
         assert_eq!(second_ai.prompt_index, Some(1));
+    }
+
+    #[test]
+    fn test_only_original_no_ai_edits() {
+        // Test that without AI edits, original lines stay original
+        let history = FileEditHistory::new("test.rs", Some("line1\nline2\n"));
+        // No AI edits added
+
+        let result = ThreeWayAnalyzer::analyze(&history, "line1\nline2\nline3\n");
+
+        // line1, line2 are original (no AI touched them)
+        // line3 is human (added without AI)
+        assert_eq!(result.summary.original_lines, 2);
+        assert_eq!(result.summary.human_lines, 1);
+        assert_eq!(result.summary.ai_lines, 0);
     }
 }
