@@ -1,0 +1,661 @@
+{
+  "version": 2,
+  "session": {
+    "session_id": "340aadae-0942-4ad2-b572-13ec33fc6921",
+    "model": {
+      "id": "claude-opus-4-5-20251101",
+      "provider": "anthropic"
+    },
+    "started_at": "2026-01-31T17:30:09.209782+00:00",
+    "prompt_count": 2
+  },
+  "prompts": [
+    {
+      "index": 0,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T17:30:09.209817+00:00",
+      "affected_files": [
+        ".github/workflows/ci.yml"
+      ]
+    },
+    {
+      "index": 1,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T17:30:10.449369+00:00",
+      "affected_files": [
+        ".github/workflows/ci.yml"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "lines": [
+        {
+          "line_number": 1,
+          "content": "name: CI",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 2,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 3,
+          "content": "on:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 4,
+          "content": "  push:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 5,
+          "content": "    branches: [main]",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 6,
+          "content": "  pull_request:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 7,
+          "content": "    branches: [main]",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 8,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 9,
+          "content": "env:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 10,
+          "content": "  CARGO_TERM_COLOR: always",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 11,
+          "content": "  RUST_BACKTRACE: 1",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 12,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 13,
+          "content": "jobs:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 14,
+          "content": "  test:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 15,
+          "content": "    name: Test",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 16,
+          "content": "    runs-on: ubuntu-latest",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 17,
+          "content": "    steps:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 18,
+          "content": "      - uses: actions/checkout@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 19,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 20,
+          "content": "      - name: Install Rust toolchain",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 21,
+          "content": "        uses: dtolnay/rust-toolchain@stable",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 22,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 23,
+          "content": "      - name: Build",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 24,
+          "content": "        run: cargo build --verbose",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 25,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 26,
+          "content": "      - name: Run tests",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 27,
+          "content": "        run: cargo test --verbose",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 28,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 29,
+          "content": "  lint:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 30,
+          "content": "    name: Lint",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 31,
+          "content": "    runs-on: ubuntu-latest",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 32,
+          "content": "    steps:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 33,
+          "content": "      - uses: actions/checkout@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 34,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 35,
+          "content": "      - name: Install Rust toolchain",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 36,
+          "content": "        uses: dtolnay/rust-toolchain@stable",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 37,
+          "content": "        with:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 38,
+          "content": "          components: clippy, rustfmt",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 39,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 40,
+          "content": "      - name: Check formatting",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 41,
+          "content": "        run: cargo fmt --all -- --check",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 42,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 43,
+          "content": "      - name: Run clippy",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 44,
+          "content": "        run: cargo clippy --all-targets --all-features -- -D warnings",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 45,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 46,
+          "content": "  security:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 47,
+          "content": "    name: Security audit",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 48,
+          "content": "    runs-on: ubuntu-latest",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 49,
+          "content": "    steps:",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 50,
+          "content": "      - uses: actions/checkout@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 51,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 52,
+          "content": "      - name: Install cargo-audit",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 53,
+          "content": "        run: cargo install cargo-audit",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 54,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 55,
+          "content": "      - name: Run security audit",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 56,
+          "content": "        run: cargo audit",
+          "source": {
+            "type": "AI",
+            "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759"
+          },
+          "edit_id": "db88ef35-3099-4e63-b94d-a145a16af759",
+          "prompt_index": 1,
+          "confidence": 1.0
+        }
+      ],
+      "summary": {
+        "total_lines": 56,
+        "ai_lines": 56,
+        "ai_modified_lines": 0,
+        "human_lines": 0,
+        "original_lines": 0,
+        "unknown_lines": 0
+      }
+    }
+  ]
+}
