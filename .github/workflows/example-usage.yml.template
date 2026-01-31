@@ -1,0 +1,31 @@
+# Example workflow for using ai-blame PR summaries
+# Copy this file to your repository's .github/workflows/ directory
+# and rename it to ai-attribution.yml
+
+name: AI Attribution Summary
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  ai-attribution:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch git notes
+        run: git fetch origin refs/notes/ai-blame:refs/notes/ai-blame || true
+        continue-on-error: true
+
+      - name: AI Attribution Summary
+        uses: dotsetlabs/ai-blame/.github/actions/pr-summary@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,251 @@
+name: AI Attribution Summary
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git notes
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Fetch git notes
+        run: |
+          git fetch origin refs/notes/ai-blame:refs/notes/ai-blame || echo "No ai-blame notes found"
+        continue-on-error: true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-action@stable
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build ai-blame
+        run: cargo build --release
+
+      - name: Analyze PR commits
+        id: analyze
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Create analysis script
+          cat > /tmp/analyze.sh << 'SCRIPT'
+          #!/bin/bash
+          set -e
+
+          BASE_SHA="$1"
+          HEAD_SHA="$2"
+          AI_BLAME="./target/release/ai-blame"
+
+          # Get list of commits in PR
+          COMMITS=$(git rev-list --reverse "$BASE_SHA".."$HEAD_SHA")
+
+          if [ -z "$COMMITS" ]; then
+            echo "No commits to analyze"
+            echo "has_data=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Initialize counters
+          TOTAL_AI=0
+          TOTAL_AI_MODIFIED=0
+          TOTAL_HUMAN=0
+          TOTAL_ORIGINAL=0
+          COMMITS_WITH_AI=0
+          COMMIT_COUNT=0
+
+          # Collect per-commit data
+          COMMIT_DETAILS=""
+
+          for COMMIT in $COMMITS; do
+            COMMIT_COUNT=$((COMMIT_COUNT + 1))
+            SHORT=$(echo "$COMMIT" | cut -c1-7)
+
+            # Try to get attribution for this commit
+            if ATTR=$("$AI_BLAME" show "$COMMIT" --format json 2>/dev/null); then
+              # Parse JSON output
+              AI=$(echo "$ATTR" | jq -r '[.files[].summary.ai_lines] | add // 0')
+              AI_MOD=$(echo "$ATTR" | jq -r '[.files[].summary.ai_modified_lines] | add // 0')
+              HUMAN=$(echo "$ATTR" | jq -r '[.files[].summary.human_lines] | add // 0')
+              ORIGINAL=$(echo "$ATTR" | jq -r '[.files[].summary.original_lines] | add // 0')
+              MODEL=$(echo "$ATTR" | jq -r '.session.model.id // "unknown"')
+              FILES=$(echo "$ATTR" | jq -r '.files | length')
+
+              if [ "$AI" != "0" ] || [ "$AI_MOD" != "0" ]; then
+                COMMITS_WITH_AI=$((COMMITS_WITH_AI + 1))
+                TOTAL_AI=$((TOTAL_AI + AI))
+                TOTAL_AI_MODIFIED=$((TOTAL_AI_MODIFIED + AI_MOD))
+                TOTAL_HUMAN=$((TOTAL_HUMAN + HUMAN))
+                TOTAL_ORIGINAL=$((TOTAL_ORIGINAL + ORIGINAL))
+
+                # Get commit message (first line)
+                MSG=$(git log -1 --format=%s "$COMMIT" | head -c 50)
+
+                COMMIT_DETAILS="${COMMIT_DETAILS}| \`${SHORT}\` | ${MSG} | ${AI} | ${AI_MOD} | ${HUMAN} | ${FILES} |
+          "
+              fi
+            fi
+          done
+
+          # Calculate totals
+          TOTAL_LINES=$((TOTAL_AI + TOTAL_AI_MODIFIED + TOTAL_HUMAN + TOTAL_ORIGINAL))
+
+          if [ "$COMMITS_WITH_AI" -eq 0 ]; then
+            echo "has_data=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Calculate percentage
+          if [ "$TOTAL_LINES" -gt 0 ]; then
+            AI_PERCENT=$(echo "scale=1; ($TOTAL_AI + $TOTAL_AI_MODIFIED) * 100 / $TOTAL_LINES" | bc)
+          else
+            AI_PERCENT="0"
+          fi
+
+          # Build summary
+          echo "has_data=true" >> "$GITHUB_OUTPUT"
+          echo "total_ai=$TOTAL_AI" >> "$GITHUB_OUTPUT"
+          echo "total_ai_modified=$TOTAL_AI_MODIFIED" >> "$GITHUB_OUTPUT"
+          echo "total_human=$TOTAL_HUMAN" >> "$GITHUB_OUTPUT"
+          echo "total_original=$TOTAL_ORIGINAL" >> "$GITHUB_OUTPUT"
+          echo "commits_with_ai=$COMMITS_WITH_AI" >> "$GITHUB_OUTPUT"
+          echo "commit_count=$COMMIT_COUNT" >> "$GITHUB_OUTPUT"
+          echo "ai_percent=$AI_PERCENT" >> "$GITHUB_OUTPUT"
+
+          # Write commit details to file for multi-line output
+          echo "$COMMIT_DETAILS" > /tmp/commit_details.txt
+          SCRIPT
+
+          chmod +x /tmp/analyze.sh
+          /tmp/analyze.sh "$BASE_SHA" "$HEAD_SHA"
+
+      - name: Post PR comment
+        if: steps.analyze.outputs.has_data == 'true'
+        uses: actions/github-script@v7
+        env:
+          TOTAL_AI: ${{ steps.analyze.outputs.total_ai }}
+          TOTAL_AI_MODIFIED: ${{ steps.analyze.outputs.total_ai_modified }}
+          TOTAL_HUMAN: ${{ steps.analyze.outputs.total_human }}
+          TOTAL_ORIGINAL: ${{ steps.analyze.outputs.total_original }}
+          COMMITS_WITH_AI: ${{ steps.analyze.outputs.commits_with_ai }}
+          COMMIT_COUNT: ${{ steps.analyze.outputs.commit_count }}
+          AI_PERCENT: ${{ steps.analyze.outputs.ai_percent }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            const totalAI = parseInt(process.env.TOTAL_AI) || 0;
+            const totalAIMod = parseInt(process.env.TOTAL_AI_MODIFIED) || 0;
+            const totalHuman = parseInt(process.env.TOTAL_HUMAN) || 0;
+            const totalOriginal = parseInt(process.env.TOTAL_ORIGINAL) || 0;
+            const commitsWithAI = parseInt(process.env.COMMITS_WITH_AI) || 0;
+            const commitCount = parseInt(process.env.COMMIT_COUNT) || 0;
+            const aiPercent = process.env.AI_PERCENT || '0';
+
+            // Read commit details
+            let commitDetails = '';
+            try {
+              commitDetails = fs.readFileSync('/tmp/commit_details.txt', 'utf8').trim();
+            } catch (e) {
+              console.log('No commit details file found');
+            }
+
+            // Determine emoji based on AI percentage
+            let emoji = '🤖';
+            const pct = parseFloat(aiPercent);
+            if (pct >= 80) emoji = '🤖🤖🤖';
+            else if (pct >= 50) emoji = '🤖🤖';
+            else if (pct >= 20) emoji = '🤖';
+            else emoji = '👤';
+
+            const totalLines = totalAI + totalAIMod + totalHuman + totalOriginal;
+
+            let body = `## ${emoji} AI Attribution Summary
+
+            This PR contains **${commitsWithAI}** of **${commitCount}** commits with AI-assisted changes.
+
+            ### Overview
+
+            | Metric | Lines | Percentage |
+            |--------|------:|----------:|
+            | 🟢 AI-generated | ${totalAI} | ${totalLines > 0 ? ((totalAI / totalLines) * 100).toFixed(1) : 0}% |
+            | 🟡 AI-modified by human | ${totalAIMod} | ${totalLines > 0 ? ((totalAIMod / totalLines) * 100).toFixed(1) : 0}% |
+            | 🔵 Human-added | ${totalHuman} | ${totalLines > 0 ? ((totalHuman / totalLines) * 100).toFixed(1) : 0}% |
+            | ⚪ Original/unchanged | ${totalOriginal} | ${totalLines > 0 ? ((totalOriginal / totalLines) * 100).toFixed(1) : 0}% |
+            | **Total** | **${totalLines}** | **100%** |
+
+            **AI involvement: ${aiPercent}%** of changed lines
+
+            `;
+
+            if (commitDetails) {
+              body += `### Commits with AI Attribution
+
+            | Commit | Message | AI | Modified | Human | Files |
+            |--------|---------|---:|--------:|------:|------:|
+            ${commitDetails}
+            `;
+            }
+
+            body += `
+            ---
+            <sub>Generated by [ai-blame](https://github.com/dotsetlabs/ai-blame) • [View detailed attribution](command:ai-blame show HEAD)</sub>
+            `;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('AI Attribution Summary')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+              console.log('Updated existing comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+              console.log('Created new comment');
+            }
+
+      - name: No AI attribution found
+        if: steps.analyze.outputs.has_data != 'true'
+        run: |
+          echo "No AI attribution data found in this PR's commits."
+          echo "This is normal if the commits were not made with ai-blame tracking enabled."
