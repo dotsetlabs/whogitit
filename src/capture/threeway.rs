@@ -108,6 +108,10 @@ impl ThreeWayAnalyzer {
         // Compare: original -> final, and latest_ai -> final
         let latest_ai = history.latest_ai_content();
 
+        // Build lookup sets
+        let original_lines = build_line_set(&history.original.content);
+        let ai_line_map = build_ai_line_map(history);
+
         // Track which final lines match AI content
         let ai_to_final_mapping = diff_map_lines(&latest_ai.content, final_content);
 
@@ -118,13 +122,28 @@ impl ThreeWayAnalyzer {
         let mut final_line_sources: HashMap<usize, (LineSource, Option<String>, Option<u32>)> =
             HashMap::new();
 
-        // First pass: mark lines that came from AI edits (takes priority)
-        let ai_line_map = build_ai_line_map(history);
+        // First pass: mark lines that exist in original as Original
+        // (Lines in both original and AI should be Original - they weren't changed)
+        for (_, final_idx) in &original_to_final_mapping {
+            final_line_sources.insert(*final_idx, (LineSource::Original, None, None));
+        }
+
+        // Second pass: mark lines from AI edits that weren't mapped from original
+        // Key insight: if a final line has position mapping from AI but NOT from original,
+        // it's AI-generated - even if the content happens to match something in original
+        // (e.g., a `}` added by AI shouldn't be marked as Original just because
+        // the original file also had a `}` at a different position)
         for (ai_idx, final_idx) in &ai_to_final_mapping {
+            // Skip if already marked (came from original position mapping)
+            if final_line_sources.contains_key(final_idx) {
+                continue;
+            }
+
             let ai_line = latest_ai.lines().get(*ai_idx).copied().unwrap_or("");
             let normalized = normalize_for_key(ai_line);
 
-            // Check if this line came from an AI edit
+            // This line was mapped from AI output and NOT from original position
+            // So it's AI-generated (regardless of whether similar content exists in original)
             if let Some((edit_id, prompt_idx)) = ai_line_map.get(&normalized) {
                 final_line_sources.insert(
                     *final_idx,
@@ -139,16 +158,7 @@ impl ThreeWayAnalyzer {
             }
         }
 
-        // Second pass: mark lines that exist in original (only if not already AI)
-        for (_, final_idx) in &original_to_final_mapping {
-            if !final_line_sources.contains_key(final_idx) {
-                final_line_sources.insert(*final_idx, (LineSource::Original, None, None));
-            }
-        }
-
-        // Third pass: check unmapped lines against AI content
-        // This is critical - the diff may not map lines even if they're identical
-        // (e.g., when surrounding context changes, diff sees Delete+Insert instead of Equal)
+        // Third pass: check unmapped lines
         for (idx, line) in final_lines.iter().enumerate() {
             if final_line_sources.contains_key(&idx) {
                 continue;
@@ -156,9 +166,13 @@ impl ThreeWayAnalyzer {
 
             let normalized = normalize_for_key(line);
 
-            // First check for exact match in AI map - this is the key fix!
-            // Lines that exist verbatim in AI output should be attributed to AI
-            // even if the diff algorithm didn't map them as "Equal"
+            // Check if line exists in original first
+            if original_lines.contains(&normalized) {
+                final_line_sources.insert(idx, (LineSource::Original, None, None));
+                continue;
+            }
+
+            // Check if line is in AI output (but not original)
             if let Some((edit_id, prompt_idx)) = ai_line_map.get(&normalized) {
                 final_line_sources.insert(
                     idx,
@@ -188,12 +202,6 @@ impl ThreeWayAnalyzer {
                         Some(prompt_idx),
                     ),
                 );
-                continue;
-            }
-
-            // Check if line exists in original (untouched by AI or human)
-            if line_in_content(line, &history.original.content) {
-                final_line_sources.insert(idx, (LineSource::Original, None, None));
                 continue;
             }
 
@@ -304,9 +312,9 @@ fn diff_map_lines(source: &str, target: &str) -> Vec<(usize, usize)> {
 /// Attribute a single line
 ///
 /// Priority order:
-/// 1. AI - if line is in the AI edit output, it's AI-generated
-/// 2. AIModified - if line is similar to an AI line
-/// 3. Original - if line existed before AI edits and wasn't touched
+/// 1. Original - if line existed before AI edits and is unchanged
+/// 2. AI - if line is in the AI edit output but NOT in original (actually changed)
+/// 3. AIModified - if line is similar to an AI line
 /// 4. Human - line was added after AI edits
 ///
 /// All lookups use normalized line content to handle whitespace differences.
@@ -318,11 +326,37 @@ fn attribute_line(
     _history: &FileEditHistory,
 ) -> LineAttribution {
     let normalized = normalize_for_key(line);
+    let in_original = original_lines.contains(&normalized);
+    let in_ai = ai_line_sources.get(&normalized);
 
-    // Check if line matches an AI edit exactly - AI takes priority
-    // because if the AI output contains this line, it's AI-generated
-    // (even if the same line existed in the original)
-    if let Some((edit_id, prompt_idx)) = ai_line_sources.get(&normalized) {
+    // If line exists in original AND in AI output, it's unchanged - mark as Original
+    // This prevents counting context lines that AI included but didn't change
+    if in_original && in_ai.is_some() {
+        return LineAttribution {
+            line_number,
+            content: line.to_string(),
+            source: LineSource::Original,
+            edit_id: None,
+            prompt_index: None,
+            confidence: 1.0,
+        };
+    }
+
+    // If line is in original but NOT in AI output, it's still Original
+    // (The AI didn't touch this line at all)
+    if in_original {
+        return LineAttribution {
+            line_number,
+            content: line.to_string(),
+            source: LineSource::Original,
+            edit_id: None,
+            prompt_index: None,
+            confidence: 1.0,
+        };
+    }
+
+    // If line is in AI output but NOT in original, it's AI-generated
+    if let Some((edit_id, prompt_idx)) = in_ai {
         return LineAttribution {
             line_number,
             content: line.to_string(),
@@ -352,19 +386,7 @@ fn attribute_line(
         };
     }
 
-    // Check if line existed in original (and wasn't part of AI output)
-    if original_lines.contains(&normalized) {
-        return LineAttribution {
-            line_number,
-            content: line.to_string(),
-            source: LineSource::Original,
-            edit_id: None,
-            prompt_index: None,
-            confidence: 1.0,
-        };
-    }
-
-    // Line doesn't match original or AI - it's a human addition
+    // Line doesn't exist in original or AI output - must be human-added
     LineAttribution {
         line_number,
         content: line.to_string(),
@@ -510,10 +532,10 @@ mod tests {
 
         let result = ThreeWayAnalyzer::analyze(&history, "line1\nline2\nline3\n");
 
-        // All 3 lines are in the AI's output, so all 3 are AI-generated
-        // (even though line1 and line2 also existed in original)
-        assert_eq!(result.summary.ai_lines, 3);
-        assert_eq!(result.summary.original_lines, 0);
+        // line1 and line2 exist in both original and AI output -> Original (unchanged)
+        // line3 is only in AI output -> AI (actually added by AI)
+        assert_eq!(result.summary.ai_lines, 1);
+        assert_eq!(result.summary.original_lines, 2);
         assert_eq!(result.summary.human_lines, 0);
     }
 
@@ -533,14 +555,14 @@ mod tests {
         let final_content = "line1\nAI line modified\nhuman line\n";
         let result = ThreeWayAnalyzer::analyze(&history, final_content);
 
-        // "line1" is in AI output, so it's AI
-        assert_eq!(result.summary.ai_lines, 1);
-        // "AI line modified" should be detected as AIModified
-        // "human line" should be detected as Human
+        // "line1" is in both original and AI output -> Original (unchanged)
+        assert_eq!(result.summary.original_lines, 1);
+        // "AI line modified" should be detected as AIModified (similar to "AI line")
+        // "human line" should be detected as Human (not in original or AI)
         assert_eq!(
             result.summary.ai_modified_lines + result.summary.human_lines,
             2,
-            "Should have 2 non-AI lines (modified + human)"
+            "Should have 2 changed lines (modified + human)"
         );
     }
 
@@ -560,11 +582,12 @@ mod tests {
         let final_content = "new first line\nline1\nline2\nAI added\n";
         let result = ThreeWayAnalyzer::analyze_with_diff(&history, final_content);
 
-        // "new first line" is Human (not in AI output)
-        // "line1", "line2", "AI added" are all in AI output, so AI
+        // "new first line" is Human (not in original or AI output)
+        // "line1", "line2" are in both original and AI output -> Original (unchanged)
+        // "AI added" is only in AI output -> AI
         assert_eq!(result.summary.human_lines, 1);
-        assert_eq!(result.summary.ai_lines, 3);
-        assert_eq!(result.summary.original_lines, 0);
+        assert_eq!(result.summary.ai_lines, 1);
+        assert_eq!(result.summary.original_lines, 2);
     }
 
     #[test]
@@ -605,14 +628,13 @@ mod tests {
 
         let result = ThreeWayAnalyzer::analyze(&history, "original\nfirst AI\nsecond AI\n");
 
-        // All lines are in the AI output from the second edit
-        // "original" gets attributed to edit 1 (first appearance in AI output)
-        // "first AI" gets attributed to edit 0 (first added)
-        // "second AI" gets attributed to edit 1 (first added)
-        assert_eq!(result.summary.ai_lines, 3);
-        assert_eq!(result.summary.original_lines, 0);
+        // "original" is in the original file AND in AI outputs -> Original (unchanged)
+        // "first AI" is NOT in original, added by AI -> AI
+        // "second AI" is NOT in original, added by AI -> AI
+        assert_eq!(result.summary.original_lines, 1);
+        assert_eq!(result.summary.ai_lines, 2);
 
-        // Check prompt indices - later edits override, so "original" is from edit 1
+        // Check that AI lines have correct prompt indices
         let first_ai = result
             .lines
             .iter()
@@ -712,16 +734,14 @@ mod tests {
     }
 
     #[test]
-    fn test_diff_unmapped_lines_still_attributed_to_ai() {
-        // This test covers the critical bug fix:
-        // When the diff algorithm sees structural changes, it may not map identical lines
-        // (treating them as Delete+Insert instead of Equal). We need to still attribute
-        // those lines to AI if they exist in the AI output.
+    fn test_diff_unmapped_lines_still_attributed_correctly() {
+        // This test verifies that lines existing in BOTH original and AI output are Original,
+        // while lines only in AI output are AI.
         let original = "fn foo() {\n    old_code();\n}\n";
         let mut history = FileEditHistory::new("test.rs", Some(original));
 
         // AI rewrites the function with new content
-        // The closing brace "}" exists in both, but diff might not map it
+        // "fn foo() {" and "}" exist in both original and AI output
         let ai_output = "fn foo() {\n    new_code();\n    more_code();\n}\n";
         history.add_edit(AIEdit::new(
             "Rewrite function",
@@ -734,19 +754,21 @@ mod tests {
         // Final content matches AI output exactly
         let result = ThreeWayAnalyzer::analyze_with_diff(&history, ai_output);
 
-        // All lines should be AI - especially the closing brace
-        assert_eq!(result.summary.ai_lines, 4, "All lines should be AI");
+        // Lines in both original AND AI output → Original (unchanged)
+        // "fn foo() {" and "}" are in both → 2 Original
+        // "new_code();" and "more_code();" are only in AI → 2 AI
+        assert_eq!(result.summary.ai_lines, 2, "2 lines only in AI output");
         assert_eq!(result.summary.human_lines, 0, "No human lines expected");
         assert_eq!(
-            result.summary.original_lines, 0,
-            "No original lines (all in AI output)"
+            result.summary.original_lines, 2,
+            "2 lines unchanged from original (fn foo and closing brace)"
         );
 
-        // Verify the closing brace specifically is AI
+        // Verify the closing brace is Original (exists in both original and AI)
         let closing_brace = result.lines.iter().find(|l| l.content == "}").unwrap();
         assert!(
-            matches!(closing_brace.source, LineSource::AI { .. }),
-            "Closing brace should be AI, got {:?}",
+            matches!(closing_brace.source, LineSource::Original),
+            "Closing brace should be Original (exists in both), got {:?}",
             closing_brace.source
         );
     }
@@ -781,8 +803,14 @@ mod tests {
             );
         }
 
-        // All 8 lines should be AI (they're all in the AI edit output)
-        assert_eq!(result.summary.ai_lines, 8, "All lines should be AI");
+        // line1, line2, line4, line5: Original (unchanged from original)
+        // LINE3_MODIFIED: AI (this line was changed by AI)
+        // line6, line7, line8: AI (new lines added by AI)
+        assert_eq!(result.summary.ai_lines, 4, "4 lines actually changed by AI");
+        assert_eq!(
+            result.summary.original_lines, 4,
+            "4 lines unchanged from original"
+        );
         assert_eq!(result.summary.human_lines, 0, "No human lines expected");
     }
 
@@ -823,22 +851,42 @@ fn bar() {
             );
         }
 
-        // All lines should be AI (including the duplicate "}")
+        // Lines 1-3 (fn foo, code(), }) exist in BOTH original and AI → Original
+        // Lines 4-7 (empty, fn bar, more_code(), }) are only in AI → AI
         assert_eq!(
             result.summary.human_lines, 0,
-            "No human lines - all are in AI output"
+            "No human lines - all are either original or AI"
         );
-        // The closing brace "}" appears twice but both should be AI
+        assert_eq!(
+            result.summary.original_lines, 3,
+            "3 lines unchanged from original (fn foo, code, first closing brace)"
+        );
+        assert_eq!(
+            result.summary.ai_lines, 4,
+            "4 lines added by AI (empty, fn bar, more_code, second closing brace)"
+        );
+
+        // The closing brace "}" appears twice:
+        // - Line 3: from original (exists in both) → Original
+        // - Line 7: added by AI (only in AI output) → AI
         let closing_braces: Vec<_> = result.lines.iter().filter(|l| l.content == "}").collect();
         assert_eq!(closing_braces.len(), 2, "Should have 2 closing braces");
-        for brace in closing_braces {
-            assert!(
-                matches!(brace.source, LineSource::AI { .. }),
-                "Closing brace at line {} should be AI, got {:?}",
-                brace.line_number,
-                brace.source
-            );
-        }
+
+        // First closing brace (line 3) should be Original
+        assert!(
+            matches!(closing_braces[0].source, LineSource::Original),
+            "First closing brace (line {}) should be Original, got {:?}",
+            closing_braces[0].line_number,
+            closing_braces[0].source
+        );
+
+        // Second closing brace (line 7) should be AI
+        assert!(
+            matches!(closing_braces[1].source, LineSource::AI { .. }),
+            "Second closing brace (line {}) should be AI, got {:?}",
+            closing_braces[1].line_number,
+            closing_braces[1].source
+        );
     }
 
     #[test]

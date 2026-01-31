@@ -101,10 +101,19 @@ impl CaptureHook {
             eprintln!("ai-blame: Warning - empty new_content for non-delete operation");
         }
 
+        // Determine old content: use provided value, or fall back to git HEAD
+        let old_content = match input.old_content {
+            Some(content) => Some(content),
+            None => {
+                // Try to get content from git HEAD for existing files
+                self.get_content_from_git_head(&relative_path)
+            }
+        };
+
         // Record the edit with full content snapshots
         buffer.record_edit(
             &relative_path,
-            input.old_content.as_deref(),
+            old_content.as_deref(),
             &input.new_content,
             &input.tool,
             &input.prompt,
@@ -115,6 +124,17 @@ impl CaptureHook {
         store.save(&buffer)?;
 
         Ok(())
+    }
+
+    /// Get file content from git HEAD (the last committed version)
+    fn get_content_from_git_head(&self, path: &str) -> Option<String> {
+        let repo = Repository::open(&self.repo_root).ok()?;
+        let head = repo.head().ok()?.peel_to_commit().ok()?;
+        let tree = head.tree().ok()?;
+        let entry = tree.get_path(std::path::Path::new(path)).ok()?;
+        let blob = repo.find_blob(entry.id()).ok()?;
+        let content = std::str::from_utf8(blob.content()).ok()?;
+        Some(content.to_string())
     }
 
     /// Handle post-commit: perform three-way analysis, attach notes, and clean up
