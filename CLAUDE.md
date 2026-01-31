@@ -59,7 +59,7 @@ cargo run -- init
 
 ## Architecture Overview
 
-ai-blame tracks AI-generated code at line-level granularity using a dual-hook capture system and three-way diff analysis.
+whogitit tracks AI-generated code at line-level granularity using a dual-hook capture system and three-way diff analysis.
 
 ### Data Flow
 
@@ -70,7 +70,7 @@ Claude Code Session (Edit/Write tools)
     ├─► PostToolUse Hook: captures change + prompt from transcript
     │
     ▼
-Pending Buffer (.ai-blame-pending.json)
+Pending Buffer (.whogitit-pending.json)
     │   - Full content snapshots (original → AI edit 1 → AI edit 2 → ...)
     │   - Session metadata, prompts, file histories
     │
@@ -81,7 +81,7 @@ Three-Way Analysis
     │   - Attributes each line: AI / AIModified / Human / Original
     │
     ▼
-Git Notes (refs/notes/ai-blame)
+Git Notes (refs/notes/whogitit)
     - AIAttribution JSON per commit
     - Prompts (redacted), line-level attribution, summaries
 ```
@@ -99,7 +99,7 @@ Git Notes (refs/notes/ai-blame)
   - `blame.rs`: AIBlamer - combines git blame with AI notes
 
 - **storage/**: Git notes persistence
-  - `notes.rs`: NotesStore - read/write attribution to `refs/notes/ai-blame`
+  - `notes.rs`: NotesStore - read/write attribution to `refs/notes/whogitit`
   - `trailers.rs`: TrailerGenerator - git trailers from attribution
 
 - **cli/**: Command implementations
@@ -121,9 +121,9 @@ Git Notes (refs/notes/ai-blame)
 
 ### Data Formats
 
-**Pending Buffer** (`.ai-blame-pending.json`): Version 2 format with full content snapshots per file, edit history chain, and session metadata.
+**Pending Buffer** (`.whogitit-pending.json`): Version 2 format with full content snapshots per file, edit history chain, and session metadata.
 
-**Git Notes** (`refs/notes/ai-blame`): AIAttribution JSON with schema version 2, containing session info, prompts array, and per-file line-level attribution results.
+**Git Notes** (`refs/notes/whogitit`): AIAttribution JSON with schema version 2, containing session info, prompts array, and per-file line-level attribution results.
 
 ## Code Style
 
@@ -134,4 +134,4 @@ Git Notes (refs/notes/ai-blame)
 
 ## Hook Integration
 
-The shell hook at `hooks/ai-blame-capture.sh` (installed to `~/.claude/hooks/`) reads the `transcript_path` JSONL file provided by Claude Code to extract user prompts. It uses `jq -s` (slurp mode) since the transcript is JSON Lines format, not a JSON array.
+The shell hook at `hooks/whogitit-capture.sh` (installed to `~/.claude/hooks/`) reads the `transcript_path` JSONL file provided by Claude Code to extract user prompts. It uses `jq -s` (slurp mode) since the transcript is JSON Lines format, not a JSON array.

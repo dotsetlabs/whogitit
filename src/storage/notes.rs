@@ -4,7 +4,7 @@ use git2::{Oid, Repository, Signature};
 use crate::core::attribution::AIAttribution;
 
 /// Notes reference used for AI attribution storage
-pub const NOTES_REF: &str = "refs/notes/ai-blame";
+pub const NOTES_REF: &str = "refs/notes/whogitit";
 
 /// Git notes storage for AI attribution data
 pub struct NotesStore<'a> {
@@ -66,12 +66,12 @@ impl<'a> NotesStore<'a> {
     fn get_signature(&self) -> Result<Signature<'static>> {
         if let Ok(sig) = self.repo.signature() {
             return Ok(Signature::now(
-                sig.name().unwrap_or("ai-blame"),
-                sig.email().unwrap_or("ai-blame@local"),
+                sig.name().unwrap_or("whogitit"),
+                sig.email().unwrap_or("whogitit@local"),
             )?);
         }
 
-        Ok(Signature::now("ai-blame", "ai-blame@local")?)
+        Ok(Signature::now("whogitit", "whogitit@local")?)
     }
 
     /// List all commits with AI attribution

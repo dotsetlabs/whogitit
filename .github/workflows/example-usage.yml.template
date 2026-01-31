@@ -1,4 +1,4 @@
-# Example workflow for using ai-blame PR summaries
+# Example workflow for using whogitit PR summaries
 # Copy this file to your repository's .github/workflows/ directory
 # and rename it to ai-attribution.yml
 
@@ -22,10 +22,10 @@ jobs:
           fetch-depth: 0
 
       - name: Fetch git notes
-        run: git fetch origin refs/notes/ai-blame:refs/notes/ai-blame || true
+        run: git fetch origin refs/notes/whogitit:refs/notes/whogitit || true
         continue-on-error: true
 
       - name: AI Attribution Summary
-        uses: dotsetlabs/ai-blame/.github/actions/pr-summary@main
+        uses: dotsetlabs/whogitit/.github/actions/pr-summary@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

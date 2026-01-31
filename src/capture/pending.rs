@@ -13,7 +13,7 @@ use crate::core::attribution::ModelInfo;
 use crate::privacy::redaction::Redactor;
 
 /// Pending change buffer filename (v2 format with full snapshots)
-const PENDING_FILE: &str = ".ai-blame-pending.json";
+const PENDING_FILE: &str = ".whogitit-pending.json";
 
 /// Maximum age in hours before a pending buffer is considered stale
 const MAX_PENDING_AGE_HOURS: i64 = 24;
@@ -291,26 +291,26 @@ impl PendingStore {
                 // Validate buffer integrity
                 if let Err(e) = buffer.validate() {
                     eprintln!(
-                        "ai-blame: Warning - pending buffer validation failed: {}",
+                        "whogitit: Warning - pending buffer validation failed: {}",
                         e
                     );
-                    eprintln!("ai-blame: The pending buffer may be corrupted. Run 'ai-blame clear' to reset.");
+                    eprintln!("whogitit: The pending buffer may be corrupted. Run 'whogitit clear' to reset.");
                 }
 
                 // Warn if buffer is stale
                 if buffer.is_stale() {
                     eprintln!(
-                        "ai-blame: Warning - pending buffer is stale (started {})",
+                        "whogitit: Warning - pending buffer is stale (started {})",
                         buffer.age_string()
                     );
-                    eprintln!("ai-blame: Consider running 'ai-blame clear' if these changes are no longer relevant.");
+                    eprintln!("whogitit: Consider running 'whogitit clear' if these changes are no longer relevant.");
                 }
 
                 Ok(Some(buffer))
             }
             Err(e) => {
-                eprintln!("ai-blame: Warning - failed to parse pending buffer: {}", e);
-                eprintln!("ai-blame: The file may be corrupted. Run 'ai-blame clear' to reset.");
+                eprintln!("whogitit: Warning - failed to parse pending buffer: {}", e);
+                eprintln!("whogitit: The file may be corrupted. Run 'whogitit clear' to reset.");
                 // Return None to allow fresh start, but don't delete the file
                 // in case the user wants to recover it
                 Ok(None)
@@ -347,7 +347,7 @@ impl PendingStore {
             serde_json::to_string_pretty(buffer).context("Failed to serialize pending buffer")?;
 
         // Write to temporary file first
-        let temp_path = self.repo_root.join(".ai-blame-pending.tmp");
+        let temp_path = self.repo_root.join(".whogitit-pending.tmp");
 
         let mut temp_file =
             File::create(&temp_path).context("Failed to create temporary pending buffer file")?;
@@ -372,7 +372,7 @@ impl PendingStore {
     /// Delete the pending buffer file
     pub fn delete(&self) -> Result<()> {
         // Also clean up any leftover temp file
-        let temp_path = self.repo_root.join(".ai-blame-pending.tmp");
+        let temp_path = self.repo_root.join(".whogitit-pending.tmp");
         if temp_path.exists() {
             let _ = fs::remove_file(&temp_path);
         }
@@ -400,7 +400,7 @@ impl PendingStore {
         }
 
         let backup_name = format!(
-            ".ai-blame-pending.backup.{}",
+            ".whogitit-pending.backup.{}",
             Utc::now().format("%Y%m%d-%H%M%S")
         );
         let backup_path = self.repo_root.join(backup_name);

@@ -1,13 +1,13 @@
 #!/bin/bash
-# ai-blame capture hook for Claude Code
+# whogitit capture hook for Claude Code
 # This script captures file changes for AI attribution tracking
 # It reads the conversation transcript to extract actual user prompts
 
 set -o pipefail
 
 # Enable debug logging
-DEBUG_LOG="/tmp/ai-blame-hook-debug.log"
-ERROR_LOG="/tmp/ai-blame-hook-errors.log"
+DEBUG_LOG="/tmp/whogitit-hook-debug.log"
+ERROR_LOG="/tmp/whogitit-hook-errors.log"
 
 log_debug() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') [$HOOK_PHASE] $1" >> "$DEBUG_LOG"
@@ -19,7 +19,7 @@ log_error() {
 }
 
 # State directory for tracking pre-edit content
-STATE_DIR="${TMPDIR:-/tmp}/ai-blame-state"
+STATE_DIR="${TMPDIR:-/tmp}/whogitit-state"
 mkdir -p "$STATE_DIR" 2>/dev/null || {
     log_error "Failed to create state directory: $STATE_DIR"
     exit 0
@@ -36,7 +36,7 @@ if [[ -z "$INPUT" ]]; then
 fi
 
 # Determine hook phase (pre or post)
-HOOK_PHASE="${AI_BLAME_HOOK_PHASE:-post}"
+HOOK_PHASE="${WHOGITIT_HOOK_PHASE:-post}"
 
 log_debug "Hook started"
 
@@ -182,14 +182,14 @@ fi
 
 log_debug "Prompt: ${PROMPT:0:100}..."
 
-# Check if ai-blame is available
-AI_BLAME_BIN="${AI_BLAME_BIN:-$HOME/.cargo/bin/ai-blame}"
-if [[ ! -x "$AI_BLAME_BIN" ]]; then
-    log_error "ai-blame binary not found at: $AI_BLAME_BIN"
+# Check if whogitit is available
+WHOGITIT_BIN="${WHOGITIT_BIN:-$HOME/.cargo/bin/whogitit}"
+if [[ ! -x "$WHOGITIT_BIN" ]]; then
+    log_error "whogitit binary not found at: $WHOGITIT_BIN"
     exit 0
 fi
 
-# Build and send to ai-blame
+# Build and send to whogitit
 capture_result=""
 if [[ -z "$OLD_CONTENT" ]]; then
     log_debug "Sending as NEW file"
@@ -204,7 +204,7 @@ if [[ -z "$OLD_CONTENT" ]]; then
             prompt: $prompt,
             old_content: null,
             new_content: $new_content
-        }' 2>/dev/null | "$AI_BLAME_BIN" capture --stdin 2>&1)
+        }' 2>/dev/null | "$WHOGITIT_BIN" capture --stdin 2>&1)
 else
     log_debug "Sending as MODIFIED file"
     capture_result=$(jq -n \
@@ -219,12 +219,12 @@ else
             prompt: $prompt,
             old_content: $old_content,
             new_content: $new_content
-        }' 2>/dev/null | "$AI_BLAME_BIN" capture --stdin 2>&1)
+        }' 2>/dev/null | "$WHOGITIT_BIN" capture --stdin 2>&1)
 fi
 
 capture_exit=$?
 if [[ $capture_exit -ne 0 ]]; then
-    log_error "ai-blame capture failed (exit $capture_exit): $capture_result"
+    log_error "whogitit capture failed (exit $capture_exit): $capture_result"
 else
     if [[ -n "$capture_result" ]]; then
         log_debug "capture output: $capture_result"

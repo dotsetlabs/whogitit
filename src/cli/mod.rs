@@ -16,7 +16,7 @@ use crate::capture::hook;
 
 /// AI-aware git blame tool for tracking AI-generated code
 #[derive(Debug, Parser)]
-#[command(name = "ai-blame")]
+#[command(name = "whogitit")]
 #[command(author, version, about, long_about = None)]
 pub struct Cli {
     #[command(subcommand)]
@@ -49,7 +49,7 @@ pub enum Commands {
     /// Clear pending changes without committing
     Clear,
 
-    /// Initialize ai-blame in a git repository (installs post-commit hook)
+    /// Initialize whogitit in a git repository (installs post-commit hook)
     Init,
 }
 
@@ -126,7 +126,7 @@ fn run_status() -> Result<()> {
 
         if status.is_stale {
             println!("\n⚠️  Warning: This pending buffer is stale (> 24 hours old).");
-            println!("   Run 'ai-blame clear' if these changes are no longer relevant.");
+            println!("   Run 'whogitit clear' if these changes are no longer relevant.");
         } else {
             println!("\nRun 'git commit' to finalize attribution.");
         }
@@ -181,32 +181,32 @@ fn install_post_commit_hook(hooks_dir: &std::path::Path) -> Result<()> {
 
     if hook_path.exists() {
         let content = fs::read_to_string(&hook_path)?;
-        if content.contains("ai-blame") {
-            println!("✓ ai-blame post-commit hook already installed.");
+        if content.contains("whogitit") {
+            println!("✓ whogitit post-commit hook already installed.");
             return Ok(());
         }
 
         // Append to existing hook
         let new_content = format!(
-            "{}\n\n# ai-blame post-commit hook\nif command -v ai-blame &> /dev/null; then\n    ai-blame post-commit 2>/dev/null || true\nfi\n",
+            "{}\n\n# whogitit post-commit hook\nif command -v whogitit &> /dev/null; then\n    whogitit post-commit 2>/dev/null || true\nfi\n",
             content.trim_end()
         );
         fs::write(&hook_path, new_content)?;
-        println!("✓ Added ai-blame to existing post-commit hook.");
+        println!("✓ Added whogitit to existing post-commit hook.");
     } else {
         let hook_content = r#"#!/bin/bash
-# ai-blame post-commit hook
+# whogitit post-commit hook
 # Attaches AI attribution notes to the commit
 
-if command -v ai-blame &> /dev/null; then
-    ai-blame post-commit 2>/dev/null || true
-elif [[ -x "$HOME/.cargo/bin/ai-blame" ]]; then
-    "$HOME/.cargo/bin/ai-blame" post-commit 2>/dev/null || true
+if command -v whogitit &> /dev/null; then
+    whogitit post-commit 2>/dev/null || true
+elif [[ -x "$HOME/.cargo/bin/whogitit" ]]; then
+    "$HOME/.cargo/bin/whogitit" post-commit 2>/dev/null || true
 fi
 "#;
         fs::write(&hook_path, hook_content)?;
         make_executable(&hook_path)?;
-        println!("✓ Installed ai-blame post-commit hook.");
+        println!("✓ Installed whogitit post-commit hook.");
     }
 
     Ok(())
@@ -217,36 +217,36 @@ fn install_pre_push_hook(hooks_dir: &std::path::Path) -> Result<()> {
 
     if hook_path.exists() {
         let content = fs::read_to_string(&hook_path)?;
-        if content.contains("ai-blame") {
-            println!("✓ ai-blame pre-push hook already installed.");
+        if content.contains("whogitit") {
+            println!("✓ whogitit pre-push hook already installed.");
             return Ok(());
         }
 
         // Append to existing hook
         let new_content = format!(
-            "{}\n\n# ai-blame pre-push hook - automatically push notes\n# Skip if already pushing notes (prevent recursion)\n[[ \"$AI_BLAME_PUSHING_NOTES\" == \"1\" ]] && exit 0\nremote=\"$1\"\nif git notes --ref=ai-blame list &>/dev/null; then\n    AI_BLAME_PUSHING_NOTES=1 git push \"$remote\" refs/notes/ai-blame 2>/dev/null || true\nfi\n",
+            "{}\n\n# whogitit pre-push hook - automatically push notes\n# Skip if already pushing notes (prevent recursion)\n[[ \"$WHOGITIT_PUSHING_NOTES\" == \"1\" ]] && exit 0\nremote=\"$1\"\nif git notes --ref=whogitit list &>/dev/null; then\n    WHOGITIT_PUSHING_NOTES=1 git push \"$remote\" refs/notes/whogitit 2>/dev/null || true\nfi\n",
             content.trim_end()
         );
         fs::write(&hook_path, new_content)?;
-        println!("✓ Added ai-blame to existing pre-push hook.");
+        println!("✓ Added whogitit to existing pre-push hook.");
     } else {
         let hook_content = r#"#!/bin/bash
-# ai-blame pre-push hook
-# Automatically pushes ai-blame notes alongside regular pushes
+# whogitit pre-push hook
+# Automatically pushes whogitit notes alongside regular pushes
 
 # Prevent recursion - skip if we're already pushing notes
-[[ "$AI_BLAME_PUSHING_NOTES" == "1" ]] && exit 0
+[[ "$WHOGITIT_PUSHING_NOTES" == "1" ]] && exit 0
 
 remote="$1"
 
 # Only push notes if they exist
-if git notes --ref=ai-blame list &>/dev/null; then
-    AI_BLAME_PUSHING_NOTES=1 git push "$remote" refs/notes/ai-blame 2>/dev/null || true
+if git notes --ref=whogitit list &>/dev/null; then
+    WHOGITIT_PUSHING_NOTES=1 git push "$remote" refs/notes/whogitit 2>/dev/null || true
 fi
 "#;
         fs::write(&hook_path, hook_content)?;
         make_executable(&hook_path)?;
-        println!("✓ Installed ai-blame pre-push hook.");
+        println!("✓ Installed whogitit pre-push hook.");
     }
 
     Ok(())
@@ -268,14 +268,14 @@ fn make_executable(_path: &std::path::Path) -> Result<()> {
     Ok(())
 }
 
-/// Configure git to automatically fetch ai-blame notes
+/// Configure git to automatically fetch whogitit notes
 fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
     let mut config = repo.config().context("Failed to open git config")?;
 
-    let fetch_refspec = "+refs/notes/ai-blame:refs/notes/ai-blame";
+    let fetch_refspec = "+refs/notes/whogitit:refs/notes/whogitit";
     let fetch_configured = config
         .get_string("remote.origin.fetch")
-        .map(|v| v.contains("ai-blame"))
+        .map(|v| v.contains("whogitit"))
         .unwrap_or(false);
 
     if !fetch_configured {
@@ -283,9 +283,9 @@ fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
             .set_multivar("remote.origin.fetch", "^$", fetch_refspec)
             .or_else(|_| config.set_str("remote.origin.fetch", fetch_refspec))
             .context("Failed to configure fetch refspec")?;
-        println!("✓ Configured git to fetch ai-blame notes automatically.");
+        println!("✓ Configured git to fetch whogitit notes automatically.");
     } else {
-        println!("✓ Git already configured to fetch ai-blame notes.");
+        println!("✓ Git already configured to fetch whogitit notes.");
     }
 
     Ok(())

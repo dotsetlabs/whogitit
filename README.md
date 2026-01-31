@@ -1,4 +1,4 @@
-# ai-blame
+# whogitit
 
 Track AI-generated code at line-level granularity. Know exactly which lines were written by AI, which were modified by humans, and what prompts generated them.
 
@@ -16,8 +16,8 @@ Track AI-generated code at line-level granularity. Know exactly which lines were
 
 ```bash
 # From source
-git clone https://github.com/dotsetlabs/ai-blame
-cd ai-blame
+git clone https://github.com/dotsetlabs/whogitit
+cd whogitit
 cargo install --path .
 ```
 
@@ -27,7 +27,7 @@ cargo install --path .
 
 ```bash
 cd your-project
-ai-blame init
+whogitit init
 ```
 
 This installs git hooks that:
@@ -41,8 +41,8 @@ Copy the capture script to your Claude hooks directory:
 
 ```bash
 mkdir -p ~/.claude/hooks
-cp hooks/ai-blame-capture.sh ~/.claude/hooks/
-chmod +x ~/.claude/hooks/ai-blame-capture.sh
+cp hooks/whogitit-capture.sh ~/.claude/hooks/
+chmod +x ~/.claude/hooks/whogitit-capture.sh
 ```
 
 Add to `~/.claude/settings.json`:
@@ -56,7 +56,7 @@ Add to `~/.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "AI_BLAME_HOOK_PHASE=pre ~/.claude/hooks/ai-blame-capture.sh"
+            "command": "WHOGITIT_HOOK_PHASE=pre ~/.claude/hooks/whogitit-capture.sh"
           }
         ]
       }
@@ -67,7 +67,7 @@ Add to `~/.claude/settings.json`:
         "hooks": [
           {
             "type": "command",
-            "command": "AI_BLAME_HOOK_PHASE=post ~/.claude/hooks/ai-blame-capture.sh"
+            "command": "WHOGITIT_HOOK_PHASE=post ~/.claude/hooks/whogitit-capture.sh"
           }
         ]
       }
@@ -78,20 +78,20 @@ Add to `~/.claude/settings.json`:
 
 ### 3. Push notes with commits
 
-Git notes must be pushed separately. After `ai-blame init`, this happens automatically on `git push`. To push manually:
+Git notes must be pushed separately. After `whogitit init`, this happens automatically on `git push`. To push manually:
 
 ```bash
-git push origin refs/notes/ai-blame
+git push origin refs/notes/whogitit
 ```
 
 ## CLI Commands
 
-### `ai-blame blame <file>`
+### `whogitit blame <file>`
 
 Show AI attribution for each line:
 
 ```
-$ ai-blame blame src/main.rs
+$ whogitit blame src/main.rs
 
  LINE   │ COMMIT  │ AUTHOR     │ SRC │ CODE
 ─────────────────────────────────────────────────────────────────────────────────────
@@ -111,12 +111,12 @@ Options:
 - `--ai-only` - Show only AI-generated lines
 - `--human-only` - Show only human-written lines
 
-### `ai-blame show <commit>`
+### `whogitit show <commit>`
 
 View attribution summary for a commit:
 
 ```
-$ ai-blame show HEAD
+$ whogitit show HEAD
 
 Commit: d4e5f6g
 Session: 7f3a-4b2c-9d1e-8a7b
@@ -138,12 +138,12 @@ Summary:
   5 original/unchanged lines
 ```
 
-### `ai-blame prompt <file:line>`
+### `whogitit prompt <file:line>`
 
 View the prompt that generated specific lines:
 
 ```
-$ ai-blame prompt src/main.rs:42
+$ whogitit prompt src/main.rs:42
 
 ╔════════════════════════════════════════════════════════════════════╗
 ║  PROMPT #2 in session 7f3a-4b2c-9d1e...                            ║
@@ -159,22 +159,22 @@ Files affected by this prompt:
   - src/main.rs
 ```
 
-### `ai-blame summary`
+### `whogitit summary`
 
 Generate attribution summary for a commit range (useful for PRs):
 
 ```bash
-ai-blame summary --base main --head HEAD
-ai-blame summary --base main --format markdown
-ai-blame summary --format json
+whogitit summary --base main --head HEAD
+whogitit summary --base main --format markdown
+whogitit summary --format json
 ```
 
-### `ai-blame status`
+### `whogitit status`
 
 Check pending attribution changes (before commit):
 
 ```
-$ ai-blame status
+$ whogitit status
 
 Pending AI attribution:
   Session: 7f3a-4b2c-9d1e-8a7b
@@ -184,12 +184,12 @@ Pending AI attribution:
 Run 'git commit' to finalize attribution.
 ```
 
-### `ai-blame clear`
+### `whogitit clear`
 
 Discard pending changes without committing:
 
 ```bash
-ai-blame clear
+whogitit clear
 ```
 
 ## GitHub Action
@@ -221,7 +221,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Fetch git notes
-        run: git fetch origin refs/notes/ai-blame:refs/notes/ai-blame || true
+        run: git fetch origin refs/notes/whogitit:refs/notes/whogitit || true
         continue-on-error: true
 
       - name: Setup Rust
@@ -238,7 +238,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build ai-blame
+      - name: Build whogitit
         run: cargo build --release
 
       # ... analysis and comment posting steps
@@ -303,7 +303,7 @@ crate. The function should take a user_id and return a Result<String>.
 
 ### Three-Way Diff Analysis
 
-ai-blame captures complete file snapshots during editing, enabling accurate attribution:
+whogitit captures complete file snapshots during editing, enabling accurate attribution:
 
 1. **Original** - Content before any AI edits
 2. **AI Snapshots** - Content after each AI edit
@@ -330,26 +330,26 @@ Claude Code (Edit/Write tools)
          ├─► PostToolUse: Capture change + prompt
          │
          ▼
-Pending Buffer (.ai-blame-pending.json)
+Pending Buffer (.whogitit-pending.json)
          │
          ▼ git commit
          │
-Three-Way Analysis → Git Notes (refs/notes/ai-blame)
+Three-Way Analysis → Git Notes (refs/notes/whogitit)
 ```
 
 ## Storage
 
-Attribution is stored in git notes (`refs/notes/ai-blame`), which:
+Attribution is stored in git notes (`refs/notes/whogitit`), which:
 - Travel with repository when pushed/fetched
 - Don't clutter commit history
 - Can be inspected with standard git commands
 
 ```bash
 # View raw attribution
-git notes --ref=ai-blame show HEAD
+git notes --ref=whogitit show HEAD
 
 # List all attributed commits
-git notes --ref=ai-blame list
+git notes --ref=whogitit list
 ```
 
 ## Privacy

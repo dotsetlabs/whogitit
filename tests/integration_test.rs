@@ -3,11 +3,11 @@ use std::fs;
 use git2::{Repository, Signature};
 use tempfile::TempDir;
 
-use ai_blame::capture::pending::PendingBuffer;
-use ai_blame::capture::threeway::ThreeWayAnalyzer;
-use ai_blame::core::attribution::{AIAttribution, PromptInfo, SessionMetadata};
-use ai_blame::storage::notes::NotesStore;
-use ai_blame::storage::trailers::TrailerGenerator;
+use whogitit::capture::pending::PendingBuffer;
+use whogitit::capture::threeway::ThreeWayAnalyzer;
+use whogitit::core::attribution::{AIAttribution, PromptInfo, SessionMetadata};
+use whogitit::storage::notes::NotesStore;
+use whogitit::storage::trailers::TrailerGenerator;
 
 /// Test the full workflow: capture changes, commit, and analyze with three-way diff
 #[test]
@@ -102,7 +102,7 @@ fn main() {
 /// Test that privacy redaction works
 #[test]
 fn test_privacy_redaction() {
-    let redactor = ai_blame::privacy::Redactor::default_patterns();
+    let redactor = whogitit::privacy::Redactor::default_patterns();
 
     let sensitive = "Use api_key = sk-secret123 for auth with user@email.com";
     let redacted = redactor.redact(sensitive);
@@ -115,8 +115,8 @@ fn test_privacy_redaction() {
 /// Test trailers generation
 #[test]
 fn test_trailers() {
-    use ai_blame::capture::snapshot::{AttributionSummary, FileAttributionResult};
-    use ai_blame::core::attribution::ModelInfo;
+    use whogitit::capture::snapshot::{AttributionSummary, FileAttributionResult};
+    use whogitit::core::attribution::ModelInfo;
 
     let attribution = AIAttribution {
         version: 2,
@@ -270,10 +270,10 @@ fn test_new_file_attribution() {
 /// Test storing and fetching attribution from git notes
 #[test]
 fn test_notes_roundtrip() {
-    use ai_blame::capture::snapshot::{
+    use whogitit::capture::snapshot::{
         AttributionSummary, FileAttributionResult, LineAttribution, LineSource,
     };
-    use ai_blame::core::attribution::ModelInfo;
+    use whogitit::core::attribution::ModelInfo;
 
     let dir = TempDir::new().unwrap();
     let repo = Repository::init(dir.path()).unwrap();

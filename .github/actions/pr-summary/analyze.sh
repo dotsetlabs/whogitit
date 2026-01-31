@@ -4,17 +4,17 @@ set -e
 BASE_SHA="$1"
 HEAD_SHA="$2"
 
-# Find ai-blame binary
-AI_BLAME=$(which ai-blame 2>/dev/null || echo "./target/release/ai-blame")
+# Find whogitit binary
+WHOGITIT=$(which whogitit 2>/dev/null || echo "./target/release/whogitit")
 
-if [ ! -x "$AI_BLAME" ]; then
-  echo "Error: ai-blame not found"
+if [ ! -x "$WHOGITIT" ]; then
+  echo "Error: whogitit not found"
   echo "has_data=false" >> "$GITHUB_OUTPUT"
   exit 0
 fi
 
 # Use the summary command to analyze the commit range
-if SUMMARY=$("$AI_BLAME" summary --base "$BASE_SHA" --head "$HEAD_SHA" --format json 2>/dev/null); then
+if SUMMARY=$("$WHOGITIT" summary --base "$BASE_SHA" --head "$HEAD_SHA" --format json 2>/dev/null); then
   # Parse JSON output
   COMMITS_ANALYZED=$(echo "$SUMMARY" | jq -r '.commits_analyzed // 0')
   COMMITS_WITH_AI=$(echo "$SUMMARY" | jq -r '.commits_with_ai // 0')
@@ -47,7 +47,7 @@ if SUMMARY=$("$AI_BLAME" summary --base "$BASE_SHA" --head "$HEAD_SHA" --format 
   for COMMIT in $COMMITS; do
     SHORT=$(echo "$COMMIT" | cut -c1-7)
 
-    if ATTR=$("$AI_BLAME" show "$COMMIT" --format json 2>/dev/null); then
+    if ATTR=$("$WHOGITIT" show "$COMMIT" --format json 2>/dev/null); then
       if echo "$ATTR" | jq -e '.files' > /dev/null 2>&1; then
         AI=$(echo "$ATTR" | jq -r '[.files[].summary.ai_lines] | add // 0')
         AI_MOD=$(echo "$ATTR" | jq -r '[.files[].summary.ai_modified_lines] | add // 0')
@@ -96,7 +96,7 @@ else
     COMMIT_COUNT=$((COMMIT_COUNT + 1))
     SHORT=$(echo "$COMMIT" | cut -c1-7)
 
-    if ATTR=$("$AI_BLAME" show "$COMMIT" --format json 2>/dev/null); then
+    if ATTR=$("$WHOGITIT" show "$COMMIT" --format json 2>/dev/null); then
       if echo "$ATTR" | jq -e '.files' > /dev/null 2>&1; then
         AI=$(echo "$ATTR" | jq -r '[.files[].summary.ai_lines] | add // 0')
         AI_MOD=$(echo "$ATTR" | jq -r '[.files[].summary.ai_modified_lines] | add // 0')

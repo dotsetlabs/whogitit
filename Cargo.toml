@@ -1,11 +1,11 @@
 [package]
-name = "ai-blame"
+name = "whogitit"
 version = "0.1.0"
 edition = "2021"
 description = "Track AI-generated code at line-level granularity"
 license = "MIT"
-repository = "https://github.com/dotsetlabs/ai-blame"
-homepage = "https://github.com/dotsetlabs/ai-blame"
+repository = "https://github.com/dotsetlabs/whogitit"
+homepage = "https://github.com/dotsetlabs/whogitit"
 readme = "README.md"
 keywords = ["git", "ai", "attribution", "cli", "blame"]
 categories = ["command-line-utilities", "development-tools"]

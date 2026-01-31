@@ -12,9 +12,9 @@ use crate::privacy::redaction::Redactor;
 use crate::storage::notes::NotesStore;
 
 /// Environment variable for session ID
-const ENV_SESSION_ID: &str = "AI_BLAME_SESSION_ID";
+const ENV_SESSION_ID: &str = "WHOGITIT_SESSION_ID";
 /// Environment variable for model ID
-const ENV_MODEL_ID: &str = "AI_BLAME_MODEL_ID";
+const ENV_MODEL_ID: &str = "WHOGITIT_MODEL_ID";
 /// Default model if not specified
 const DEFAULT_MODEL: &str = "claude-opus-4-5-20251101";
 
@@ -78,7 +78,7 @@ impl CaptureHook {
                     // But first, warn about uncommitted changes
                     if b.has_changes() {
                         eprintln!(
-                            "ai-blame: Warning - discarding {} uncommitted edits from previous session",
+                            "whogitit: Warning - discarding {} uncommitted edits from previous session",
                             b.total_edits()
                         );
                     }
@@ -98,7 +98,7 @@ impl CaptureHook {
             anyhow::bail!("Empty file path");
         }
         if input.new_content.is_empty() && input.tool != "Delete" {
-            eprintln!("ai-blame: Warning - empty new_content for non-delete operation");
+            eprintln!("whogitit: Warning - empty new_content for non-delete operation");
         }
 
         // Determine old content: use provided value, or fall back to git HEAD
@@ -220,7 +220,7 @@ impl CaptureHook {
             .sum::<usize>();
 
         eprintln!(
-            "ai-blame: Attached attribution - {} AI lines, {} human lines across {} files",
+            "whogitit: Attached attribution - {} AI lines, {} human lines across {} files",
             total_ai,
             total_human,
             attribution.files.len()

@@ -54,7 +54,7 @@ pub fn run(args: ShowArgs) -> Result<()> {
                 println!("null");
             } else {
                 println!("No AI attribution found for commit {}", commit_short);
-                println!("This commit was not made with AI assistance tracked by ai-blame.");
+                println!("This commit was not made with AI assistance tracked by whogitit.");
             }
         }
     }
