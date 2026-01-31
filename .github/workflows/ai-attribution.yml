@@ -83,6 +83,10 @@ jobs:
 
             # Try to get attribution for this commit
             if ATTR=$("$AI_BLAME" show "$COMMIT" --format json 2>/dev/null); then
+              # Skip if no attribution (null output)
+              if [ "$ATTR" = "null" ]; then
+                continue
+              fi
               # Parse JSON output
               AI=$(echo "$ATTR" | jq -r '[.files[].summary.ai_lines] | add // 0')
               AI_MOD=$(echo "$ATTR" | jq -r '[.files[].summary.ai_modified_lines] | add // 0')

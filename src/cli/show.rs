@@ -49,8 +49,13 @@ pub fn run(args: ShowArgs) -> Result<()> {
             }
         }
         None => {
-            println!("No AI attribution found for commit {}", commit_short);
-            println!("This commit was not made with AI assistance tracked by ai-blame.");
+            if args.format == OutputFormat::Json {
+                // Output null JSON for programmatic consumption
+                println!("null");
+            } else {
+                println!("No AI attribution found for commit {}", commit_short);
+                println!("This commit was not made with AI assistance tracked by ai-blame.");
+            }
         }
     }
 
