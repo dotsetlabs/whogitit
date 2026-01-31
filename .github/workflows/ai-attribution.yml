@@ -113,35 +113,76 @@ jobs:
           "
 
                 # Extract prompts from this commit (deduplicated)
+                # Get files changed in this commit for better file association
+                COMMIT_FILES=$(git diff-tree --no-commit-id --name-only -r "$COMMIT" 2>/dev/null | tr '\n' ', ' | sed 's/,$//')
+
                 PROMPTS=$(echo "$ATTR" | jq -r '.prompts[]? | @base64' 2>/dev/null || true)
                 for PROMPT_B64 in $PROMPTS; do
-                  # Decode and extract prompt text
-                  PROMPT_TEXT=$(echo "$PROMPT_B64" | base64 -d | jq -r '.text // ""' | head -c 200)
-                  PROMPT_FILES=$(echo "$PROMPT_B64" | base64 -d | jq -r '.affected_files | join(", ")' 2>/dev/null || echo "")
+                  # Decode and extract prompt text (full text, up to 2000 chars)
+                  PROMPT_TEXT=$(echo "$PROMPT_B64" | base64 -d | jq -r '.text // ""' 2>/dev/null | head -c 2000)
 
-                  # Skip empty prompts
-                  if [ -z "$PROMPT_TEXT" ]; then
+                  # Get affected files and make them relative/clean
+                  RAW_FILES=$(echo "$PROMPT_B64" | base64 -d | jq -r '.affected_files[]?' 2>/dev/null || echo "")
+                  PROMPT_FILES=""
+                  for FILE in $RAW_FILES; do
+                    # Make path relative to repo if it's inside the repo
+                    if [[ "$FILE" == "$PWD"/* ]]; then
+                      FILE="${FILE#$PWD/}"
+                    elif [[ "$FILE" == /* ]]; then
+                      # Absolute path outside repo - skip or just show basename
+                      FILE=$(basename "$FILE")
+                    fi
+                    if [ -n "$PROMPT_FILES" ]; then
+                      PROMPT_FILES="$PROMPT_FILES, $FILE"
+                    else
+                      PROMPT_FILES="$FILE"
+                    fi
+                  done
+
+                  # If no files from prompt, use commit files
+                  if [ -z "$PROMPT_FILES" ]; then
+                    PROMPT_FILES="$COMMIT_FILES"
+                  fi
+
+                  # Skip empty or default prompts
+                  if [ -z "$PROMPT_TEXT" ] || [ "$PROMPT_TEXT" = "AI-assisted code change" ]; then
                     continue
                   fi
 
-                  # Create a hash key for deduplication (first 50 chars)
-                  PROMPT_KEY=$(echo "$PROMPT_TEXT" | head -c 50 | md5sum | cut -d' ' -f1)
+                  # Remove surrounding quotes if present
+                  PROMPT_TEXT=$(echo "$PROMPT_TEXT" | sed 's/^"//;s/"$//')
+
+                  # Create a hash key for deduplication (first 100 chars)
+                  PROMPT_KEY=$(echo "$PROMPT_TEXT" | head -c 100 | md5sum | cut -d' ' -f1)
 
                   if [ -z "${SEEN_PROMPTS[$PROMPT_KEY]:-}" ]; then
                     SEEN_PROMPTS[$PROMPT_KEY]=1
                     PROMPT_COUNT=$((PROMPT_COUNT + 1))
 
-                    # Truncate prompt for display (max 150 chars)
-                    PROMPT_DISPLAY=$(echo "$PROMPT_TEXT" | tr '\n' ' ' | head -c 150)
-                    if [ ${#PROMPT_TEXT} -gt 150 ]; then
-                      PROMPT_DISPLAY="${PROMPT_DISPLAY}..."
+                    # Store full prompt for detailed view (escape for JSON)
+                    FULL_PROMPT=$(echo "$PROMPT_TEXT" | jq -Rs '.' | sed 's/^"//;s/"$//')
+
+                    # Create short preview (first 100 chars, single line)
+                    PROMPT_PREVIEW=$(echo "$PROMPT_TEXT" | tr '\n' ' ' | head -c 100)
+                    if [ ${#PROMPT_TEXT} -gt 100 ]; then
+                      PROMPT_PREVIEW="${PROMPT_PREVIEW}..."
                     fi
 
-                    # Escape pipe characters for markdown table
-                    PROMPT_DISPLAY=$(echo "$PROMPT_DISPLAY" | sed 's/|/\\|/g')
+                    # Escape special markdown characters
+                    PROMPT_PREVIEW=$(echo "$PROMPT_PREVIEW" | sed 's/|/\\|/g')
+                    FULL_PROMPT_ESCAPED=$(echo "$FULL_PROMPT" | sed 's/|/\\|/g')
 
-                    PROMPT_LIST="${PROMPT_LIST}| ${PROMPT_COUNT} | ${PROMPT_DISPLAY} | ${PROMPT_FILES} |
-          "
+                    # Build prompt entry with expandable full text
+                    PROMPT_LIST="${PROMPT_LIST}
+**Prompt ${PROMPT_COUNT}** (${PROMPT_FILES})
+<details>
+<summary>${PROMPT_PREVIEW}</summary>
+
+\`\`\`
+${PROMPT_TEXT}
+\`\`\`
+</details>
+"
                   fi
                 done
               fi
@@ -265,14 +306,7 @@ jobs:
             if (promptDetails && promptCount > 0) {
               body += `### Prompts Used (${promptCount})
 
-            <details>
-            <summary>Click to expand prompts</summary>
-
-            | # | Prompt | Files Affected |
-            |--:|--------|----------------|
             ${promptDetails}
-
-            </details>
             `;
             }
 
