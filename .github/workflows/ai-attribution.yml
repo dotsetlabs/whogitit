@@ -70,12 +70,17 @@ jobs:
           TOTAL_AI=0
           TOTAL_AI_MODIFIED=0
           TOTAL_HUMAN=0
-          TOTAL_ORIGINAL=0
           COMMITS_WITH_AI=0
           COMMIT_COUNT=0
 
           # Collect per-commit data
           COMMIT_DETAILS=""
+          # Collect per-file data
+          declare -A FILE_AI
+          declare -A FILE_AI_MOD
+          declare -A FILE_HUMAN
+          declare -A FILE_IS_NEW
+          FILE_LIST=""
           # Track unique prompts (deduplicated across commits)
           declare -A SEEN_PROMPTS
           PROMPT_LIST=""
@@ -104,7 +109,31 @@ jobs:
                 TOTAL_AI=$((TOTAL_AI + AI))
                 TOTAL_AI_MODIFIED=$((TOTAL_AI_MODIFIED + AI_MOD))
                 TOTAL_HUMAN=$((TOTAL_HUMAN + HUMAN))
-                TOTAL_ORIGINAL=$((TOTAL_ORIGINAL + ORIGINAL))
+
+                # Collect per-file statistics
+                FILE_DATA=$(echo "$ATTR" | jq -r '.files[] | "\(.path)|\(.summary.ai_lines)|\(.summary.ai_modified_lines)|\(.summary.human_lines)|\(.summary.original_lines)"' 2>/dev/null || true)
+                for FILE_LINE in $FILE_DATA; do
+                  F_PATH=$(echo "$FILE_LINE" | cut -d'|' -f1)
+                  F_AI=$(echo "$FILE_LINE" | cut -d'|' -f2)
+                  F_AI_MOD=$(echo "$FILE_LINE" | cut -d'|' -f3)
+                  F_HUMAN=$(echo "$FILE_LINE" | cut -d'|' -f4)
+                  F_ORIG=$(echo "$FILE_LINE" | cut -d'|' -f5)
+
+                  # Accumulate per-file stats
+                  FILE_AI["$F_PATH"]=$((${FILE_AI["$F_PATH"]:-0} + F_AI))
+                  FILE_AI_MOD["$F_PATH"]=$((${FILE_AI_MOD["$F_PATH"]:-0} + F_AI_MOD))
+                  FILE_HUMAN["$F_PATH"]=$((${FILE_HUMAN["$F_PATH"]:-0} + F_HUMAN))
+
+                  # Mark as new file if no original lines
+                  if [ "$F_ORIG" = "0" ] && [ $((F_AI + F_AI_MOD + F_HUMAN)) -gt 0 ]; then
+                    FILE_IS_NEW["$F_PATH"]=1
+                  fi
+
+                  # Track unique files
+                  if [[ ! "$FILE_LIST" =~ "$F_PATH" ]]; then
+                    FILE_LIST="${FILE_LIST}${F_PATH}|||"
+                  fi
+                done
 
                 # Get commit message (first line)
                 MSG=$(git log -1 --format=%s "$COMMIT" | head -c 50)
@@ -181,33 +210,64 @@ jobs:
             fi
           done
 
-          # Changed lines = AI + AI_modified + Human (NOT including original/unchanged)
-          CHANGED_LINES=$((TOTAL_AI + TOTAL_AI_MODIFIED + TOTAL_HUMAN))
+          # Total additions = AI + AI_modified + Human
+          TOTAL_ADDITIONS=$((TOTAL_AI + TOTAL_AI_MODIFIED + TOTAL_HUMAN))
 
           if [ "$COMMITS_WITH_AI" -eq 0 ]; then
             echo "has_data=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          # AI percentage is of CHANGED lines only
-          if [ "$CHANGED_LINES" -gt 0 ]; then
-            AI_PERCENT=$(echo "scale=1; ($TOTAL_AI + $TOTAL_AI_MODIFIED) * 100 / $CHANGED_LINES" | bc)
+          # AI percentage is of additions only
+          if [ "$TOTAL_ADDITIONS" -gt 0 ]; then
+            AI_PERCENT=$(echo "scale=1; ($TOTAL_AI + $TOTAL_AI_MODIFIED) * 100 / $TOTAL_ADDITIONS" | bc)
           else
             AI_PERCENT="0"
           fi
+
+          # Count files
+          FILE_COUNT=$(echo "$FILE_LIST" | tr '|||' '\n' | grep -v '^$' | wc -l | tr -d ' ')
+
+          # Build per-file details
+          FILE_DETAILS=""
+          for F_PATH in $(echo "$FILE_LIST" | tr '|||' '\n' | grep -v '^$'); do
+            F_AI=${FILE_AI["$F_PATH"]:-0}
+            F_AI_MOD=${FILE_AI_MOD["$F_PATH"]:-0}
+            F_HUMAN=${FILE_HUMAN["$F_PATH"]:-0}
+            F_ADDITIONS=$((F_AI + F_AI_MOD + F_HUMAN))
+            F_AI_TOTAL=$((F_AI + F_AI_MOD))
+
+            if [ "$F_ADDITIONS" -gt 0 ]; then
+              F_AI_PCT=$(echo "scale=0; $F_AI_TOTAL * 100 / $F_ADDITIONS" | bc)
+            else
+              F_AI_PCT=0
+            fi
+
+            F_STATUS="Modified"
+            if [ "${FILE_IS_NEW["$F_PATH"]:-0}" = "1" ]; then
+              F_STATUS="New"
+            fi
+
+            FILE_DETAILS="${FILE_DETAILS}| \`${F_PATH}\` | +${F_ADDITIONS} | ${F_AI_TOTAL} | ${F_HUMAN} | ${F_AI_PCT}% | ${F_STATUS} |
+          "
+          done
 
           # Build summary
           echo "has_data=true" >> "$GITHUB_OUTPUT"
           echo "total_ai=$TOTAL_AI" >> "$GITHUB_OUTPUT"
           echo "total_ai_modified=$TOTAL_AI_MODIFIED" >> "$GITHUB_OUTPUT"
           echo "total_human=$TOTAL_HUMAN" >> "$GITHUB_OUTPUT"
-          echo "total_original=$TOTAL_ORIGINAL" >> "$GITHUB_OUTPUT"
+          echo "total_additions=$TOTAL_ADDITIONS" >> "$GITHUB_OUTPUT"
           echo "commits_with_ai=$COMMITS_WITH_AI" >> "$GITHUB_OUTPUT"
           echo "commit_count=$COMMIT_COUNT" >> "$GITHUB_OUTPUT"
           echo "ai_percent=$AI_PERCENT" >> "$GITHUB_OUTPUT"
+          echo "file_count=$FILE_COUNT" >> "$GITHUB_OUTPUT"
 
           # Write commit details to file for multi-line output
           echo "$COMMIT_DETAILS" > /tmp/commit_details.txt
+
+          # Write file details to file
+          echo "$FILE_DETAILS" > /tmp/file_details.txt
 
           # Write prompts to file
           echo "$PROMPT_LIST" > /tmp/prompts.txt
@@ -224,10 +284,11 @@ jobs:
           TOTAL_AI: ${{ steps.analyze.outputs.total_ai }}
           TOTAL_AI_MODIFIED: ${{ steps.analyze.outputs.total_ai_modified }}
           TOTAL_HUMAN: ${{ steps.analyze.outputs.total_human }}
-          TOTAL_ORIGINAL: ${{ steps.analyze.outputs.total_original }}
+          TOTAL_ADDITIONS: ${{ steps.analyze.outputs.total_additions }}
           COMMITS_WITH_AI: ${{ steps.analyze.outputs.commits_with_ai }}
           COMMIT_COUNT: ${{ steps.analyze.outputs.commit_count }}
           AI_PERCENT: ${{ steps.analyze.outputs.ai_percent }}
+          FILE_COUNT: ${{ steps.analyze.outputs.file_count }}
           PROMPT_COUNT: ${{ steps.analyze.outputs.prompt_count }}
         with:
           script: |
@@ -236,10 +297,11 @@ jobs:
             const totalAI = parseInt(process.env.TOTAL_AI) || 0;
             const totalAIMod = parseInt(process.env.TOTAL_AI_MODIFIED) || 0;
             const totalHuman = parseInt(process.env.TOTAL_HUMAN) || 0;
-            const totalOriginal = parseInt(process.env.TOTAL_ORIGINAL) || 0;
+            const totalAdditions = parseInt(process.env.TOTAL_ADDITIONS) || 0;
             const commitsWithAI = parseInt(process.env.COMMITS_WITH_AI) || 0;
             const commitCount = parseInt(process.env.COMMIT_COUNT) || 0;
             const aiPercent = process.env.AI_PERCENT || '0';
+            const fileCount = parseInt(process.env.FILE_COUNT) || 0;
             const promptCount = parseInt(process.env.PROMPT_COUNT) || 0;
 
             // Read commit details
@@ -248,6 +310,14 @@ jobs:
               commitDetails = fs.readFileSync('/tmp/commit_details.txt', 'utf8').trim();
             } catch (e) {
               console.log('No commit details file found');
+            }
+
+            // Read file details
+            let fileDetails = '';
+            try {
+              fileDetails = fs.readFileSync('/tmp/file_details.txt', 'utf8').trim();
+            } catch (e) {
+              console.log('No file details file found');
             }
 
             // Read and parse prompts (base64 encoded, separated by |||)
@@ -295,25 +365,36 @@ jobs:
             else if (pct >= 20) emoji = '🤖';
             else emoji = '👤';
 
-            const totalLines = totalAI + totalAIMod + totalHuman + totalOriginal;
+            // Calculate percentages based on additions only
+            const aiPct = totalAdditions > 0 ? ((totalAI / totalAdditions) * 100).toFixed(1) : '0.0';
+            const aiModPct = totalAdditions > 0 ? ((totalAIMod / totalAdditions) * 100).toFixed(1) : '0.0';
+            const humanPct = totalAdditions > 0 ? ((totalHuman / totalAdditions) * 100).toFixed(1) : '0.0';
 
             let body = `## ${emoji} AI Attribution Summary
 
-            This PR contains **${commitsWithAI}** of **${commitCount}** commits with AI-assisted changes.
+            This PR adds **+${totalAdditions}** lines with AI attribution across **${fileCount}** files.
 
-            ### Overview
+            ### Additions Breakdown
 
-            | Metric | Lines | Percentage |
-            |--------|------:|----------:|
-            | 🟢 AI-generated | ${totalAI} | ${totalLines > 0 ? ((totalAI / totalLines) * 100).toFixed(1) : 0}% |
-            | 🟡 AI-modified by human | ${totalAIMod} | ${totalLines > 0 ? ((totalAIMod / totalLines) * 100).toFixed(1) : 0}% |
-            | 🔵 Human-added | ${totalHuman} | ${totalLines > 0 ? ((totalHuman / totalLines) * 100).toFixed(1) : 0}% |
-            | ⚪ Original/unchanged | ${totalOriginal} | ${totalLines > 0 ? ((totalOriginal / totalLines) * 100).toFixed(1) : 0}% |
-            | **Total** | **${totalLines}** | **100%** |
+            | Metric | Lines | % of Additions |
+            |--------|------:|--------------:|
+            | 🟢 AI-generated | +${totalAI} | ${aiPct}% |
+            | 🟡 AI-modified by human | +${totalAIMod} | ${aiModPct}% |
+            | 🔵 Human-written | +${totalHuman} | ${humanPct}% |
+            | **Total additions** | **+${totalAdditions}** | **100%** |
 
-            **AI involvement: ${aiPercent}%** of changed lines
+            **AI involvement: ${aiPercent}%** of additions are AI-generated
 
             `;
+
+            if (fileDetails) {
+              body += `### Files Changed
+
+            | File | +Added | AI | Human | AI % | Status |
+            |------|-------:|---:|------:|-----:|--------|
+            ${fileDetails}
+            `;
+            }
 
             if (commitDetails) {
               body += `### Commits with AI Attribution

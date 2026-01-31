@@ -318,26 +318,33 @@ The action posts a comment like this:
 
 ## 🤖🤖 AI Attribution Summary
 
-This PR contains **3** of **5** commits with AI-assisted changes.
+This PR adds **+200** lines with AI attribution across **3** files.
 
-### Overview
+### Additions Breakdown
 
-| Metric | Lines | Percentage |
-|--------|------:|----------:|
-| 🟢 AI-generated | 145 | 58.0% |
-| 🟡 AI-modified by human | 12 | 4.8% |
-| 🔵 Human-added | 43 | 17.2% |
-| ⚪ Original/unchanged | 50 | 20.0% |
-| **Total** | **250** | **100%** |
+| Metric | Lines | % of Additions |
+|--------|------:|--------------:|
+| 🟢 AI-generated | +145 | 72.5% |
+| 🟡 AI-modified by human | +12 | 6.0% |
+| 🔵 Human-written | +43 | 21.5% |
+| **Total additions** | **+200** | **100%** |
 
-**AI involvement: 62.8%** of changed lines
+**AI involvement: 78.5%** of additions are AI-generated
+
+### Files Changed
+
+| File | +Added | AI | Human | AI % | Status |
+|------|-------:|---:|------:|-----:|--------|
+| `src/auth.rs` | +80 | 72 | 8 | 90% | New |
+| `src/main.rs` | +45 | 32 | 13 | 71% | Modified |
+| `src/jwt.rs` | +75 | 53 | 22 | 71% | New |
 
 ### Commits with AI Attribution
 
 | Commit | Message | AI | Modified | Human | Files |
 |--------|---------|---:|--------:|------:|------:|
-| `abc1234` | Add user authentication | 45 | 3 | 10 | 2 |
-| `def5678` | Implement JWT tokens | 100 | 9 | 33 | 3 |
+| `abc1234` | Add user authentication | 72 | 3 | 5 | 2 |
+| `def5678` | Implement JWT tokens | 85 | 9 | 26 | 2 |
 
 ### Prompts Used (2)
 
