@@ -1,0 +1,6123 @@
+{
+  "version": 2,
+  "session": {
+    "session_id": "cc3dee19-ee63-4a8e-84ae-132de9e24c58",
+    "model": {
+      "id": "claude-opus-4-5-20251101",
+      "provider": "anthropic"
+    },
+    "started_at": "2026-01-31T20:54:27.276568+00:00",
+    "prompt_count": 4
+  },
+  "prompts": [
+    {
+      "index": 0,
+      "text": "\"Yeah, update them\"",
+      "timestamp": "2026-01-31T20:54:27.276791+00:00",
+      "affected_files": [
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "index": 1,
+      "text": "\"Yeah, update them\"",
+      "timestamp": "2026-01-31T20:54:35.692184+00:00",
+      "affected_files": [
+        "README.md"
+      ]
+    },
+    {
+      "index": 2,
+      "text": "\"Yeah, update them\"",
+      "timestamp": "2026-01-31T20:54:48.942277+00:00",
+      "affected_files": [
+        "README.md"
+      ]
+    },
+    {
+      "index": 3,
+      "text": "\"Yeah, update them\"",
+      "timestamp": "2026-01-31T20:55:11.934681+00:00",
+      "affected_files": [
+        "README.md"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "CLAUDE.md",
+      "lines": [
+        {
+          "line_number": 1,
+          "content": "# CLAUDE.md",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 2,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 3,
+          "content": "This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 4,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 5,
+          "content": "## Development Status",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 6,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 7,
+          "content": "This is an **unpublished, pre-release package** under active development. There are no external consumers or backward compatibility requirements.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 8,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 9,
+          "content": "When making changes:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 10,
+          "content": "- **Replace, don't deprecate** - Remove old code entirely when implementing new approaches",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 11,
+          "content": "- **No legacy support needed** - Don't maintain old APIs, patterns, or data formats alongside new ones",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 12,
+          "content": "- **Refactor freely** - Rename, restructure, and rewrite without compatibility shims",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 13,
+          "content": "- **Delete unused code** - If something is no longer needed, remove it completely",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 14,
+          "content": "- **Schema migrations not required** - Update data formats in place; don't version or migrate",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 15,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 16,
+          "content": "The goal is a clean, minimal codebase. Avoid accumulating dead code, `#[deprecated]` markers, or \"v1/v2\" parallel implementations.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 17,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 18,
+          "content": "## Build & Test Commands",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 19,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 20,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 21,
+          "content": "# Build",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 22,
+          "content": "cargo build",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 23,
+          "content": "cargo build --release",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 24,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 25,
+          "content": "# Run all tests",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 26,
+          "content": "cargo test --verbose",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 27,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 28,
+          "content": "# Run only unit tests",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 29,
+          "content": "cargo test --lib",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 30,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 31,
+          "content": "# Run only integration tests",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 32,
+          "content": "cargo test --test '*'",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 33,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 34,
+          "content": "# Run a single test by name",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 35,
+          "content": "cargo test test_full_workflow -- --nocapture",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 36,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 37,
+          "content": "# Lint and format",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 38,
+          "content": "cargo fmt --all -- --check",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 39,
+          "content": "cargo clippy --all-targets --all-features -- -D warnings",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 40,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 41,
+          "content": "# Security audit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 42,
+          "content": "cargo audit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 43,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 44,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 45,
+          "content": "## CLI Usage",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 46,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 47,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 48,
+          "content": "# Run locally during development",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 49,
+          "content": "cargo run -- <command>",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 50,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 51,
+          "content": "# Examples",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 52,
+          "content": "cargo run -- blame src/main.rs",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 53,
+          "content": "cargo run -- show HEAD",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 54,
+          "content": "cargo run -- prompt src/main.rs:42",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 55,
+          "content": "cargo run -- summary --base main",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 56,
+          "content": "cargo run -- status",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 57,
+          "content": "cargo run -- init",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 58,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 59,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 60,
+          "content": "## Architecture Overview",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 61,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 62,
+          "content": "whogitit tracks AI-generated code at line-level granularity using a dual-hook capture system and three-way diff analysis.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 63,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 64,
+          "content": "### Data Flow",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 65,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 66,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 67,
+          "content": "Claude Code Session (Edit/Write tools)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 68,
+          "content": "    │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 69,
+          "content": "    ├─► PreToolUse Hook: saves file state before edit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 70,
+          "content": "    ├─► PostToolUse Hook: captures change + prompt from transcript",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 71,
+          "content": "    │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 72,
+          "content": "    ▼",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 73,
+          "content": "Pending Buffer (.whogitit-pending.json)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 74,
+          "content": "    │   - Full content snapshots (original → AI edit 1 → AI edit 2 → ...)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 75,
+          "content": "    │   - Session metadata, prompts, file histories",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 76,
+          "content": "    │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 77,
+          "content": "    ▼ (git commit triggers post-commit hook)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 78,
+          "content": "    │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 79,
+          "content": "Three-Way Analysis",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 80,
+          "content": "    │   - Compares: original → AI snapshots → final committed",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 81,
+          "content": "    │   - Attributes each line: AI / AIModified / Human / Original",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 82,
+          "content": "    │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 83,
+          "content": "    ▼",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 84,
+          "content": "Git Notes (refs/notes/whogitit)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 85,
+          "content": "    - AIAttribution JSON per commit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 86,
+          "content": "    - Prompts (redacted), line-level attribution, summaries",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 87,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 88,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 89,
+          "content": "### Key Modules",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 90,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 91,
+          "content": "- **capture/**: Hook handlers and pending buffer",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 92,
+          "content": "  - `hook.rs`: CaptureHook - handles PreToolUse/PostToolUse from Claude Code",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 93,
+          "content": "  - `pending.rs`: PendingBuffer - stores snapshots until commit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 94,
+          "content": "  - `threeway.rs`: ThreeWayAnalyzer - core attribution algorithm",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 95,
+          "content": "  - `snapshot.rs`: Data structures (ContentSnapshot, AIEdit, FileEditHistory, LineAttribution)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 96,
+          "content": "  - `diff.rs`: Diff utilities",
+          "source": {
+            "type": "AI",
+            "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3"
+          },
+          "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 97,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 98,
+          "content": "- **core/**: Attribution data models and blame engine",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 99,
+          "content": "  - `attribution.rs`: AIAttribution, PromptInfo, SessionMetadata, ModelInfo",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 100,
+          "content": "  - `blame.rs`: AIBlamer - combines git blame with AI notes",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 101,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 102,
+          "content": "- **storage/**: Git notes persistence",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 103,
+          "content": "  - `notes.rs`: NotesStore - read/write attribution to `refs/notes/whogitit`",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 104,
+          "content": "  - `trailers.rs`: TrailerGenerator - git trailers from attribution",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 105,
+          "content": "  - `audit.rs`: AuditLog, AuditEvent - compliance event logging",
+          "source": {
+            "type": "AI",
+            "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3"
+          },
+          "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 106,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 107,
+          "content": "- **cli/**: Command implementations",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 108,
+          "content": "  - `blame.rs`, `show.rs`, `prompt.rs`, `summary.rs` - core commands",
+          "source": {
+            "type": "AI",
+            "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3"
+          },
+          "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 109,
+          "content": "  - `export.rs`: Bulk attribution export (JSON/CSV)",
+          "source": {
+            "type": "AI",
+            "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3"
+          },
+          "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 110,
+          "content": "  - `retention.rs`: Data retention policy management",
+          "source": {
+            "type": "AI",
+            "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3"
+          },
+          "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 111,
+          "content": "  - `audit.rs`: Audit log viewing",
+          "source": {
+            "type": "AI",
+            "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3"
+          },
+          "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 112,
+          "content": "  - `redact.rs`: Redaction pattern testing",
+          "source": {
+            "type": "AI",
+            "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3"
+          },
+          "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 113,
+          "content": "  - `output.rs`: Formatting (Pretty, JSON, Markdown)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 114,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 115,
+          "content": "- **privacy/**: Sensitive data protection",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 116,
+          "content": "  - `redaction.rs`: Redactor - regex patterns for API keys, emails, passwords, etc.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 117,
+          "content": "  - `config.rs`: WhogititConfig, PrivacyConfig, RetentionConfig - `.whogitit.toml` parsing",
+          "source": {
+            "type": "AI",
+            "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3"
+          },
+          "edit_id": "598f6a49-b892-4d9e-ab74-8a3dba5954c3",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 118,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 119,
+          "content": "### Line Attribution Types",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 120,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 121,
+          "content": "| Source | Symbol | Description |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 122,
+          "content": "|--------|--------|-------------|",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 123,
+          "content": "| AI | `●` | Generated by AI, unchanged |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 124,
+          "content": "| AIModified | `◐` | Generated by AI, then edited by human |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 125,
+          "content": "| Human | `+` | Added by human after AI edits |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 126,
+          "content": "| Original | `─` | Existed before AI session |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 127,
+          "content": "| Unknown | `?` | Could not determine source |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 128,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 129,
+          "content": "### Data Formats",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 130,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 131,
+          "content": "**Pending Buffer** (`.whogitit-pending.json`): Version 2 format with full content snapshots per file, edit history chain, and session metadata.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 132,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 133,
+          "content": "**Git Notes** (`refs/notes/whogitit`): AIAttribution JSON with schema version 2, containing session info, prompts array, and per-file line-level attribution results.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 134,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 135,
+          "content": "## Code Style",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 136,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 137,
+          "content": "- Rust 2021 edition",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 138,
+          "content": "- Max line width: 100 characters",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 139,
+          "content": "- 4-space indentation",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 140,
+          "content": "- Run `cargo fmt` before committing",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 141,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 142,
+          "content": "## Hook Integration",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 143,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 144,
+          "content": "The shell hook at `hooks/whogitit-capture.sh` (installed to `~/.claude/hooks/`) reads the `transcript_path` JSONL file provided by Claude Code to extract user prompts. It uses `jq -s` (slurp mode) since the transcript is JSON Lines format, not a JSON array.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        }
+      ],
+      "summary": {
+        "total_lines": 144,
+        "ai_lines": 8,
+        "ai_modified_lines": 0,
+        "human_lines": 0,
+        "original_lines": 136,
+        "unknown_lines": 0
+      }
+    },
+    {
+      "path": "README.md",
+      "lines": [
+        {
+          "line_number": 1,
+          "content": "# whogitit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 2,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 3,
+          "content": "Track AI-generated code at line-level granularity. Know exactly which lines were written by AI, which were modified by humans, and what prompts generated them.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 4,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 5,
+          "content": "## Features",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 6,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 7,
+          "content": "- **Line-level attribution** - Track whether each line is AI-generated, human-modified, or original",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 8,
+          "content": "- **Prompt preservation** - Store the prompts that generated code alongside commits",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 9,
+          "content": "- **Three-way diff analysis** - Accurate attribution even when you edit AI code before committing",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 10,
+          "content": "- **Git-native storage** - Uses git notes that travel with your repository",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 11,
+          "content": "- **Claude Code integration** - Automatic capture via hooks",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 12,
+          "content": "- **GitHub Action** - PR comments showing AI attribution summaries with prompts",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 13,
+          "content": "- **Privacy protection** - Automatic redaction of API keys, passwords, and sensitive data",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 14,
+          "content": "- **Data retention policies** - Configurable age limits and auto-purge for compliance",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 15,
+          "content": "- **Audit logging** - Track deletions, exports, and configuration changes",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 16,
+          "content": "- **Export capabilities** - Bulk export attribution data as JSON or CSV",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 17,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 18,
+          "content": "## Installation",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 19,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 20,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 21,
+          "content": "# From source",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 22,
+          "content": "git clone https://github.com/dotsetlabs/whogitit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 23,
+          "content": "cd whogitit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 24,
+          "content": "cargo install --path .",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 25,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 26,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 27,
+          "content": "## Setup",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 28,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 29,
+          "content": "### 1. Initialize in your repository",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 30,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 31,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 32,
+          "content": "cd your-project",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 33,
+          "content": "whogitit init",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 34,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 35,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 36,
+          "content": "This installs git hooks that:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 37,
+          "content": "- Attach attribution data to commits (post-commit)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 38,
+          "content": "- Push git notes with your commits (pre-push)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 39,
+          "content": "- Configure git to fetch notes automatically",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 40,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 41,
+          "content": "### 2. Configure Claude Code hooks",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 42,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 43,
+          "content": "Copy the capture script to your Claude hooks directory:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 44,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 45,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 46,
+          "content": "mkdir -p ~/.claude/hooks",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 47,
+          "content": "cp hooks/whogitit-capture.sh ~/.claude/hooks/",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 48,
+          "content": "chmod +x ~/.claude/hooks/whogitit-capture.sh",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 49,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 50,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 51,
+          "content": "Add to `~/.claude/settings.json`:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 52,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 53,
+          "content": "```json",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 54,
+          "content": "{",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 55,
+          "content": "  \"hooks\": {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 56,
+          "content": "    \"PreToolUse\": [",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 57,
+          "content": "      {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 58,
+          "content": "        \"matcher\": \"Edit|Write\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 59,
+          "content": "        \"hooks\": [",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 60,
+          "content": "          {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 61,
+          "content": "            \"type\": \"command\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 62,
+          "content": "            \"command\": \"WHOGITIT_HOOK_PHASE=pre ~/.claude/hooks/whogitit-capture.sh\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 63,
+          "content": "          }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 64,
+          "content": "        ]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 65,
+          "content": "      }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 66,
+          "content": "    ],",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 67,
+          "content": "    \"PostToolUse\": [",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 68,
+          "content": "      {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 69,
+          "content": "        \"matcher\": \"Edit|Write\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 70,
+          "content": "        \"hooks\": [",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 71,
+          "content": "          {",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 72,
+          "content": "            \"type\": \"command\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 73,
+          "content": "            \"command\": \"WHOGITIT_HOOK_PHASE=post ~/.claude/hooks/whogitit-capture.sh\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 74,
+          "content": "          }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 75,
+          "content": "        ]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 76,
+          "content": "      }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 77,
+          "content": "    ]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 78,
+          "content": "  }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 79,
+          "content": "}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 80,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 81,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 82,
+          "content": "### 3. Push notes with commits",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 83,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 84,
+          "content": "Git notes must be pushed separately. After `whogitit init`, this happens automatically on `git push`. To push manually:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 85,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 86,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 87,
+          "content": "git push origin refs/notes/whogitit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 88,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 89,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 90,
+          "content": "## CLI Commands",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 91,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 92,
+          "content": "### `whogitit blame <file>`",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 93,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 94,
+          "content": "Show AI attribution for each line:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 95,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 96,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 97,
+          "content": "$ whogitit blame src/main.rs",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 98,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 99,
+          "content": " LINE   │ COMMIT  │ AUTHOR     │ SRC │ CODE",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 100,
+          "content": "─────────────────────────────────────────────────────────────────────────────────────",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 101,
+          "content": "    1   │ a1b2c3d │ Greg King  │  ─  │ use std::io;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 102,
+          "content": "    2   │ d4e5f6g │ Greg King  │  ●  │ use anyhow::Result;",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 103,
+          "content": "    3   │ d4e5f6g │ Greg King  │  ●  │ use serde::{Deserialize, Serialize};",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 104,
+          "content": "    4   │ d4e5f6g │ Greg King  │  ◐  │ use chrono::Utc;  // modified",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 105,
+          "content": "    5   │ h8i9j0k │ Greg King  │  +  │ // Added by human",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 106,
+          "content": "─────────────────────────────────────────────────────────────────────────────────────",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 107,
+          "content": "Legend: ● AI (2) ◐ AI-modified (1) + Human (1) ─ Original (1)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 108,
+          "content": "AI involvement: 60% (3 of 5 lines)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 109,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 110,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 111,
+          "content": "Options:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 112,
+          "content": "- `--revision <ref>` - Blame at a specific revision",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 113,
+          "content": "- `--format json` - JSON output",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 114,
+          "content": "- `--ai-only` - Show only AI-generated lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 115,
+          "content": "- `--human-only` - Show only human-written lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 116,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 117,
+          "content": "### `whogitit show <commit>`",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 118,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 119,
+          "content": "View attribution summary for a commit:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 120,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 121,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 122,
+          "content": "$ whogitit show HEAD",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 123,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 124,
+          "content": "Commit: d4e5f6g",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 125,
+          "content": "Session: 7f3a-4b2c-9d1e-8a7b",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 126,
+          "content": "Model: claude-opus-4-5-20251101",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 127,
+          "content": "Started: 2026-01-30T14:23:17Z",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 128,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 129,
+          "content": "Prompts used:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 130,
+          "content": "  #0: \"Add error handling with anyhow...\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 131,
+          "content": "  #1: \"Implement the serialize trait...\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 132,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 133,
+          "content": "Files with AI changes:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 134,
+          "content": "  src/auth.rs (25 AI, 3 modified, 2 human) - 45 total lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 135,
+          "content": "  src/main.rs (10 AI, 5 original) - 15 total lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 136,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 137,
+          "content": "Summary:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 138,
+          "content": "  35 AI-generated lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 139,
+          "content": "  3 AI lines modified by human",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 140,
+          "content": "  2 human-added lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 141,
+          "content": "  5 original/unchanged lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 142,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 143,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 144,
+          "content": "### `whogitit prompt <file:line>`",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 145,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 146,
+          "content": "View the prompt that generated specific lines:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 147,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 148,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 149,
+          "content": "$ whogitit prompt src/main.rs:42",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 150,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 151,
+          "content": "╔════════════════════════════════════════════════════════════════════╗",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 152,
+          "content": "║  PROMPT #2 in session 7f3a-4b2c-9d1e...                            ║",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 153,
+          "content": "║  Model: claude-opus-4-5-20251101 | 2026-01-30T14:23:17Z            ║",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 154,
+          "content": "╠════════════════════════════════════════════════════════════════════╣",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 155,
+          "content": "║  Add JWT token generation with 24-hour expiration. Use the         ║",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 156,
+          "content": "║  jsonwebtoken crate. The function should take a user_id and        ║",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 157,
+          "content": "║  return a Result<String>.                                          ║",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 158,
+          "content": "╚════════════════════════════════════════════════════════════════════╝",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 159,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 160,
+          "content": "Files affected by this prompt:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 161,
+          "content": "  - src/auth.rs",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 162,
+          "content": "  - src/main.rs",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 163,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 164,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 165,
+          "content": "### `whogitit summary`",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 166,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 167,
+          "content": "Generate attribution summary for a commit range (useful for PRs):",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 168,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 169,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 170,
+          "content": "whogitit summary --base main --head HEAD",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 171,
+          "content": "whogitit summary --base main --format markdown",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 172,
+          "content": "whogitit summary --format json",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 173,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 174,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 175,
+          "content": "### `whogitit status`",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 176,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 177,
+          "content": "Check pending attribution changes (before commit):",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 178,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 179,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 180,
+          "content": "$ whogitit status",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 181,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 182,
+          "content": "Pending AI attribution:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 183,
+          "content": "  Session: 7f3a-4b2c-9d1e-8a7b",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 184,
+          "content": "  Files: 3",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 185,
+          "content": "  Lines: 45",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 186,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 187,
+          "content": "Run 'git commit' to finalize attribution.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 188,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 189,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 190,
+          "content": "### `whogitit clear`",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 191,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 192,
+          "content": "Discard pending changes without committing:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 193,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 194,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 195,
+          "content": "whogitit clear",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 196,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 197,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 198,
+          "content": "### `whogitit export`",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 199,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 200,
+          "content": "Export attribution data for multiple commits:",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 201,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 202,
+          "content": "```bash",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 203,
+          "content": "whogitit export                           # JSON to stdout",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 204,
+          "content": "whogitit export --format csv -o data.csv  # CSV to file",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 205,
+          "content": "whogitit export --since 2026-01-01        # Filter by date",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 206,
+          "content": "whogitit export --full-prompts            # Include full prompt text",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 207,
+          "content": "```",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 208,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 209,
+          "content": "Options:",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 210,
+          "content": "- `--format json|csv` - Output format (default: json)",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 211,
+          "content": "- `--since <date>` - Only commits after date (YYYY-MM-DD)",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 212,
+          "content": "- `--until <date>` - Only commits before date",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 213,
+          "content": "- `-o, --output <file>` - Output file (default: stdout)",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 214,
+          "content": "- `--full-prompts` - Include full prompt text (default: truncated)",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 215,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 216,
+          "content": "### `whogitit retention`",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 217,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 218,
+          "content": "Manage data retention policies:",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 219,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 220,
+          "content": "```bash",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 221,
+          "content": "whogitit retention config   # Show current retention settings",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 222,
+          "content": "whogitit retention preview  # Preview what would be deleted",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 223,
+          "content": "whogitit retention apply    # Dry-run deletion",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 224,
+          "content": "whogitit retention apply --execute  # Actually delete old data",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 225,
+          "content": "```",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 226,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 227,
+          "content": "### `whogitit audit`",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 228,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 229,
+          "content": "View the audit log (tracks deletions, exports, config changes):",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 230,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 231,
+          "content": "```bash",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 232,
+          "content": "whogitit audit                    # Show last 50 events",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 233,
+          "content": "whogitit audit --limit 100        # Show more events",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 234,
+          "content": "whogitit audit --since 2026-01-01 # Filter by date",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 235,
+          "content": "whogitit audit --event-type delete # Filter by type",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 236,
+          "content": "whogitit audit --json             # JSON output",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 237,
+          "content": "```",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 238,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 239,
+          "content": "### `whogitit redact-test`",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 240,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 241,
+          "content": "Test redaction patterns against text or files:",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 242,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 243,
+          "content": "```bash",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 244,
+          "content": "whogitit redact-test \"text with api_key=secret123\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 245,
+          "content": "whogitit redact-test --file config.txt",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 246,
+          "content": "```",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 247,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 248,
+          "content": "## Configuration",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 249,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 250,
+          "content": "Create `.whogitit.toml` in your repository root to configure privacy and retention:",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 251,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 252,
+          "content": "```toml",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 253,
+          "content": "[privacy]",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 254,
+          "content": "# Enable audit logging for compliance",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 255,
+          "content": "audit_log = true",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 256,
+          "content": "# Disable specific builtin patterns",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 257,
+          "content": "disabled_patterns = [\"EMAIL\"]",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 258,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 259,
+          "content": "# Additional custom redaction patterns",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 260,
+          "content": "[[privacy.custom_patterns]]",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 261,
+          "content": "name = \"INTERNAL_ID\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 262,
+          "content": "pattern = \"INTERNAL-\\\\d+\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 263,
+          "content": "description = \"Internal tracking IDs\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 264,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 265,
+          "content": "[retention]",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 266,
+          "content": "# Delete attribution older than 365 days",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 267,
+          "content": "max_age_days = 365",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 268,
+          "content": "# Keep at least 100 commits regardless of age",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 269,
+          "content": "min_commits = 100",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 270,
+          "content": "# Never delete attribution for these refs",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 271,
+          "content": "retain_refs = [\"refs/heads/main\"]",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 272,
+          "content": "# Auto-purge on commit (default: false)",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 273,
+          "content": "auto_purge = false",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 274,
+          "content": "```",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 275,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b"
+          },
+          "edit_id": "916686c0-0a0a-40bc-b9db-fd981424843b",
+          "prompt_index": 3,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 276,
+          "content": "## GitHub Action",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 277,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 278,
+          "content": "Add AI attribution summaries to pull requests automatically.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 279,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 280,
+          "content": "### Setup",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 281,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 282,
+          "content": "Create `.github/workflows/ai-attribution.yml`:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 283,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 284,
+          "content": "```yaml",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 285,
+          "content": "name: AI Attribution Summary",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 286,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 287,
+          "content": "on:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 288,
+          "content": "  pull_request:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 289,
+          "content": "    types: [opened, synchronize, reopened]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 290,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 291,
+          "content": "permissions:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 292,
+          "content": "  contents: read",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 293,
+          "content": "  pull-requests: write",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 294,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 295,
+          "content": "jobs:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 296,
+          "content": "  analyze:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 297,
+          "content": "    runs-on: ubuntu-latest",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 298,
+          "content": "    steps:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 299,
+          "content": "      - uses: actions/checkout@v4",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 300,
+          "content": "        with:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 301,
+          "content": "          fetch-depth: 0",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 302,
+          "content": "          ref: ${{ github.event.pull_request.head.sha }}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 303,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 304,
+          "content": "      - name: Fetch git notes",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 305,
+          "content": "        run: git fetch origin refs/notes/whogitit:refs/notes/whogitit || true",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 306,
+          "content": "        continue-on-error: true",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 307,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 308,
+          "content": "      - name: Setup Rust",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 309,
+          "content": "        uses: dtolnay/rust-toolchain@stable",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 310,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 311,
+          "content": "      - name: Cache cargo",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 312,
+          "content": "        uses: actions/cache@v4",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 313,
+          "content": "        with:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 314,
+          "content": "          path: |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 315,
+          "content": "            ~/.cargo/bin/",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 316,
+          "content": "            ~/.cargo/registry/index/",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 317,
+          "content": "            ~/.cargo/registry/cache/",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 318,
+          "content": "            ~/.cargo/git/db/",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 319,
+          "content": "            target/",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 320,
+          "content": "          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 321,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 322,
+          "content": "      - name: Build whogitit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 323,
+          "content": "        run: cargo build --release",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 324,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 325,
+          "content": "      # ... analysis and comment posting steps",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 326,
+          "content": "      # See .github/workflows/ai-attribution.yml for full implementation",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 327,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 328,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 329,
+          "content": "### Example PR Comment",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 330,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 331,
+          "content": "The action posts a comment like this:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 332,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 333,
+          "content": "---",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 334,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 335,
+          "content": "## 🤖🤖 AI Attribution Summary",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 336,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 337,
+          "content": "This PR contains **3** of **5** commits with AI-assisted changes.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 338,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 339,
+          "content": "### Overview",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 340,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 341,
+          "content": "| Metric | Lines | Percentage |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 342,
+          "content": "|--------|------:|----------:|",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 343,
+          "content": "| 🟢 AI-generated | 145 | 58.0% |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 344,
+          "content": "| 🟡 AI-modified by human | 12 | 4.8% |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 345,
+          "content": "| 🔵 Human-added | 43 | 17.2% |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 346,
+          "content": "| ⚪ Original/unchanged | 50 | 20.0% |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 347,
+          "content": "| **Total** | **250** | **100%** |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 348,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 349,
+          "content": "**AI involvement: 62.8%** of changed lines",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 350,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 351,
+          "content": "### Commits with AI Attribution",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 352,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 353,
+          "content": "| Commit | Message | AI | Modified | Human | Files |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 354,
+          "content": "|--------|---------|---:|--------:|------:|------:|",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 355,
+          "content": "| `abc1234` | Add user authentication | 45 | 3 | 10 | 2 |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 356,
+          "content": "| `def5678` | Implement JWT tokens | 100 | 9 | 33 | 3 |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 357,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 358,
+          "content": "### Prompts Used (2)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 359,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 360,
+          "content": "**Prompt 1** (src/auth.rs, src/main.rs)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 361,
+          "content": "<details>",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 362,
+          "content": "<summary>Add user authentication with bcrypt password hashing...</summary>",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 363,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 364,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 365,
+          "content": "Add user authentication with bcrypt password hashing. Create a User struct",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 366,
+          "content": "with email and password_hash fields. Implement register and login functions",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 367,
+          "content": "that return Result types.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 368,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 369,
+          "content": "</details>",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 370,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 371,
+          "content": "**Prompt 2** (src/jwt.rs)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 372,
+          "content": "<details>",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 373,
+          "content": "<summary>Implement JWT token generation with 24-hour expiration...</summary>",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 374,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 375,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 376,
+          "content": "Implement JWT token generation with 24-hour expiration. Use the jsonwebtoken",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 377,
+          "content": "crate. The function should take a user_id and return a Result<String>.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 378,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 379,
+          "content": "</details>",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 380,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 381,
+          "content": "---",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 382,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 383,
+          "content": "## How It Works",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 384,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 385,
+          "content": "### Three-Way Diff Analysis",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 386,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 387,
+          "content": "whogitit captures complete file snapshots during editing, enabling accurate attribution:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 388,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 389,
+          "content": "1. **Original** - Content before any AI edits",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 390,
+          "content": "2. **AI Snapshots** - Content after each AI edit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 391,
+          "content": "3. **Final** - Content at commit time",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 392,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 393,
+          "content": "This allows tracking even when you modify AI-generated code before committing.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 394,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 395,
+          "content": "### Line Attribution Types",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 396,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 397,
+          "content": "| Source | Symbol | Description |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 398,
+          "content": "|--------|--------|-------------|",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 399,
+          "content": "| AI | `●` | Generated by AI, unchanged |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 400,
+          "content": "| AIModified | `◐` | Generated by AI, then edited by human |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 401,
+          "content": "| Human | `+` | Added by human after AI edits |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 402,
+          "content": "| Original | `─` | Existed before AI session |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 403,
+          "content": "| Unknown | `?` | Could not determine source |",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 404,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 405,
+          "content": "### Data Flow",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 406,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 407,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 408,
+          "content": "Claude Code (Edit/Write tools)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 409,
+          "content": "         │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 410,
+          "content": "         ├─► PreToolUse: Save file state",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 411,
+          "content": "         ├─► PostToolUse: Capture change + prompt",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 412,
+          "content": "         │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 413,
+          "content": "         ▼",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 414,
+          "content": "Pending Buffer (.whogitit-pending.json)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 415,
+          "content": "         │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 416,
+          "content": "         ▼ git commit",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 417,
+          "content": "         │",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 418,
+          "content": "Three-Way Analysis → Git Notes (refs/notes/whogitit)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 419,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 420,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 421,
+          "content": "## Storage",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 422,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 423,
+          "content": "Attribution is stored in git notes (`refs/notes/whogitit`), which:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 424,
+          "content": "- Travel with repository when pushed/fetched",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 425,
+          "content": "- Don't clutter commit history",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 426,
+          "content": "- Can be inspected with standard git commands",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 427,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 428,
+          "content": "```bash",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 429,
+          "content": "# View raw attribution",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 430,
+          "content": "git notes --ref=whogitit show HEAD",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 431,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 432,
+          "content": "# List all attributed commits",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 433,
+          "content": "git notes --ref=whogitit list",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 434,
+          "content": "```",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 435,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 436,
+          "content": "## Privacy",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 437,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 438,
+          "content": "Prompts are automatically scanned and redacted for:",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 439,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 440,
+          "content": "- API keys (`api_key`, `apikey`, `secret`, `token`)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 441,
+          "content": "- AWS credentials (`AKIA...`)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 442,
+          "content": "- Private keys (`-----BEGIN.*PRIVATE KEY-----`)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 443,
+          "content": "- Bearer tokens",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 444,
+          "content": "- GitHub tokens (`ghp_`, `gho_`, `ghs_`, `ghr_`)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 445,
+          "content": "- Email addresses",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 446,
+          "content": "- Passwords",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 447,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 448,
+          "content": "Sensitive data is replaced with `[REDACTED]` before storage.",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 449,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 450,
+          "content": "## License",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 451,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 452,
+          "content": "MIT",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        }
+      ],
+      "summary": {
+        "total_lines": 452,
+        "ai_lines": 81,
+        "ai_modified_lines": 0,
+        "human_lines": 0,
+        "original_lines": 371,
+        "unknown_lines": 0
+      }
+    }
+  ]
+}
