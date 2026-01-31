@@ -1,0 +1,841 @@
+{
+  "version": 2,
+  "session": {
+    "session_id": "45e98105-4676-411c-a9f8-9cbc476a172f",
+    "model": {
+      "id": "claude-opus-4-5-20251101",
+      "provider": "anthropic"
+    },
+    "started_at": "2026-01-31T15:58:43.330196+00:00",
+    "prompt_count": 1
+  },
+  "prompts": [
+    {
+      "index": 0,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T15:58:43.330230+00:00",
+      "affected_files": [
+        ".github/workflows/ci.yml"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "lines": [
+        {
+          "line_number": 1,
+          "content": "name: CI",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 2,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 3,
+          "content": "on:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 4,
+          "content": "  push:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 5,
+          "content": "    branches: [main]",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 6,
+          "content": "  pull_request:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 7,
+          "content": "    branches: [main]",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 8,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 9,
+          "content": "env:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 10,
+          "content": "  CARGO_TERM_COLOR: always",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 11,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 12,
+          "content": "jobs:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 13,
+          "content": "  test:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 14,
+          "content": "    runs-on: ubuntu-latest",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 15,
+          "content": "    steps:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 16,
+          "content": "      - uses: actions/checkout@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 17,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 18,
+          "content": "      - name: Setup Rust",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 19,
+          "content": "        uses: dtolnay/rust-action@stable",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 20,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 21,
+          "content": "      - name: Cache cargo",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 22,
+          "content": "        uses: actions/cache@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 23,
+          "content": "        with:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 24,
+          "content": "          path: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 25,
+          "content": "            ~/.cargo/bin/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 26,
+          "content": "            ~/.cargo/registry/index/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 27,
+          "content": "            ~/.cargo/registry/cache/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 28,
+          "content": "            ~/.cargo/git/db/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 29,
+          "content": "            target/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 30,
+          "content": "          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 31,
+          "content": "          restore-keys: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 32,
+          "content": "            ${{ runner.os }}-cargo-",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 33,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 34,
+          "content": "      - name: Build",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 35,
+          "content": "        run: cargo build --verbose",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 36,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 37,
+          "content": "      - name: Run tests",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 38,
+          "content": "        run: cargo test --verbose",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 39,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 40,
+          "content": "      - name: Run clippy",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 41,
+          "content": "        run: cargo clippy -- -D warnings",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 42,
+          "content": "        continue-on-error: true",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 43,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 44,
+          "content": "      - name: Check formatting",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 45,
+          "content": "        run: cargo fmt -- --check",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 46,
+          "content": "        continue-on-error: true",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 47,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 48,
+          "content": "  build-release:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 49,
+          "content": "    runs-on: ubuntu-latest",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 50,
+          "content": "    steps:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 51,
+          "content": "      - uses: actions/checkout@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 52,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 53,
+          "content": "      - name: Setup Rust",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 54,
+          "content": "        uses: dtolnay/rust-action@stable",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 55,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 56,
+          "content": "      - name: Cache cargo",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 57,
+          "content": "        uses: actions/cache@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 58,
+          "content": "        with:",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 59,
+          "content": "          path: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 60,
+          "content": "            ~/.cargo/bin/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 61,
+          "content": "            ~/.cargo/registry/index/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 62,
+          "content": "            ~/.cargo/registry/cache/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 63,
+          "content": "            ~/.cargo/git/db/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 64,
+          "content": "            target/",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 65,
+          "content": "          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 66,
+          "content": "          restore-keys: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 67,
+          "content": "            ${{ runner.os }}-cargo-release-",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 68,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 69,
+          "content": "      - name: Build release",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 70,
+          "content": "        run: cargo build --release",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 71,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 72,
+          "content": "      - name: Test CLI help",
+          "source": {
+            "type": "AI",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68"
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 73,
+          "content": "        run: ./target/release/ai-blame --help",
+          "source": {
+            "type": "AIModified",
+            "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+            "similarity": 1.0
+          },
+          "edit_id": "5b706c2a-08cf-4771-8446-878966deee68",
+          "prompt_index": 0,
+          "confidence": 1.0
+        }
+      ],
+      "summary": {
+        "total_lines": 73,
+        "ai_lines": 72,
+        "ai_modified_lines": 1,
+        "human_lines": 0,
+        "original_lines": 0,
+        "unknown_lines": 0
+      }
+    }
+  ]
+}
