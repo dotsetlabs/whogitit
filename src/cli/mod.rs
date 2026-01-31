@@ -1,6 +1,10 @@
+pub mod audit;
 pub mod blame;
+pub mod export;
 pub mod output;
 pub mod prompt;
+pub mod redact;
+pub mod retention;
 pub mod show;
 pub mod summary;
 
@@ -36,6 +40,18 @@ pub enum Commands {
 
     /// Generate summary for a range of commits (useful for PRs)
     Summary(summary::SummaryArgs),
+
+    /// Test redaction patterns against text or files
+    RedactTest(redact::RedactArgs),
+
+    /// Export attribution data for multiple commits
+    Export(export::ExportArgs),
+
+    /// Manage data retention policies
+    Retention(retention::RetentionArgs),
+
+    /// View the audit log
+    Audit(audit::AuditArgs),
 
     /// Capture a file change (called by Claude Code hook)
     Capture(CaptureArgs),
@@ -82,6 +98,10 @@ pub fn run() -> Result<()> {
         Commands::Prompt(args) => prompt::run(args),
         Commands::Show(args) => show::run(args),
         Commands::Summary(args) => summary::run(args),
+        Commands::RedactTest(args) => redact::run(args),
+        Commands::Export(args) => export::run(args),
+        Commands::Retention(args) => retention::run(args),
+        Commands::Audit(args) => audit::run(args),
         Commands::Capture(args) => run_capture(args),
         Commands::PostCommit => run_post_commit(),
         Commands::Status => run_status(),

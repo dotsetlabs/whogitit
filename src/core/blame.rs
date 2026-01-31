@@ -291,6 +291,8 @@ mod tests {
                 model: ModelInfo::claude("test-model"),
                 started_at: "2026-01-30T10:00:00Z".to_string(),
                 prompt_count: 1,
+                used_plan_mode: false,
+                subagent_count: 0,
             },
             prompts: vec![PromptInfo {
                 index: 0,
@@ -379,6 +381,8 @@ mod tests {
                 model: ModelInfo::claude("test-model"),
                 started_at: "2026-01-30T10:00:00Z".to_string(),
                 prompt_count: 1,
+                used_plan_mode: false,
+                subagent_count: 0,
             },
             prompts: vec![],
             files: vec![],

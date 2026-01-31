@@ -2,8 +2,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::capture::snapshot::{FileAttributionResult, LineSource};
 
-/// Schema version for the attribution format
-pub const SCHEMA_VERSION: u8 = 2;
+/// Schema version for the attribution format (3 = with edit context)
+pub const SCHEMA_VERSION: u8 = 3;
 
 /// Core attribution data attached to commits via git notes
 ///
@@ -72,6 +72,12 @@ pub struct SessionMetadata {
     pub started_at: String,
     /// Number of prompts in this session
     pub prompt_count: u32,
+    /// Whether plan mode was used in this session
+    #[serde(default)]
+    pub used_plan_mode: bool,
+    /// Number of subagents spawned during this session
+    #[serde(default)]
+    pub subagent_count: u32,
 }
 
 /// Information about the AI model used
@@ -198,6 +204,8 @@ mod tests {
                 model: ModelInfo::claude("claude-opus-4-5-20251101"),
                 started_at: "2026-01-30T10:00:00Z".to_string(),
                 prompt_count: 1,
+                used_plan_mode: false,
+                subagent_count: 0,
             },
             prompts: vec![],
             files: vec![FileAttributionResult {
@@ -275,6 +283,8 @@ mod tests {
                 model: ModelInfo::claude("claude-opus-4-5-20251101"),
                 started_at: "2026-01-30T10:00:00Z".to_string(),
                 prompt_count: 1,
+                used_plan_mode: false,
+                subagent_count: 0,
             },
             prompts: vec![PromptInfo {
                 index: 0,

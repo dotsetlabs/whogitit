@@ -5,6 +5,24 @@ use git2::Repository;
 
 use crate::storage::notes::NotesStore;
 
+/// Check if repository is a shallow clone
+fn is_shallow_clone(repo: &Repository) -> bool {
+    repo.is_shallow()
+}
+
+/// Print shallow clone warning
+fn print_shallow_warning() {
+    eprintln!(
+        "{} Running in shallow clone mode - historical attribution data may be incomplete.",
+        "Warning:".yellow()
+    );
+    eprintln!(
+        "         Run '{}' to get full history.",
+        "git fetch --unshallow".cyan()
+    );
+    eprintln!();
+}
+
 /// Output format for summary command
 #[derive(Debug, Clone, Copy, Default, ValueEnum)]
 pub enum SummaryFormat {
@@ -75,6 +93,12 @@ impl AggregateSummary {
 /// Run the summary command
 pub fn run(args: SummaryArgs) -> Result<()> {
     let repo = Repository::discover(".").context("Not in a git repository")?;
+
+    // Check for shallow clone
+    if is_shallow_clone(&repo) && matches!(args.format, SummaryFormat::Pretty) {
+        print_shallow_warning();
+    }
+
     let notes_store = NotesStore::new(&repo)?;
 
     // Resolve head commit

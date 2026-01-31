@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::capture::pending::{PendingBuffer, PendingStore};
 use crate::capture::threeway::ThreeWayAnalyzer;
 use crate::core::attribution::{AIAttribution, PromptInfo, SessionMetadata};
-use crate::privacy::redaction::Redactor;
+use crate::privacy::{Redactor, WhogititConfig};
 use crate::storage::notes::NotesStore;
 
 /// Environment variable for session ID
@@ -17,6 +17,23 @@ const ENV_SESSION_ID: &str = "WHOGITIT_SESSION_ID";
 const ENV_MODEL_ID: &str = "WHOGITIT_MODEL_ID";
 /// Default model if not specified
 const DEFAULT_MODEL: &str = "claude-opus-4-5-20251101";
+
+/// Context from Claude Code transcript
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct HookContext {
+    /// Whether the edit was made in plan mode
+    #[serde(default)]
+    pub plan_mode: bool,
+    /// Whether this is from a subagent
+    #[serde(default)]
+    pub is_subagent: bool,
+    /// Agent nesting depth (0=main, 1+=subagent)
+    #[serde(default)]
+    pub agent_depth: u8,
+    /// Subagent ID if applicable
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent_id: Option<String>,
+}
 
 /// Input from Claude Code hook for file changes
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,6 +48,9 @@ pub struct HookInput {
     pub old_content: Option<String>,
     /// New file content
     pub new_content: String,
+    /// Context from transcript (plan mode, subagent, etc.)
+    #[serde(default)]
+    pub context: Option<HookContext>,
 }
 
 /// Claude Code hook handler
@@ -39,17 +59,24 @@ pub struct CaptureHook {
     repo_root: std::path::PathBuf,
     /// Privacy redactor
     redactor: Redactor,
+    /// Whether audit logging is enabled
+    audit_enabled: bool,
 }
 
 impl CaptureHook {
     /// Create a new capture hook for a repository
     pub fn new(repo_path: &Path) -> Result<Self> {
         let repo_root = repo_path.to_path_buf();
-        let redactor = Redactor::default_patterns();
+
+        // Load config and build redactor
+        let config = WhogititConfig::load(&repo_root).unwrap_or_default();
+        let redactor = config.privacy.build_redactor();
+        let audit_enabled = config.privacy.audit_log;
 
         Ok(Self {
             repo_root,
             redactor,
+            audit_enabled,
         })
     }
 
@@ -87,7 +114,11 @@ impl CaptureHook {
                     b
                 }
             }
-            None => PendingBuffer::new(&Self::get_session_id(), &Self::get_model_id()),
+            None => {
+                let mut buffer = PendingBuffer::new(&Self::get_session_id(), &Self::get_model_id());
+                buffer.audit_logging_enabled = self.audit_enabled;
+                buffer
+            }
         };
 
         // Make path relative to repo root
@@ -110,14 +141,27 @@ impl CaptureHook {
             }
         };
 
+        // Build edit context from hook input
+        let edit_context =
+            input
+                .context
+                .as_ref()
+                .map(|ctx| crate::capture::snapshot::EditContext {
+                    plan_mode: ctx.plan_mode,
+                    subagent_id: ctx.subagent_id.clone(),
+                    agent_depth: ctx.agent_depth,
+                    plan_step: None,
+                });
+
         // Record the edit with full content snapshots
-        buffer.record_edit(
+        buffer.record_edit_with_context(
             &relative_path,
             old_content.as_deref(),
             &input.new_content,
             &input.tool,
             &input.prompt,
             Some(&self.redactor),
+            edit_context,
         );
 
         // Save buffer with atomic write
@@ -177,14 +221,30 @@ impl CaptureHook {
             file_results.push(result);
         }
 
+        // Compute extended session metadata
+        let used_plan_mode = buffer
+            .file_histories
+            .values()
+            .flat_map(|h| h.edits.iter())
+            .any(|e| e.context.plan_mode);
+
+        let subagent_count = buffer
+            .file_histories
+            .values()
+            .flat_map(|h| h.edits.iter())
+            .filter(|e| e.context.agent_depth > 0)
+            .count() as u32;
+
         // Create attribution with full analysis
         let attribution = AIAttribution {
-            version: 2,
+            version: 3,
             session: SessionMetadata {
                 session_id: buffer.session.session_id.clone(),
                 model: buffer.session.model.clone(),
                 started_at: buffer.session.started_at.clone(),
                 prompt_count: buffer.session.prompt_count,
+                used_plan_mode,
+                subagent_count,
             },
             prompts: buffer
                 .session
@@ -375,6 +435,7 @@ mod tests {
             prompt: "Create a test file".to_string(),
             old_content: None,
             new_content: "fn test() {}\n".to_string(),
+            context: None,
         };
 
         hook.on_file_change(input).unwrap();
@@ -398,6 +459,7 @@ mod tests {
             prompt: "Create file".to_string(),
             old_content: None,
             new_content: "line1\n".to_string(),
+            context: None,
         })
         .unwrap();
 
@@ -408,6 +470,7 @@ mod tests {
             prompt: "Add line".to_string(),
             old_content: Some("line1\n".to_string()),
             new_content: "line1\nline2\n".to_string(),
+            context: None,
         })
         .unwrap();
 
@@ -439,6 +502,7 @@ mod tests {
             prompt: "test".to_string(),
             old_content: None,
             new_content: "content\n".to_string(),
+            context: None,
         })
         .unwrap();
 

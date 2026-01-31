@@ -4,6 +4,23 @@ use sha2::{Digest, Sha256};
 
 use crate::utils::{hex, CONTENT_HASH_BYTES};
 
+/// Context about the edit from Claude Code transcript
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct EditContext {
+    /// Whether the edit was made in plan mode
+    #[serde(default)]
+    pub plan_mode: bool,
+    /// If this edit was made by a subagent, the agent ID
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subagent_id: Option<String>,
+    /// Agent depth (0=main conversation, 1+=subagent)
+    #[serde(default)]
+    pub agent_depth: u8,
+    /// Plan step index if in plan mode
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub plan_step: Option<u32>,
+}
+
 /// A point-in-time snapshot of a file's content
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContentSnapshot {
@@ -53,6 +70,14 @@ pub struct AIEdit {
     pub after: ContentSnapshot,
     /// Timestamp of this edit
     pub timestamp: String,
+    /// Context from Claude Code transcript (plan mode, subagent, etc.)
+    #[serde(default, skip_serializing_if = "is_default_context")]
+    pub context: EditContext,
+}
+
+/// Helper for skip_serializing_if
+fn is_default_context(ctx: &EditContext) -> bool {
+    !ctx.plan_mode && ctx.subagent_id.is_none() && ctx.agent_depth == 0 && ctx.plan_step.is_none()
 }
 
 impl AIEdit {
@@ -71,6 +96,27 @@ impl AIEdit {
             before: ContentSnapshot::new(before_content),
             after: ContentSnapshot::new(after_content),
             timestamp: Utc::now().to_rfc3339(),
+            context: EditContext::default(),
+        }
+    }
+
+    pub fn with_context(
+        prompt: &str,
+        prompt_index: u32,
+        tool: &str,
+        before_content: &str,
+        after_content: &str,
+        context: EditContext,
+    ) -> Self {
+        Self {
+            edit_id: uuid::Uuid::new_v4().to_string(),
+            prompt: prompt.to_string(),
+            prompt_index,
+            tool: tool.to_string(),
+            before: ContentSnapshot::new(before_content),
+            after: ContentSnapshot::new(after_content),
+            timestamp: Utc::now().to_rfc3339(),
+            context,
         }
     }
 }

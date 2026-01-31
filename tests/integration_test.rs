@@ -125,6 +125,8 @@ fn test_trailers() {
             model: ModelInfo::claude("claude-opus-4-5-20251101"),
             started_at: "2026-01-30T10:00:00Z".to_string(),
             prompt_count: 5,
+            used_plan_mode: false,
+            subagent_count: 0,
         },
         prompts: vec![],
         files: vec![FileAttributionResult {
@@ -297,6 +299,8 @@ fn test_notes_roundtrip() {
             model: ModelInfo::claude("claude-opus-4-5-20251101"),
             started_at: "2026-01-30T10:00:00Z".to_string(),
             prompt_count: 1,
+            used_plan_mode: false,
+            subagent_count: 0,
         },
         prompts: vec![PromptInfo {
             index: 0,

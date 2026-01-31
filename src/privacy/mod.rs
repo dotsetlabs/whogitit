@@ -1,3 +1,5 @@
+pub mod config;
 pub mod redaction;
 
-pub use redaction::Redactor;
+pub use config::{PatternConfig, PrivacyConfig, RetentionConfig, WhogititConfig};
+pub use redaction::{RedactionEvent, RedactionResult, Redactor};

@@ -8,9 +8,9 @@ use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::capture::snapshot::{AIEdit, FileEditHistory};
+use crate::capture::snapshot::{AIEdit, EditContext, FileEditHistory};
 use crate::core::attribution::ModelInfo;
-use crate::privacy::redaction::Redactor;
+use crate::privacy::redaction::{RedactionEvent, Redactor};
 
 /// Pending change buffer filename (v2 format with full snapshots)
 const PENDING_FILE: &str = ".whogitit-pending.json";
@@ -44,15 +44,18 @@ pub struct PromptRecord {
     pub timestamp: String,
     /// Files affected by this prompt
     pub affected_files: Vec<String>,
+    /// Redaction audit events (if audit logging enabled)
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub redaction_events: Vec<RedactionEvent>,
 }
 
-/// Buffer of pending changes with full content snapshots (v2)
+/// Buffer of pending changes with full content snapshots (v3)
 ///
 /// This version stores complete file histories to enable accurate
-/// three-way diff analysis at commit time.
+/// three-way diff analysis at commit time, plus redaction audit trail.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PendingBuffer {
-    /// Schema version
+    /// Schema version (3 = with redaction audit)
     pub version: u8,
     /// Session information
     pub session: SessionInfo,
@@ -60,13 +63,19 @@ pub struct PendingBuffer {
     pub file_histories: HashMap<String, FileEditHistory>,
     /// Current prompt index counter
     pub prompt_counter: u32,
+    /// Whether redaction audit logging is enabled for this session
+    #[serde(default)]
+    pub audit_logging_enabled: bool,
+    /// Total redaction count across all prompts
+    #[serde(default)]
+    pub total_redactions: u32,
 }
 
 impl PendingBuffer {
     /// Create a new pending buffer for a session
     pub fn new(session_id: &str, model_id: &str) -> Self {
         Self {
-            version: 2,
+            version: 3,
             session: SessionInfo {
                 session_id: session_id.to_string(),
                 model: ModelInfo::claude(model_id),
@@ -76,7 +85,16 @@ impl PendingBuffer {
             },
             file_histories: HashMap::new(),
             prompt_counter: 0,
+            audit_logging_enabled: false,
+            total_redactions: 0,
         }
+    }
+
+    /// Create a new pending buffer with audit logging enabled
+    pub fn new_with_audit(session_id: &str, model_id: &str) -> Self {
+        let mut buffer = Self::new(session_id, model_id);
+        buffer.audit_logging_enabled = true;
+        buffer
     }
 
     /// Create with a new random session ID
@@ -92,6 +110,7 @@ impl PendingBuffer {
     /// - The content before this specific edit
     /// - The content after this edit
     /// - The prompt that triggered the edit
+    /// - Redaction audit events (if audit logging enabled)
     pub fn record_edit(
         &mut self,
         path: &str,
@@ -101,22 +120,28 @@ impl PendingBuffer {
         prompt: &str,
         redactor: Option<&Redactor>,
     ) {
-        // Redact prompt if redactor provided
-        let redacted_prompt = match redactor {
-            Some(r) => r.redact(prompt),
-            None => prompt.to_string(),
+        // Redact prompt if redactor provided, with audit if enabled
+        let (redacted_prompt, redaction_events) = match redactor {
+            Some(r) if self.audit_logging_enabled => {
+                let result = r.redact_with_audit(prompt);
+                self.total_redactions += result.redaction_count as u32;
+                (result.text, result.events)
+            }
+            Some(r) => (r.redact(prompt), Vec::new()),
+            None => (prompt.to_string(), Vec::new()),
         };
 
         let prompt_index = self.prompt_counter;
         self.prompt_counter += 1;
         self.session.prompt_count = self.prompt_counter;
 
-        // Record the prompt
+        // Record the prompt with optional redaction events
         self.session.prompts.push(PromptRecord {
             index: prompt_index,
             text: redacted_prompt.clone(),
             timestamp: Utc::now().to_rfc3339(),
             affected_files: vec![path.to_string()],
+            redaction_events,
         });
 
         // Get or create file history
@@ -142,6 +167,77 @@ impl PendingBuffer {
             before_content,
             new_content,
         );
+
+        history.add_edit(edit);
+    }
+
+    /// Record an AI edit with context (plan mode, subagent, etc.)
+    #[allow(clippy::too_many_arguments)]
+    pub fn record_edit_with_context(
+        &mut self,
+        path: &str,
+        old_content: Option<&str>,
+        new_content: &str,
+        tool: &str,
+        prompt: &str,
+        redactor: Option<&Redactor>,
+        context: Option<EditContext>,
+    ) {
+        // Redact prompt if redactor provided, with audit if enabled
+        let (redacted_prompt, redaction_events) = match redactor {
+            Some(r) if self.audit_logging_enabled => {
+                let result = r.redact_with_audit(prompt);
+                self.total_redactions += result.redaction_count as u32;
+                (result.text, result.events)
+            }
+            Some(r) => (r.redact(prompt), Vec::new()),
+            None => (prompt.to_string(), Vec::new()),
+        };
+
+        let prompt_index = self.prompt_counter;
+        self.prompt_counter += 1;
+        self.session.prompt_count = self.prompt_counter;
+
+        // Record the prompt with optional redaction events
+        self.session.prompts.push(PromptRecord {
+            index: prompt_index,
+            text: redacted_prompt.clone(),
+            timestamp: Utc::now().to_rfc3339(),
+            affected_files: vec![path.to_string()],
+            redaction_events,
+        });
+
+        // Get or create file history
+        let history = self
+            .file_histories
+            .entry(path.to_string())
+            .or_insert_with(|| FileEditHistory::new(path, old_content));
+
+        // Determine before content
+        let before_content = if history.edits.is_empty() {
+            old_content.unwrap_or("")
+        } else {
+            &history.latest_ai_content().content
+        };
+
+        // Create the edit record with context
+        let edit = match context {
+            Some(ctx) => AIEdit::with_context(
+                &redacted_prompt,
+                prompt_index,
+                tool,
+                before_content,
+                new_content,
+                ctx,
+            ),
+            None => AIEdit::new(
+                &redacted_prompt,
+                prompt_index,
+                tool,
+                before_content,
+                new_content,
+            ),
+        };
 
         history.add_edit(edit);
     }
@@ -229,8 +325,8 @@ impl PendingBuffer {
 
     /// Validate buffer integrity
     pub fn validate(&self) -> Result<(), String> {
-        // Check version
-        if self.version != 2 {
+        // Check version (accept v2 for backwards compatibility, v3 for new features)
+        if self.version != 2 && self.version != 3 {
             return Err(format!("Unsupported buffer version: {}", self.version));
         }
 

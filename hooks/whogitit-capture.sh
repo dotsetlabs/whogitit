@@ -148,13 +148,18 @@ fi
 TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // ""' 2>/dev/null)
 
 PROMPT=""
+PLAN_MODE="false"
+IS_SUBAGENT="false"
+AGENT_DEPTH="0"
+
 if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
     # Extract the most recent user message from the transcript
     # The transcript is a JSONL file (one JSON object per line)
     # User messages have type="user" and no toolUseResult (those are tool responses)
+    # Filter out automatic compaction messages (isCompactSummary == true)
     # The actual prompt is in .message.content (can be string or array)
     PROMPT=$(jq -s '
-        [.[] | select(.type == "user" and .toolUseResult == null)] |
+        [.[] | select(.type == "user" and .toolUseResult == null and .isCompactSummary != true)] |
         last |
         if .message.content then
             if (.message.content | type) == "string" then
@@ -169,6 +174,47 @@ if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
         end
     ' "$TRANSCRIPT_PATH" 2>/dev/null | head -c 2000)
     log_debug "Extracted prompt from transcript: ${PROMPT:0:100}..."
+
+    # Extract plan mode status
+    # Look for planMode field or EnterPlanMode/ExitPlanMode tool usage
+    PLAN_MODE=$(jq -s '
+        # Check for explicit planMode field
+        ([.[] | select(.planMode != null)] | last | .planMode) //
+        # Check for EnterPlanMode without subsequent ExitPlanMode
+        (
+            [.[] | select(.tool_name == "EnterPlanMode" or .tool_name == "ExitPlanMode")] |
+            if length > 0 then
+                last | .tool_name == "EnterPlanMode"
+            else
+                false
+            end
+        )
+    ' "$TRANSCRIPT_PATH" 2>/dev/null)
+
+    if [[ "$PLAN_MODE" == "true" ]]; then
+        log_debug "Plan mode detected"
+    fi
+
+    # Detect if this is a subagent (Task tool spawn)
+    # Look for Task tool invocations in the transcript
+    SUBAGENT_INFO=$(jq -s '
+        # Count Task tool invocations that spawned agents
+        [.[] | select(.tool_name == "Task")] | length as $task_count |
+        # Check if we are inside a subagent context
+        ([.[] | select(.agentId != null)] | length > 0) as $has_agent_id |
+        {
+            is_subagent: ($has_agent_id or $task_count > 0),
+            agent_depth: (if $task_count > 0 then 1 else 0 end),
+            subagent_count: $task_count
+        }
+    ' "$TRANSCRIPT_PATH" 2>/dev/null)
+
+    IS_SUBAGENT=$(echo "$SUBAGENT_INFO" | jq -r '.is_subagent // false')
+    AGENT_DEPTH=$(echo "$SUBAGENT_INFO" | jq -r '.agent_depth // 0')
+
+    if [[ "$IS_SUBAGENT" == "true" ]]; then
+        log_debug "Subagent context detected (depth: $AGENT_DEPTH)"
+    fi
 fi
 
 # Fallback to tool input description or default
@@ -198,12 +244,20 @@ if [[ -z "$OLD_CONTENT" ]]; then
         --arg file_path "$FILE_PATH" \
         --arg prompt "$PROMPT" \
         --arg new_content "$NEW_CONTENT" \
+        --argjson plan_mode "$PLAN_MODE" \
+        --argjson is_subagent "$IS_SUBAGENT" \
+        --argjson agent_depth "$AGENT_DEPTH" \
         '{
             tool: $tool,
             file_path: $file_path,
             prompt: $prompt,
             old_content: null,
-            new_content: $new_content
+            new_content: $new_content,
+            context: {
+                plan_mode: $plan_mode,
+                is_subagent: $is_subagent,
+                agent_depth: $agent_depth
+            }
         }' 2>/dev/null | "$WHOGITIT_BIN" capture --stdin 2>&1)
 else
     log_debug "Sending as MODIFIED file"
@@ -213,12 +267,20 @@ else
         --arg prompt "$PROMPT" \
         --arg old_content "$OLD_CONTENT" \
         --arg new_content "$NEW_CONTENT" \
+        --argjson plan_mode "$PLAN_MODE" \
+        --argjson is_subagent "$IS_SUBAGENT" \
+        --argjson agent_depth "$AGENT_DEPTH" \
         '{
             tool: $tool,
             file_path: $file_path,
             prompt: $prompt,
             old_content: $old_content,
-            new_content: $new_content
+            new_content: $new_content,
+            context: {
+                plan_mode: $plan_mode,
+                is_subagent: $is_subagent,
+                agent_depth: $agent_depth
+            }
         }' 2>/dev/null | "$WHOGITIT_BIN" capture --stdin 2>&1)
 fi
 
