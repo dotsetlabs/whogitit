@@ -745,6 +745,83 @@ mod tests {
     }
 
     #[test]
+    fn test_debug_attribution_flow() {
+        // Debug test to verify attribution logic
+        let original = "line1\nline2\nline3\nline4\nline5\n";
+        let mut history = FileEditHistory::new("test.rs", Some(original));
+
+        // First AI edit: adds line6, line7
+        let after1 = "line1\nline2\nline3\nline4\nline5\nline6\nline7\n";
+        history.add_edit(AIEdit::new("prompt1", 0, "Edit", original, after1));
+
+        // Second AI edit: adds line8 and modifies line3
+        let after2 = "line1\nline2\nLINE3_MODIFIED\nline4\nline5\nline6\nline7\nline8\n";
+        history.add_edit(AIEdit::new("prompt2", 1, "Edit", after1, after2));
+
+        // Final content matches AI edit exactly
+        let result = ThreeWayAnalyzer::analyze_with_diff(&history, after2);
+
+        println!("\nAttribution results:");
+        println!("  AI lines: {}", result.summary.ai_lines);
+        println!("  AI modified lines: {}", result.summary.ai_modified_lines);
+        println!("  Original lines: {}", result.summary.original_lines);
+        println!("  Human lines: {}", result.summary.human_lines);
+
+        for line in &result.lines {
+            println!("  Line {}: {:?} - '{}'", line.line_number, line.source, line.content);
+        }
+
+        // All 8 lines should be AI (they're all in the AI edit output)
+        assert_eq!(result.summary.ai_lines, 8, "All lines should be AI");
+        assert_eq!(result.summary.human_lines, 0, "No human lines expected");
+    }
+
+    #[test]
+    fn test_duplicate_lines_in_ai_output() {
+        // Test that duplicate lines (like closing braces) are properly attributed
+        // This tests the real-world scenario where the same line content appears multiple times
+        let original = r#"fn foo() {
+    code();
+}
+"#;
+        let mut history = FileEditHistory::new("test.rs", Some(original));
+
+        // AI adds a new function with similar structure (duplicate "}" and empty lines)
+        let after1 = r#"fn foo() {
+    code();
+}
+
+fn bar() {
+    more_code();
+}
+"#;
+        history.add_edit(AIEdit::new("Add bar function", 0, "Edit", original, after1));
+
+        let result = ThreeWayAnalyzer::analyze_with_diff(&history, after1);
+
+        println!("\nDuplicate lines test:");
+        for line in &result.lines {
+            let source_str = match &line.source {
+                LineSource::AI { .. } => "AI",
+                LineSource::Original => "Orig",
+                LineSource::Human => "Human",
+                _ => "Other",
+            };
+            println!("  Line {}: {} - '{}'", line.line_number, source_str, line.content);
+        }
+
+        // All lines should be AI (including the duplicate "}")
+        assert_eq!(result.summary.human_lines, 0, "No human lines - all are in AI output");
+        // The closing brace "}" appears twice but both should be AI
+        let closing_braces: Vec<_> = result.lines.iter().filter(|l| l.content == "}").collect();
+        assert_eq!(closing_braces.len(), 2, "Should have 2 closing braces");
+        for brace in closing_braces {
+            assert!(matches!(brace.source, LineSource::AI { .. }),
+                "Closing brace at line {} should be AI, got {:?}", brace.line_number, brace.source);
+        }
+    }
+
+    #[test]
     fn test_common_patterns_attributed_to_ai() {
         // Test that common patterns like empty lines, closing braces, and doc comments
         // are properly attributed to AI when they appear in AI output
