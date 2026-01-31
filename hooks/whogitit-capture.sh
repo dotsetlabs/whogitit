@@ -1,7 +1,10 @@
 #!/bin/bash
 # whogitit capture hook for Claude Code
 # This script captures file changes for AI attribution tracking
-# It reads the conversation transcript to extract actual user prompts
+# It handles Edit, Write, and Bash tools with proper before/after tracking
+#
+# For Edit/Write: tracks single file changes
+# For Bash: snapshots all dirty files before command, detects changes after
 
 set -o pipefail
 
@@ -20,7 +23,8 @@ log_error() {
 
 # State directory for tracking pre-edit content
 STATE_DIR="${TMPDIR:-/tmp}/whogitit-state"
-mkdir -p "$STATE_DIR" 2>/dev/null || {
+BASH_STATE_DIR="$STATE_DIR/bash"
+mkdir -p "$STATE_DIR" "$BASH_STATE_DIR" 2>/dev/null || {
     log_error "Failed to create state directory: $STATE_DIR"
     exit 0
 }
@@ -49,248 +53,521 @@ fi
 
 log_debug "Tool: $TOOL_NAME"
 
-# Only process Edit and Write tools
-if [[ "$TOOL_NAME" != "Edit" && "$TOOL_NAME" != "Write" ]]; then
-    log_debug "Skipping non-Edit/Write tool"
-    exit 0
-fi
-
-# Extract file path with multiple fallbacks
-FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // .file_path // ""' 2>/dev/null)
-
-log_debug "File path from input: $FILE_PATH"
-
-if [[ -z "$FILE_PATH" || "$FILE_PATH" == "null" ]]; then
-    log_error "Empty or null file path in input"
-    exit 0
-fi
-
-# Make absolute path
-if [[ ! "$FILE_PATH" = /* ]]; then
-    FILE_PATH="$(pwd)/$FILE_PATH"
-fi
-
-# Normalize path (resolve symlinks, remove ..)
-FILE_PATH=$(realpath "$FILE_PATH" 2>/dev/null || echo "$FILE_PATH")
-
-log_debug "Absolute path: $FILE_PATH"
-
-# Hash the file path for state file name (use md5 on macOS, md5sum on Linux)
-if command -v md5 &> /dev/null; then
-    STATE_HASH=$(echo -n "$FILE_PATH" | md5)
-elif command -v md5sum &> /dev/null; then
-    STATE_HASH=$(echo -n "$FILE_PATH" | md5sum | cut -d' ' -f1)
-else
-    # Fallback to simple hash
-    STATE_HASH=$(echo -n "$FILE_PATH" | cksum | cut -d' ' -f1)
-fi
-STATE_FILE="$STATE_DIR/$STATE_HASH"
-
-log_debug "State file: $STATE_FILE"
-
-if [[ "$HOOK_PHASE" == "pre" ]]; then
-    # PRE-TOOL: Save current file content before modification
-    if [[ -f "$FILE_PATH" ]]; then
-        if cp "$FILE_PATH" "$STATE_FILE" 2>/dev/null; then
-            LINES=$(wc -l < "$STATE_FILE" 2>/dev/null | tr -d ' ')
-            log_debug "Saved pre-edit state: $LINES lines"
-        else
-            log_error "Failed to copy file to state: $FILE_PATH"
-        fi
+# Check if whogitit is available (do this early)
+WHOGITIT_BIN="${WHOGITIT_BIN:-$HOME/.cargo/bin/whogitit}"
+if [[ ! -x "$WHOGITIT_BIN" ]]; then
+    # Try to find it in PATH
+    if command -v whogitit &> /dev/null; then
+        WHOGITIT_BIN=$(command -v whogitit)
     else
-        rm -f "$STATE_FILE" 2>/dev/null
-        log_debug "File doesn't exist, removed state"
+        log_error "whogitit binary not found"
+        exit 0
     fi
+fi
+
+# Get repository root
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+if [[ -z "$REPO_ROOT" ]]; then
+    log_debug "Not in a git repository, skipping"
     exit 0
 fi
 
-# POST-TOOL: Capture the change
+# ============================================================================
+# UTILITY FUNCTIONS
+# ============================================================================
 
-# Get old content from state file
-OLD_CONTENT=""
-if [[ -f "$STATE_FILE" ]]; then
-    OLD_CONTENT=$(cat "$STATE_FILE" 2>/dev/null)
-    if [[ $? -ne 0 ]]; then
-        log_error "Failed to read state file"
-        OLD_CONTENT=""
+# Hash a string for state file naming
+hash_string() {
+    if command -v md5 &> /dev/null; then
+        echo -n "$1" | md5
+    elif command -v md5sum &> /dev/null; then
+        echo -n "$1" | md5sum | cut -d' ' -f1
     else
-        OLD_LINES=$(echo "$OLD_CONTENT" | wc -l | tr -d ' ')
-        log_debug "Read old content: $OLD_LINES lines"
+        echo -n "$1" | cksum | cut -d' ' -f1
     fi
-    rm -f "$STATE_FILE" 2>/dev/null
-else
-    log_debug "WARNING: No state file found (file may be new)"
-fi
+}
 
-# Get new content from actual file
-if [[ ! -f "$FILE_PATH" ]]; then
-    log_error "File doesn't exist for post-hook: $FILE_PATH"
-    exit 0
-fi
+# Get transcript path from input
+get_transcript_path() {
+    echo "$INPUT" | jq -r '.transcript_path // ""' 2>/dev/null
+}
 
-NEW_CONTENT=$(cat "$FILE_PATH" 2>/dev/null)
-if [[ $? -ne 0 ]]; then
-    log_error "Failed to read file: $FILE_PATH"
-    exit 0
-fi
-NEW_LINES=$(echo "$NEW_CONTENT" | wc -l | tr -d ' ')
+# Extract prompt from transcript
+extract_prompt_from_transcript() {
+    local transcript_path="$1"
+    local fallback="$2"
 
-log_debug "Read new content: $NEW_LINES lines"
-
-# Skip if no actual change
-if [[ "$OLD_CONTENT" == "$NEW_CONTENT" ]]; then
-    log_debug "No change detected, skipping"
-    exit 0
-fi
-
-# Get the prompt from the conversation transcript
-# Claude Code provides transcript_path pointing to the conversation JSON
-TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // ""' 2>/dev/null)
-
-PROMPT=""
-PLAN_MODE="false"
-IS_SUBAGENT="false"
-AGENT_DEPTH="0"
-
-if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
-    # Extract the most recent user message from the transcript
-    # The transcript is a JSONL file (one JSON object per line)
-    # User messages have type="user" and no toolUseResult (those are tool responses)
-    # Filter out automatic compaction messages (isCompactSummary == true)
-    # The actual prompt is in .message.content (can be string or array)
-    PROMPT=$(jq -s '
-        [.[] | select(.type == "user" and .toolUseResult == null and .isCompactSummary != true)] |
-        last |
-        if .message.content then
-            if (.message.content | type) == "string" then
-                .message.content
-            elif (.message.content | type) == "array" then
-                [.message.content[] | select(.type == "text") | .text] | join(" ")
+    if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
+        local prompt
+        prompt=$(jq -s '
+            [.[] | select(.type == "user" and .toolUseResult == null and .isCompactSummary != true)] |
+            last |
+            if .message.content then
+                if (.message.content | type) == "string" then
+                    .message.content
+                elif (.message.content | type) == "array" then
+                    [.message.content[] | select(.type == "text") | .text] | join(" ")
+                else
+                    ""
+                end
             else
                 ""
             end
+        ' "$transcript_path" 2>/dev/null | head -c 2000)
+
+        if [[ -n "$prompt" && "$prompt" != "null" && "$prompt" != '""' ]]; then
+            echo "$prompt"
+            return
+        fi
+    fi
+
+    echo "$fallback"
+}
+
+# Extract context (plan mode, subagent) from transcript
+extract_context_from_transcript() {
+    local transcript_path="$1"
+
+    local plan_mode="false"
+    local is_subagent="false"
+    local agent_depth="0"
+
+    if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
+        plan_mode=$(jq -s '
+            ([.[] | select(.planMode != null)] | last | .planMode) //
+            (
+                [.[] | select(.tool_name == "EnterPlanMode" or .tool_name == "ExitPlanMode")] |
+                if length > 0 then
+                    last | .tool_name == "EnterPlanMode"
+                else
+                    false
+                end
+            )
+        ' "$transcript_path" 2>/dev/null)
+
+        local subagent_info
+        subagent_info=$(jq -s '
+            [.[] | select(.tool_name == "Task")] | length as $task_count |
+            ([.[] | select(.agentId != null)] | length > 0) as $has_agent_id |
+            {
+                is_subagent: ($has_agent_id or $task_count > 0),
+                agent_depth: (if $task_count > 0 then 1 else 0 end)
+            }
+        ' "$transcript_path" 2>/dev/null)
+
+        is_subagent=$(echo "$subagent_info" | jq -r '.is_subagent // false')
+        agent_depth=$(echo "$subagent_info" | jq -r '.agent_depth // 0')
+    fi
+
+    # Return as JSON
+    echo "{\"plan_mode\": $plan_mode, \"is_subagent\": $is_subagent, \"agent_depth\": $agent_depth}"
+}
+
+# Send a file change to whogitit capture
+send_to_whogitit() {
+    local tool="$1"
+    local file_path="$2"
+    local prompt="$3"
+    local old_content="$4"
+    local new_content="$5"
+    local context_json="$6"
+
+    local plan_mode is_subagent agent_depth
+    plan_mode=$(echo "$context_json" | jq -r '.plan_mode // false')
+    is_subagent=$(echo "$context_json" | jq -r '.is_subagent // false')
+    agent_depth=$(echo "$context_json" | jq -r '.agent_depth // 0')
+
+    local capture_result
+    if [[ -z "$old_content" ]]; then
+        log_debug "Sending $file_path as NEW file"
+        capture_result=$(jq -n \
+            --arg tool "$tool" \
+            --arg file_path "$file_path" \
+            --arg prompt "$prompt" \
+            --arg new_content "$new_content" \
+            --argjson plan_mode "$plan_mode" \
+            --argjson is_subagent "$is_subagent" \
+            --argjson agent_depth "$agent_depth" \
+            '{
+                tool: $tool,
+                file_path: $file_path,
+                prompt: $prompt,
+                old_content: null,
+                new_content: $new_content,
+                context: {
+                    plan_mode: $plan_mode,
+                    is_subagent: $is_subagent,
+                    agent_depth: $agent_depth
+                }
+            }' 2>/dev/null | "$WHOGITIT_BIN" capture --stdin 2>&1)
+    else
+        log_debug "Sending $file_path as MODIFIED file"
+        capture_result=$(jq -n \
+            --arg tool "$tool" \
+            --arg file_path "$file_path" \
+            --arg prompt "$prompt" \
+            --arg old_content "$old_content" \
+            --arg new_content "$new_content" \
+            --argjson plan_mode "$plan_mode" \
+            --argjson is_subagent "$is_subagent" \
+            --argjson agent_depth "$agent_depth" \
+            '{
+                tool: $tool,
+                file_path: $file_path,
+                prompt: $prompt,
+                old_content: $old_content,
+                new_content: $new_content,
+                context: {
+                    plan_mode: $plan_mode,
+                    is_subagent: $is_subagent,
+                    agent_depth: $agent_depth
+                }
+            }' 2>/dev/null | "$WHOGITIT_BIN" capture --stdin 2>&1)
+    fi
+
+    local capture_exit=$?
+    if [[ $capture_exit -ne 0 ]]; then
+        log_error "whogitit capture failed for $file_path (exit $capture_exit): $capture_result"
+        return 1
+    else
+        if [[ -n "$capture_result" ]]; then
+            log_debug "capture output for $file_path: $capture_result"
+        fi
+    fi
+    return 0
+}
+
+# ============================================================================
+# EDIT/WRITE TOOL HANDLING (single file)
+# ============================================================================
+
+handle_edit_write_pre() {
+    local file_path="$1"
+    local state_file="$2"
+
+    if [[ -f "$file_path" ]]; then
+        if cp "$file_path" "$state_file" 2>/dev/null; then
+            local lines
+            lines=$(wc -l < "$state_file" 2>/dev/null | tr -d ' ')
+            log_debug "Saved pre-edit state for $file_path: $lines lines"
         else
-            ""
-        end
-    ' "$TRANSCRIPT_PATH" 2>/dev/null | head -c 2000)
-    log_debug "Extracted prompt from transcript: ${PROMPT:0:100}..."
+            log_error "Failed to copy file to state: $file_path"
+        fi
+    else
+        rm -f "$state_file" 2>/dev/null
+        log_debug "File doesn't exist, removed state: $file_path"
+    fi
+}
 
-    # Extract plan mode status
-    # Look for planMode field or EnterPlanMode/ExitPlanMode tool usage
-    PLAN_MODE=$(jq -s '
-        # Check for explicit planMode field
-        ([.[] | select(.planMode != null)] | last | .planMode) //
-        # Check for EnterPlanMode without subsequent ExitPlanMode
-        (
-            [.[] | select(.tool_name == "EnterPlanMode" or .tool_name == "ExitPlanMode")] |
-            if length > 0 then
-                last | .tool_name == "EnterPlanMode"
-            else
-                false
-            end
-        )
-    ' "$TRANSCRIPT_PATH" 2>/dev/null)
+handle_edit_write_post() {
+    local file_path="$1"
+    local state_file="$2"
+    local tool_name="$3"
 
-    if [[ "$PLAN_MODE" == "true" ]]; then
-        log_debug "Plan mode detected"
+    # Get old content from state file
+    local old_content=""
+    if [[ -f "$state_file" ]]; then
+        old_content=$(cat "$state_file" 2>/dev/null)
+        rm -f "$state_file" 2>/dev/null
     fi
 
-    # Detect if this is a subagent (Task tool spawn)
-    # Look for Task tool invocations in the transcript
-    SUBAGENT_INFO=$(jq -s '
-        # Count Task tool invocations that spawned agents
-        [.[] | select(.tool_name == "Task")] | length as $task_count |
-        # Check if we are inside a subagent context
-        ([.[] | select(.agentId != null)] | length > 0) as $has_agent_id |
-        {
-            is_subagent: ($has_agent_id or $task_count > 0),
-            agent_depth: (if $task_count > 0 then 1 else 0 end),
-            subagent_count: $task_count
-        }
-    ' "$TRANSCRIPT_PATH" 2>/dev/null)
-
-    IS_SUBAGENT=$(echo "$SUBAGENT_INFO" | jq -r '.is_subagent // false')
-    AGENT_DEPTH=$(echo "$SUBAGENT_INFO" | jq -r '.agent_depth // 0')
-
-    if [[ "$IS_SUBAGENT" == "true" ]]; then
-        log_debug "Subagent context detected (depth: $AGENT_DEPTH)"
+    # Get new content from actual file
+    if [[ ! -f "$file_path" ]]; then
+        log_error "File doesn't exist for post-hook: $file_path"
+        return 1
     fi
-fi
 
-# Fallback to tool input description or default
-if [[ -z "$PROMPT" || "$PROMPT" == "null" ]]; then
-    PROMPT=$(echo "$INPUT" | jq -r '.tool_input.description // ""' 2>/dev/null)
-fi
-
-if [[ -z "$PROMPT" || "$PROMPT" == "null" ]]; then
-    PROMPT="AI-assisted code change"
-fi
-
-log_debug "Prompt: ${PROMPT:0:100}..."
-
-# Check if whogitit is available
-WHOGITIT_BIN="${WHOGITIT_BIN:-$HOME/.cargo/bin/whogitit}"
-if [[ ! -x "$WHOGITIT_BIN" ]]; then
-    log_error "whogitit binary not found at: $WHOGITIT_BIN"
-    exit 0
-fi
-
-# Build and send to whogitit
-capture_result=""
-if [[ -z "$OLD_CONTENT" ]]; then
-    log_debug "Sending as NEW file"
-    capture_result=$(jq -n \
-        --arg tool "$TOOL_NAME" \
-        --arg file_path "$FILE_PATH" \
-        --arg prompt "$PROMPT" \
-        --arg new_content "$NEW_CONTENT" \
-        --argjson plan_mode "$PLAN_MODE" \
-        --argjson is_subagent "$IS_SUBAGENT" \
-        --argjson agent_depth "$AGENT_DEPTH" \
-        '{
-            tool: $tool,
-            file_path: $file_path,
-            prompt: $prompt,
-            old_content: null,
-            new_content: $new_content,
-            context: {
-                plan_mode: $plan_mode,
-                is_subagent: $is_subagent,
-                agent_depth: $agent_depth
-            }
-        }' 2>/dev/null | "$WHOGITIT_BIN" capture --stdin 2>&1)
-else
-    log_debug "Sending as MODIFIED file"
-    capture_result=$(jq -n \
-        --arg tool "$TOOL_NAME" \
-        --arg file_path "$FILE_PATH" \
-        --arg prompt "$PROMPT" \
-        --arg old_content "$OLD_CONTENT" \
-        --arg new_content "$NEW_CONTENT" \
-        --argjson plan_mode "$PLAN_MODE" \
-        --argjson is_subagent "$IS_SUBAGENT" \
-        --argjson agent_depth "$AGENT_DEPTH" \
-        '{
-            tool: $tool,
-            file_path: $file_path,
-            prompt: $prompt,
-            old_content: $old_content,
-            new_content: $new_content,
-            context: {
-                plan_mode: $plan_mode,
-                is_subagent: $is_subagent,
-                agent_depth: $agent_depth
-            }
-        }' 2>/dev/null | "$WHOGITIT_BIN" capture --stdin 2>&1)
-fi
-
-capture_exit=$?
-if [[ $capture_exit -ne 0 ]]; then
-    log_error "whogitit capture failed (exit $capture_exit): $capture_result"
-else
-    if [[ -n "$capture_result" ]]; then
-        log_debug "capture output: $capture_result"
+    local new_content
+    new_content=$(cat "$file_path" 2>/dev/null)
+    if [[ $? -ne 0 ]]; then
+        log_error "Failed to read file: $file_path"
+        return 1
     fi
-fi
+
+    # Skip if no actual change
+    if [[ "$old_content" == "$new_content" ]]; then
+        log_debug "No change detected for $file_path, skipping"
+        return 0
+    fi
+
+    # Get prompt and context
+    local transcript_path
+    transcript_path=$(get_transcript_path)
+
+    local prompt
+    prompt=$(extract_prompt_from_transcript "$transcript_path" "AI-assisted code change")
+
+    # Try tool input description as fallback
+    if [[ -z "$prompt" || "$prompt" == "null" || "$prompt" == '""' ]]; then
+        prompt=$(echo "$INPUT" | jq -r '.tool_input.description // "AI-assisted code change"' 2>/dev/null)
+    fi
+
+    local context_json
+    context_json=$(extract_context_from_transcript "$transcript_path")
+
+    # Send to whogitit
+    send_to_whogitit "$tool_name" "$file_path" "$prompt" "$old_content" "$new_content" "$context_json"
+}
+
+# ============================================================================
+# BASH TOOL HANDLING (multiple files via git status tracking)
+# ============================================================================
+
+# Get unique ID for this Bash command invocation
+get_bash_invocation_id() {
+    # Use tool_use_id if available, otherwise generate from timestamp
+    local tool_use_id
+    tool_use_id=$(echo "$INPUT" | jq -r '.tool_use_id // .id // ""' 2>/dev/null)
+    if [[ -n "$tool_use_id" && "$tool_use_id" != "null" ]]; then
+        echo "$tool_use_id"
+    else
+        echo "bash_$(date +%s%N)"
+    fi
+}
+
+# Get list of dirty files (modified, staged, or untracked) in the repo
+get_dirty_files() {
+    cd "$REPO_ROOT" || return
+
+    # Get modified and staged files (excluding deleted)
+    # Also get untracked files that aren't ignored
+    git status --porcelain 2>/dev/null | while read -r status file; do
+        # Skip deleted files (first char is D or second char is D)
+        if [[ "${status:0:1}" == "D" || "${status:1:1}" == "D" ]]; then
+            continue
+        fi
+        # Skip empty lines
+        if [[ -z "$file" ]]; then
+            continue
+        fi
+        # Handle renamed files (show new name)
+        if [[ "$file" == *" -> "* ]]; then
+            file="${file##* -> }"
+        fi
+        # Output the file path (relative to repo root)
+        echo "$file"
+    done
+}
+
+# Snapshot all dirty files before Bash command
+handle_bash_pre() {
+    local bash_id="$1"
+    local bash_state_subdir="$BASH_STATE_DIR/$bash_id"
+
+    mkdir -p "$bash_state_subdir" 2>/dev/null
+
+    # Save list of dirty files and their content
+    local file_count=0
+    local manifest_file="$bash_state_subdir/manifest.txt"
+
+    # Clear manifest
+    > "$manifest_file"
+
+    while IFS= read -r rel_path; do
+        if [[ -z "$rel_path" ]]; then
+            continue
+        fi
+
+        local abs_path="$REPO_ROOT/$rel_path"
+
+        # Skip if not a regular file
+        if [[ ! -f "$abs_path" ]]; then
+            continue
+        fi
+
+        # Skip binary files (check if file contains null bytes)
+        if file "$abs_path" 2>/dev/null | grep -q "binary\|executable\|image\|archive"; then
+            log_debug "Skipping binary file: $rel_path"
+            continue
+        fi
+
+        # Hash the path for state file name
+        local path_hash
+        path_hash=$(hash_string "$rel_path")
+        local state_file="$bash_state_subdir/$path_hash"
+
+        # Save current content
+        if cp "$abs_path" "$state_file" 2>/dev/null; then
+            echo "$rel_path" >> "$manifest_file"
+            file_count=$((file_count + 1))
+        fi
+    done < <(get_dirty_files)
+
+    # Also record files that don't exist yet (will be created by command)
+    # We'll detect these in post by comparing git status
+
+    log_debug "Bash pre-hook: saved state for $file_count dirty files (id: $bash_id)"
+}
+
+# Detect changes after Bash command and capture them
+handle_bash_post() {
+    local bash_id="$1"
+    local bash_command="$2"
+    local bash_description="$3"
+    local bash_state_subdir="$BASH_STATE_DIR/$bash_id"
+
+    if [[ ! -d "$bash_state_subdir" ]]; then
+        log_debug "No pre-Bash state found for id: $bash_id"
+        return 0
+    fi
+
+    local manifest_file="$bash_state_subdir/manifest.txt"
+
+    # Get prompt and context from transcript
+    local transcript_path
+    transcript_path=$(get_transcript_path)
+
+    # Use bash description as prompt, with command as fallback
+    local prompt
+    if [[ -n "$bash_description" && "$bash_description" != "null" ]]; then
+        prompt="[Bash] $bash_description"
+    elif [[ -n "$bash_command" ]]; then
+        # Truncate long commands
+        local cmd_preview="${bash_command:0:200}"
+        if [[ ${#bash_command} -gt 200 ]]; then
+            cmd_preview="$cmd_preview..."
+        fi
+        prompt="[Bash] $cmd_preview"
+    else
+        prompt="[Bash] AI-executed shell command"
+    fi
+
+    local context_json
+    context_json=$(extract_context_from_transcript "$transcript_path")
+
+    local changed_count=0
+    local created_count=0
+
+    # Check files that were in pre-state manifest
+    if [[ -f "$manifest_file" ]]; then
+        while IFS= read -r rel_path; do
+            if [[ -z "$rel_path" ]]; then
+                continue
+            fi
+
+            local abs_path="$REPO_ROOT/$rel_path"
+            local path_hash
+            path_hash=$(hash_string "$rel_path")
+            local state_file="$bash_state_subdir/$path_hash"
+
+            # Get old content
+            local old_content=""
+            if [[ -f "$state_file" ]]; then
+                old_content=$(cat "$state_file" 2>/dev/null)
+            fi
+
+            # Check if file still exists
+            if [[ ! -f "$abs_path" ]]; then
+                # File was deleted - we don't track deletions
+                log_debug "File deleted by Bash: $rel_path"
+                continue
+            fi
+
+            # Get new content
+            local new_content
+            new_content=$(cat "$abs_path" 2>/dev/null)
+
+            # Check if changed
+            if [[ "$old_content" != "$new_content" ]]; then
+                log_debug "File modified by Bash: $rel_path"
+                send_to_whogitit "Bash" "$abs_path" "$prompt" "$old_content" "$new_content" "$context_json"
+                changed_count=$((changed_count + 1))
+            fi
+        done < "$manifest_file"
+    fi
+
+    # Check for newly created files (in git status but not in manifest)
+    while IFS= read -r rel_path; do
+        if [[ -z "$rel_path" ]]; then
+            continue
+        fi
+
+        # Skip if was in manifest (already handled above)
+        if [[ -f "$manifest_file" ]] && grep -qxF "$rel_path" "$manifest_file" 2>/dev/null; then
+            continue
+        fi
+
+        local abs_path="$REPO_ROOT/$rel_path"
+
+        # Skip if not a regular file
+        if [[ ! -f "$abs_path" ]]; then
+            continue
+        fi
+
+        # Skip binary files
+        if file "$abs_path" 2>/dev/null | grep -q "binary\|executable\|image\|archive"; then
+            log_debug "Skipping new binary file: $rel_path"
+            continue
+        fi
+
+        # This is a new file created by the Bash command
+        local new_content
+        new_content=$(cat "$abs_path" 2>/dev/null)
+
+        if [[ -n "$new_content" ]]; then
+            log_debug "File created by Bash: $rel_path"
+            send_to_whogitit "Bash" "$abs_path" "$prompt" "" "$new_content" "$context_json"
+            created_count=$((created_count + 1))
+        fi
+    done < <(get_dirty_files)
+
+    # Clean up state
+    rm -rf "$bash_state_subdir" 2>/dev/null
+
+    log_debug "Bash post-hook: $changed_count files modified, $created_count files created (id: $bash_id)"
+}
+
+# ============================================================================
+# MAIN ROUTING LOGIC
+# ============================================================================
+
+case "$TOOL_NAME" in
+    Edit|Write)
+        # Extract file path
+        FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // .file_path // ""' 2>/dev/null)
+
+        if [[ -z "$FILE_PATH" || "$FILE_PATH" == "null" ]]; then
+            log_error "Empty or null file path for $TOOL_NAME"
+            exit 0
+        fi
+
+        # Make absolute path
+        if [[ ! "$FILE_PATH" = /* ]]; then
+            FILE_PATH="$(pwd)/$FILE_PATH"
+        fi
+        FILE_PATH=$(realpath "$FILE_PATH" 2>/dev/null || echo "$FILE_PATH")
+
+        # Create state file path
+        STATE_HASH=$(hash_string "$FILE_PATH")
+        STATE_FILE="$STATE_DIR/$STATE_HASH"
+
+        if [[ "$HOOK_PHASE" == "pre" ]]; then
+            handle_edit_write_pre "$FILE_PATH" "$STATE_FILE"
+        else
+            handle_edit_write_post "$FILE_PATH" "$STATE_FILE" "$TOOL_NAME"
+        fi
+        ;;
+
+    Bash)
+        # Get Bash command details
+        BASH_COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null)
+        BASH_DESCRIPTION=$(echo "$INPUT" | jq -r '.tool_input.description // ""' 2>/dev/null)
+        BASH_ID=$(get_bash_invocation_id)
+
+        log_debug "Bash command (id: $BASH_ID): ${BASH_COMMAND:0:100}..."
+
+        if [[ "$HOOK_PHASE" == "pre" ]]; then
+            handle_bash_pre "$BASH_ID"
+        else
+            handle_bash_post "$BASH_ID" "$BASH_COMMAND" "$BASH_DESCRIPTION"
+        fi
+        ;;
+
+    *)
+        # Skip other tools (Task, Read, Glob, Grep, etc.)
+        log_debug "Skipping tool: $TOOL_NAME"
+        exit 0
+        ;;
+esac
 
 log_debug "Hook completed"
