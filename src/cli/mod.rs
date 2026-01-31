@@ -112,8 +112,18 @@ fn run_status() -> Result<()> {
         println!("Pending AI attribution:");
         println!("  Session: {}", status.session_id.as_deref().unwrap_or("unknown"));
         println!("  Files: {}", status.file_count);
+        println!("  Edits: {}", status.edit_count);
         println!("  Lines: {}", status.line_count);
-        println!("\nRun 'git commit' to finalize attribution.");
+        if !status.age.is_empty() {
+            println!("  Age: {}", status.age);
+        }
+
+        if status.is_stale {
+            println!("\n⚠️  Warning: This pending buffer is stale (> 24 hours old).");
+            println!("   Run 'ai-blame clear' if these changes are no longer relevant.");
+        } else {
+            println!("\nRun 'git commit' to finalize attribution.");
+        }
     } else {
         println!("No pending AI attribution.");
     }

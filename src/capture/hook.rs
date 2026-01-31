@@ -68,12 +68,38 @@ impl CaptureHook {
         let store = PendingStore::new(&self.repo_root);
 
         // Load or create pending buffer
-        let mut buffer = store.load()?.unwrap_or_else(|| {
-            PendingBuffer::new(&Self::get_session_id(), &Self::get_model_id())
-        });
+        let mut buffer = match store.load()? {
+            Some(b) => {
+                // Check if we should start a new session
+                // (different session ID in env means new session)
+                let current_session = Self::get_session_id();
+                if b.session.session_id != current_session && env::var(ENV_SESSION_ID).is_ok() {
+                    // New session ID explicitly set, start fresh
+                    // But first, warn about uncommitted changes
+                    if b.has_changes() {
+                        eprintln!(
+                            "ai-blame: Warning - discarding {} uncommitted edits from previous session",
+                            b.total_edits()
+                        );
+                    }
+                    PendingBuffer::new(&current_session, &Self::get_model_id())
+                } else {
+                    b
+                }
+            }
+            None => PendingBuffer::new(&Self::get_session_id(), &Self::get_model_id()),
+        };
 
         // Make path relative to repo root
         let relative_path = self.make_relative_path(&input.file_path)?;
+
+        // Validate input
+        if relative_path.is_empty() {
+            anyhow::bail!("Empty file path");
+        }
+        if input.new_content.is_empty() && input.tool != "Delete" {
+            eprintln!("ai-blame: Warning - empty new_content for non-delete operation");
+        }
 
         // Record the edit with full content snapshots
         buffer.record_edit(
@@ -85,7 +111,7 @@ impl CaptureHook {
             Some(&self.redactor),
         );
 
-        // Save buffer
+        // Save buffer with atomic write
         store.save(&buffer)?;
 
         Ok(())
@@ -204,7 +230,8 @@ impl CaptureHook {
     pub fn status(&self) -> Result<PendingStatus> {
         let store = PendingStore::new(&self.repo_root);
 
-        match store.load()? {
+        // Use quiet load to avoid spurious warnings during status check
+        match store.load_quiet()? {
             Some(buffer) => {
                 let session_id = buffer.session.session_id.clone();
                 let file_count = buffer.file_count();
@@ -212,6 +239,8 @@ impl CaptureHook {
                 let edit_count = buffer.total_edits();
                 let prompt_count = buffer.session.prompt_count;
                 let has_pending = buffer.has_changes();
+                let is_stale = buffer.is_stale();
+                let age = buffer.age_string();
                 Ok(PendingStatus {
                     has_pending,
                     session_id: Some(session_id),
@@ -219,6 +248,8 @@ impl CaptureHook {
                     line_count,
                     edit_count,
                     prompt_count,
+                    is_stale,
+                    age,
                 })
             }
             None => Ok(PendingStatus {
@@ -228,6 +259,8 @@ impl CaptureHook {
                 line_count: 0,
                 edit_count: 0,
                 prompt_count: 0,
+                is_stale: false,
+                age: String::new(),
             }),
         }
     }
@@ -248,6 +281,10 @@ pub struct PendingStatus {
     pub line_count: u32,
     pub edit_count: usize,
     pub prompt_count: u32,
+    /// Whether the pending buffer is stale (older than 24 hours)
+    pub is_stale: bool,
+    /// Human-readable age of the pending buffer
+    pub age: String,
 }
 
 /// Hook entry point for Claude Code integration

@@ -1,9 +1,10 @@
 use std::collections::HashMap;
-use std::fs;
+use std::fs::{self, File};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use chrono::Utc;
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -13,6 +14,9 @@ use crate::privacy::redaction::Redactor;
 
 /// Pending change buffer filename (v2 format with full snapshots)
 const PENDING_FILE: &str = ".ai-blame-pending.json";
+
+/// Maximum age in hours before a pending buffer is considered stale
+const MAX_PENDING_AGE_HOURS: i64 = 24;
 
 /// Session metadata for the current AI session
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -191,12 +195,72 @@ impl PendingBuffer {
     pub fn get_prompt(&self, index: u32) -> Option<&PromptRecord> {
         self.session.prompts.iter().find(|p| p.index == index)
     }
+
+    /// Check if this buffer is stale (older than MAX_PENDING_AGE_HOURS)
+    pub fn is_stale(&self) -> bool {
+        if let Ok(started) = DateTime::parse_from_rfc3339(&self.session.started_at) {
+            let age = Utc::now().signed_duration_since(started);
+            age > Duration::hours(MAX_PENDING_AGE_HOURS)
+        } else {
+            // If we can't parse the timestamp, consider it stale
+            true
+        }
+    }
+
+    /// Get the age of this buffer in human-readable format
+    pub fn age_string(&self) -> String {
+        if let Ok(started) = DateTime::parse_from_rfc3339(&self.session.started_at) {
+            let age = Utc::now().signed_duration_since(started);
+            if age.num_hours() > 0 {
+                format!("{} hours ago", age.num_hours())
+            } else if age.num_minutes() > 0 {
+                format!("{} minutes ago", age.num_minutes())
+            } else {
+                "just now".to_string()
+            }
+        } else {
+            "unknown".to_string()
+        }
+    }
+
+    /// Validate buffer integrity
+    pub fn validate(&self) -> Result<(), String> {
+        // Check version
+        if self.version != 2 {
+            return Err(format!("Unsupported buffer version: {}", self.version));
+        }
+
+        // Check session ID is valid UUID
+        if Uuid::parse_str(&self.session.session_id).is_err() {
+            return Err("Invalid session ID format".to_string());
+        }
+
+        // Check prompt count matches prompts
+        if self.session.prompt_count != self.session.prompts.len() as u32 {
+            return Err(format!(
+                "Prompt count mismatch: {} vs {}",
+                self.session.prompt_count,
+                self.session.prompts.len()
+            ));
+        }
+
+        // Check each file history has at least one edit
+        for (path, history) in &self.file_histories {
+            if history.edits.is_empty() {
+                return Err(format!("File '{}' has no edits", path));
+            }
+        }
+
+        Ok(())
+    }
 }
 
 /// Manager for persisting pending buffer to disk
 pub struct PendingStore {
     /// Path to the pending file
     file_path: PathBuf,
+    /// Path to the repo root
+    repo_root: PathBuf,
 }
 
 impl PendingStore {
@@ -204,10 +268,11 @@ impl PendingStore {
     pub fn new(repo_root: &Path) -> Self {
         Self {
             file_path: repo_root.join(PENDING_FILE),
+            repo_root: repo_root.to_path_buf(),
         }
     }
 
-    /// Load pending buffer from disk
+    /// Load pending buffer from disk, with stale detection
     pub fn load(&self) -> Result<Option<PendingBuffer>> {
         if !self.file_path.exists() {
             return Ok(None);
@@ -218,24 +283,93 @@ impl PendingStore {
 
         // Try to parse as v2 format
         match serde_json::from_str::<PendingBuffer>(&content) {
-            Ok(buffer) => Ok(Some(buffer)),
-            Err(_) => {
-                // Could add v1 migration here if needed
+            Ok(buffer) => {
+                // Validate buffer integrity
+                if let Err(e) = buffer.validate() {
+                    eprintln!("ai-blame: Warning - pending buffer validation failed: {}", e);
+                    eprintln!("ai-blame: The pending buffer may be corrupted. Run 'ai-blame clear' to reset.");
+                }
+
+                // Warn if buffer is stale
+                if buffer.is_stale() {
+                    eprintln!(
+                        "ai-blame: Warning - pending buffer is stale (started {})",
+                        buffer.age_string()
+                    );
+                    eprintln!("ai-blame: Consider running 'ai-blame clear' if these changes are no longer relevant.");
+                }
+
+                Ok(Some(buffer))
+            }
+            Err(e) => {
+                eprintln!("ai-blame: Warning - failed to parse pending buffer: {}", e);
+                eprintln!("ai-blame: The file may be corrupted. Run 'ai-blame clear' to reset.");
+                // Return None to allow fresh start, but don't delete the file
+                // in case the user wants to recover it
                 Ok(None)
             }
         }
     }
 
-    /// Save pending buffer to disk
+    /// Load buffer without warnings (for status checks)
+    pub fn load_quiet(&self) -> Result<Option<PendingBuffer>> {
+        if !self.file_path.exists() {
+            return Ok(None);
+        }
+
+        let content = fs::read_to_string(&self.file_path)
+            .context("Failed to read pending buffer file")?;
+
+        match serde_json::from_str::<PendingBuffer>(&content) {
+            Ok(buffer) => Ok(Some(buffer)),
+            Err(_) => Ok(None),
+        }
+    }
+
+    /// Save pending buffer to disk atomically
+    ///
+    /// Uses write-to-temp-then-rename pattern to prevent corruption
+    /// if the process is interrupted during write.
     pub fn save(&self, buffer: &PendingBuffer) -> Result<()> {
+        // Validate before saving
+        if let Err(e) = buffer.validate() {
+            anyhow::bail!("Cannot save invalid buffer: {}", e);
+        }
+
         let content =
             serde_json::to_string_pretty(buffer).context("Failed to serialize pending buffer")?;
-        fs::write(&self.file_path, content).context("Failed to write pending buffer file")?;
+
+        // Write to temporary file first
+        let temp_path = self.repo_root.join(".ai-blame-pending.tmp");
+
+        let mut temp_file = File::create(&temp_path)
+            .context("Failed to create temporary pending buffer file")?;
+
+        temp_file
+            .write_all(content.as_bytes())
+            .context("Failed to write to temporary pending buffer file")?;
+
+        temp_file
+            .sync_all()
+            .context("Failed to sync temporary pending buffer file")?;
+
+        drop(temp_file);
+
+        // Atomically rename temp file to final path
+        fs::rename(&temp_path, &self.file_path)
+            .context("Failed to rename temporary pending buffer file")?;
+
         Ok(())
     }
 
     /// Delete the pending buffer file
     pub fn delete(&self) -> Result<()> {
+        // Also clean up any leftover temp file
+        let temp_path = self.repo_root.join(".ai-blame-pending.tmp");
+        if temp_path.exists() {
+            let _ = fs::remove_file(&temp_path);
+        }
+
         if self.file_path.exists() {
             fs::remove_file(&self.file_path).context("Failed to delete pending buffer file")?;
         }
@@ -250,6 +384,24 @@ impl PendingStore {
     /// Get the file path
     pub fn path(&self) -> &Path {
         &self.file_path
+    }
+
+    /// Create a backup of the current pending buffer
+    pub fn backup(&self) -> Result<Option<PathBuf>> {
+        if !self.file_path.exists() {
+            return Ok(None);
+        }
+
+        let backup_name = format!(
+            ".ai-blame-pending.backup.{}",
+            Utc::now().format("%Y%m%d-%H%M%S")
+        );
+        let backup_path = self.repo_root.join(backup_name);
+
+        fs::copy(&self.file_path, &backup_path)
+            .context("Failed to create backup of pending buffer")?;
+
+        Ok(Some(backup_path))
     }
 }
 
@@ -354,7 +506,9 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let store = PendingStore::new(dir.path());
 
-        let mut buffer = PendingBuffer::new("test-session", "claude-opus-4-5-20251101");
+        // Use a valid UUID for session ID
+        let session_id = Uuid::new_v4().to_string();
+        let mut buffer = PendingBuffer::new(&session_id, "claude-opus-4-5-20251101");
         buffer.record_edit(
             "test.rs",
             Some("before\n"),
@@ -367,8 +521,8 @@ mod tests {
         store.save(&buffer).unwrap();
         assert!(store.exists());
 
-        let loaded = store.load().unwrap().unwrap();
-        assert_eq!(loaded.session.session_id, "test-session");
+        let loaded = store.load_quiet().unwrap().unwrap();
+        assert_eq!(loaded.session.session_id, session_id);
         assert_eq!(loaded.file_count(), 1);
 
         let history = loaded.get_file_history("test.rs").unwrap();
