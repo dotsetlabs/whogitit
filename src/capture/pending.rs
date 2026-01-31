@@ -120,9 +120,10 @@ impl PendingBuffer {
         });
 
         // Get or create file history
-        let history = self.file_histories.entry(path.to_string()).or_insert_with(|| {
-            FileEditHistory::new(path, old_content)
-        });
+        let history = self
+            .file_histories
+            .entry(path.to_string())
+            .or_insert_with(|| FileEditHistory::new(path, old_content));
 
         // Determine before content
         let before_content = if history.edits.is_empty() {
@@ -175,12 +176,15 @@ impl PendingBuffer {
         self.file_histories
             .values()
             .map(|h| {
-                h.edits.iter().map(|e| {
-                    // Count lines added in each edit
-                    let before_lines = e.before.line_count;
-                    let after_lines = e.after.line_count;
-                    after_lines.saturating_sub(before_lines) as u32
-                }).sum::<u32>()
+                h.edits
+                    .iter()
+                    .map(|e| {
+                        // Count lines added in each edit
+                        let before_lines = e.before.line_count;
+                        let after_lines = e.after.line_count;
+                        after_lines.saturating_sub(before_lines) as u32
+                    })
+                    .sum::<u32>()
             })
             .sum()
     }
@@ -278,15 +282,18 @@ impl PendingStore {
             return Ok(None);
         }
 
-        let content = fs::read_to_string(&self.file_path)
-            .context("Failed to read pending buffer file")?;
+        let content =
+            fs::read_to_string(&self.file_path).context("Failed to read pending buffer file")?;
 
         // Try to parse as v2 format
         match serde_json::from_str::<PendingBuffer>(&content) {
             Ok(buffer) => {
                 // Validate buffer integrity
                 if let Err(e) = buffer.validate() {
-                    eprintln!("ai-blame: Warning - pending buffer validation failed: {}", e);
+                    eprintln!(
+                        "ai-blame: Warning - pending buffer validation failed: {}",
+                        e
+                    );
                     eprintln!("ai-blame: The pending buffer may be corrupted. Run 'ai-blame clear' to reset.");
                 }
 
@@ -317,8 +324,8 @@ impl PendingStore {
             return Ok(None);
         }
 
-        let content = fs::read_to_string(&self.file_path)
-            .context("Failed to read pending buffer file")?;
+        let content =
+            fs::read_to_string(&self.file_path).context("Failed to read pending buffer file")?;
 
         match serde_json::from_str::<PendingBuffer>(&content) {
             Ok(buffer) => Ok(Some(buffer)),
@@ -342,8 +349,8 @@ impl PendingStore {
         // Write to temporary file first
         let temp_path = self.repo_root.join(".ai-blame-pending.tmp");
 
-        let mut temp_file = File::create(&temp_path)
-            .context("Failed to create temporary pending buffer file")?;
+        let mut temp_file =
+            File::create(&temp_path).context("Failed to create temporary pending buffer file")?;
 
         temp_file
             .write_all(content.as_bytes())

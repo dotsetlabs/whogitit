@@ -5,6 +5,7 @@ use git2::Repository;
 
 use crate::cli::output::OutputFormat;
 use crate::storage::notes::NotesStore;
+use crate::utils::{truncate, SHORT_COMMIT_LEN};
 
 /// Show command arguments
 #[derive(Debug, Args)]
@@ -13,9 +14,9 @@ pub struct ShowArgs {
     #[arg(default_value = "HEAD")]
     pub commit: String,
 
-    /// Output format (pretty or json)
-    #[arg(long, default_value = "pretty")]
-    pub format: String,
+    /// Output format
+    #[arg(long, value_enum, default_value_t = OutputFormat::Pretty)]
+    pub format: OutputFormat,
 }
 
 /// Run the show command
@@ -32,28 +33,29 @@ pub fn run(args: ShowArgs) -> Result<()> {
         .with_context(|| format!("Not a valid commit: {}", args.commit))?;
 
     let commit_id = commit.id().to_string();
-    let commit_short = &commit_id[..7];
+    // Safe substring: commit IDs are hex strings (ASCII), but we still use min() for safety
+    let commit_short = &commit_id[..commit_id.len().min(SHORT_COMMIT_LEN)];
 
     // Get attribution
     let notes_store = NotesStore::new(&repo)?;
     let attribution = notes_store.fetch_attribution(commit.id())?;
 
-    let format = match args.format.to_lowercase().as_str() {
-        "json" => OutputFormat::Json,
-        _ => OutputFormat::Pretty,
-    };
-
     match attribution {
         Some(attr) => {
-            if format == OutputFormat::Json {
+            if args.format == OutputFormat::Json {
                 println!("{}", serde_json::to_string_pretty(&attr)?);
             } else {
                 print_summary(commit_short, &attr);
             }
         }
         None => {
-            println!("No AI attribution found for commit {}", commit_short);
-            println!("This commit was not made with AI assistance tracked by ai-blame.");
+            if args.format == OutputFormat::Json {
+                // Output null JSON for programmatic consumption
+                println!("null");
+            } else {
+                println!("No AI attribution found for commit {}", commit_short);
+                println!("This commit was not made with AI assistance tracked by ai-blame.");
+            }
         }
     }
 
@@ -71,11 +73,7 @@ fn print_summary(commit_short: &str, attr: &crate::core::attribution::AIAttribut
     if !attr.prompts.is_empty() {
         println!("{}", "Prompts used:".bold());
         for prompt in &attr.prompts {
-            let preview = if prompt.text.len() > 60 {
-                format!("{}...", &prompt.text[..57])
-            } else {
-                prompt.text.clone()
-            };
+            let preview = truncate(&prompt.text, 60);
             println!("  #{}: \"{}\"", prompt.index, preview.dimmed());
         }
         println!();

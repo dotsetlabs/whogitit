@@ -208,12 +208,18 @@ mod tests {
         let attribution = test_attribution();
         let trailers = TrailerGenerator::generate(&attribution);
 
-        assert!(trailers.iter().any(|(k, v)| k == "AI-Session" && v == "abc123-def45"));
-        assert!(trailers.iter().any(|(k, v)| k == "AI-Model" && v == "claude-opus-4-5-20251101"));
+        assert!(trailers
+            .iter()
+            .any(|(k, v)| k == "AI-Session" && v == "abc123-def45"));
+        assert!(trailers
+            .iter()
+            .any(|(k, v)| k == "AI-Model" && v == "claude-opus-4-5-20251101"));
         assert!(trailers.iter().any(|(k, v)| k == "AI-Lines" && v == "10"));
         assert!(trailers.iter().any(|(k, v)| k == "AI-Modified" && v == "3"));
         assert!(trailers.iter().any(|(k, v)| k == "Human-Lines" && v == "5"));
-        assert!(trailers.iter().any(|(k, v)| k == "Co-Authored-By" && v.contains("Claude Opus 4.5")));
+        assert!(trailers
+            .iter()
+            .any(|(k, v)| k == "Co-Authored-By" && v.contains("Claude Opus 4.5")));
     }
 
     #[test]

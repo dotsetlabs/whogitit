@@ -2,6 +2,8 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+use crate::utils::{hex, CONTENT_HASH_BYTES};
+
 /// A point-in-time snapshot of a file's content
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContentSnapshot {
@@ -108,7 +110,10 @@ impl FileEditHistory {
 
     /// Get the content after all AI edits
     pub fn latest_ai_content(&self) -> &ContentSnapshot {
-        self.edits.last().map(|e| &e.after).unwrap_or(&self.original)
+        self.edits
+            .last()
+            .map(|e| &e.after)
+            .unwrap_or(&self.original)
     }
 
     /// Get all unique prompts used for this file
@@ -118,7 +123,9 @@ impl FileEditHistory {
 
     /// Check if content matches any AI snapshot
     pub fn find_matching_edit(&self, content_hash: &str) -> Option<&AIEdit> {
-        self.edits.iter().find(|e| e.after.content_hash == content_hash)
+        self.edits
+            .iter()
+            .find(|e| e.after.content_hash == content_hash)
     }
 }
 
@@ -213,14 +220,7 @@ pub fn compute_hash(content: &str) -> String {
     let mut hasher = Sha256::new();
     hasher.update(content.as_bytes());
     let result = hasher.finalize();
-    hex::encode(&result[..16]) // First 16 bytes = 32 hex chars
-}
-
-/// Simple hex encoding
-mod hex {
-    pub fn encode(bytes: &[u8]) -> String {
-        bytes.iter().map(|b| format!("{:02x}", b)).collect()
-    }
+    hex::encode(&result[..CONTENT_HASH_BYTES])
 }
 
 #[cfg(test)]
@@ -251,13 +251,7 @@ mod tests {
         assert!(!history.was_new_file);
         assert_eq!(history.original.content, "original content");
 
-        let edit = AIEdit::new(
-            "Add function",
-            0,
-            "Edit",
-            "original content",
-            "new content",
-        );
+        let edit = AIEdit::new("Add function", 0, "Edit", "original content", "new content");
         history.add_edit(edit);
 
         assert_eq!(history.edits.len(), 1);

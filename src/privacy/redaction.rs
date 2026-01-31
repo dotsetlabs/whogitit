@@ -15,7 +15,8 @@ pub mod patterns {
     pub const PASSWORD: &str = r"(?i)(password|passwd|pwd)\s*[:=]\s*\S+";
 
     /// AWS key pattern
-    pub const AWS_KEY: &str = r"(?i)(aws[_-]?)?(access[_-]?key[_-]?id|secret[_-]?access[_-]?key)\s*[:=]\s*\S+";
+    pub const AWS_KEY: &str =
+        r"(?i)(aws[_-]?)?(access[_-]?key[_-]?id|secret[_-]?access[_-]?key)\s*[:=]\s*\S+";
 
     /// Private key header
     pub const PRIVATE_KEY: &str = r"-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----";
@@ -27,7 +28,8 @@ pub mod patterns {
     pub const GITHUB_TOKEN: &str = r"gh[pousr]_[A-Za-z0-9_]{36,}";
 
     /// Generic secret assignment
-    pub const GENERIC_SECRET: &str = r#"(?i)["']?(?:secret|private|credential)[_-]?(?:key)?["']?\s*[:=]\s*["']?[^"'\s]+"#;
+    pub const GENERIC_SECRET: &str =
+        r#"(?i)["']?(?:secret|private|credential)[_-]?(?:key)?["']?\s*[:=]\s*["']?[^"'\s]+"#;
 }
 
 /// Privacy redactor for sensitive data in prompts

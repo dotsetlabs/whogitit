@@ -3,6 +3,7 @@ pub mod cli;
 pub mod core;
 pub mod privacy;
 pub mod storage;
+pub mod utils;
 
 pub use core::attribution::*;
 pub use core::blame::AIBlamer;

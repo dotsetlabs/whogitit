@@ -1,9 +1,22 @@
 use anyhow::{Context, Result};
-use clap::Args;
+use clap::{Args, ValueEnum};
 use colored::Colorize;
 use git2::Repository;
 
 use crate::storage::notes::NotesStore;
+
+/// Output format for summary command
+#[derive(Debug, Clone, Copy, Default, ValueEnum)]
+pub enum SummaryFormat {
+    /// Human-readable terminal output with colors
+    #[default]
+    Pretty,
+    /// JSON output for machine consumption
+    Json,
+    /// Markdown output for documentation/PRs
+    #[value(alias = "md")]
+    Markdown,
+}
 
 /// Summary command arguments
 #[derive(Debug, Args)]
@@ -16,9 +29,9 @@ pub struct SummaryArgs {
     #[arg(long, default_value = "HEAD")]
     pub head: String,
 
-    /// Output format (pretty, json, or markdown)
-    #[arg(long, default_value = "pretty")]
-    pub format: String,
+    /// Output format
+    #[arg(long, value_enum, default_value_t = SummaryFormat::Pretty)]
+    pub format: SummaryFormat,
 }
 
 /// Aggregated summary across multiple commits
@@ -117,10 +130,10 @@ pub fn run(args: SummaryArgs) -> Result<()> {
     }
 
     // Output based on format
-    match args.format.to_lowercase().as_str() {
-        "json" => print_json(&summary),
-        "markdown" | "md" => print_markdown(&summary),
-        _ => print_pretty(&summary),
+    match args.format {
+        SummaryFormat::Pretty => print_pretty(&summary),
+        SummaryFormat::Json => print_json(&summary),
+        SummaryFormat::Markdown => print_markdown(&summary),
     }
 
     Ok(())
@@ -272,7 +285,10 @@ fn print_markdown(summary: &AggregateSummary) {
     );
     println!("| **Total** | **{}** | **100%** |", total);
     println!();
-    println!("**AI involvement: {:.1}%** of changed lines", summary.ai_percentage());
+    println!(
+        "**AI involvement: {:.1}%** of changed lines",
+        summary.ai_percentage()
+    );
     println!();
 
     if !summary.files_touched.is_empty() {

@@ -79,10 +79,8 @@ impl<'a> NotesStore<'a> {
         let mut commits = Vec::new();
 
         if let Ok(notes) = self.repo.notes(Some(NOTES_REF)) {
-            for note_result in notes {
-                if let Ok((_, commit_oid)) = note_result {
-                    commits.push(commit_oid);
-                }
+            for (_, commit_oid) in notes.flatten() {
+                commits.push(commit_oid);
             }
         }
 
@@ -93,7 +91,9 @@ impl<'a> NotesStore<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::capture::snapshot::{AttributionSummary, FileAttributionResult, LineAttribution, LineSource};
+    use crate::capture::snapshot::{
+        AttributionSummary, FileAttributionResult, LineAttribution, LineSource,
+    };
     use crate::core::attribution::{ModelInfo, PromptInfo, SessionMetadata};
     use tempfile::TempDir;
 
@@ -141,7 +141,9 @@ mod tests {
                 lines: vec![LineAttribution {
                     line_number: 1,
                     content: "fn test() {}".to_string(),
-                    source: LineSource::AI { edit_id: "e1".to_string() },
+                    source: LineSource::AI {
+                        edit_id: "e1".to_string(),
+                    },
                     edit_id: Some("e1".to_string()),
                     prompt_index: Some(0),
                     confidence: 1.0,

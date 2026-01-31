@@ -4,6 +4,7 @@ use colored::Colorize;
 use git2::Repository;
 
 use crate::core::blame::AIBlamer;
+use crate::utils::{pad_right, truncate, word_wrap};
 
 /// Prompt command arguments
 #[derive(Debug, Args)]
@@ -68,12 +69,8 @@ pub fn run(args: PromptArgs) -> Result<()> {
     let line = match target_line {
         Some(l) => l,
         None => {
-            if file_ref.line.is_some() {
-                bail!(
-                    "Line {} not found in {}",
-                    file_ref.line.unwrap(),
-                    file_ref.file
-                );
+            if let Some(line_num) = file_ref.line {
+                bail!("Line {} not found in {}", line_num, file_ref.file);
             } else {
                 bail!("No AI-generated lines found in {}", file_ref.file);
             }
@@ -178,47 +175,4 @@ fn print_prompt_box(
         }
         println!();
     }
-}
-
-fn truncate(s: &str, max: usize) -> String {
-    if s.len() <= max {
-        s.to_string()
-    } else {
-        format!("{}...", &s[..max.saturating_sub(3)])
-    }
-}
-
-fn pad_right(s: &str, len: usize) -> String {
-    if s.len() >= len {
-        s[..len].to_string()
-    } else {
-        format!("{}{}", s, " ".repeat(len - s.len()))
-    }
-}
-
-fn word_wrap(text: &str, width: usize) -> Vec<String> {
-    let mut lines = Vec::new();
-    let mut current_line = String::new();
-
-    for word in text.split_whitespace() {
-        if current_line.is_empty() {
-            current_line = word.to_string();
-        } else if current_line.len() + 1 + word.len() <= width {
-            current_line.push(' ');
-            current_line.push_str(word);
-        } else {
-            lines.push(current_line);
-            current_line = word.to_string();
-        }
-    }
-
-    if !current_line.is_empty() {
-        lines.push(current_line);
-    }
-
-    if lines.is_empty() {
-        lines.push(String::new());
-    }
-
-    lines
 }

@@ -1,6 +1,8 @@
 use sha2::{Digest, Sha256};
 use similar::{ChangeTag, TextDiff};
 
+use crate::utils::{hex, DIFF_HASH_BYTES};
+
 /// A hunk of changed lines in a diff
 #[derive(Debug, Clone)]
 pub struct DiffHunk {
@@ -21,7 +23,7 @@ impl DiffHunk {
             hasher.update(b"\n");
         }
         let result = hasher.finalize();
-        hex::encode(&result[..8]) // First 8 bytes = 16 hex chars
+        hex::encode(&result[..DIFF_HASH_BYTES])
     }
 }
 
@@ -114,13 +116,6 @@ pub fn compute_diff(old_content: &str, new_content: &str) -> DiffResult {
 /// Compute diff for a newly created file (all lines are additions)
 pub fn compute_create_diff(content: &str) -> DiffResult {
     compute_diff("", content)
-}
-
-/// Encode bytes as hex string
-mod hex {
-    pub fn encode(bytes: &[u8]) -> String {
-        bytes.iter().map(|b| format!("{:02x}", b)).collect()
-    }
 }
 
 #[cfg(test)]

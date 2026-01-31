@@ -5,10 +5,12 @@ pub mod show;
 pub mod summary;
 
 use std::fs;
-use std::os::unix::fs::PermissionsExt;
 
 use anyhow::{Context, Result};
+
 use clap::{Parser, Subcommand};
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
 
 use crate::capture::hook;
 
@@ -102,7 +104,8 @@ fn run_post_commit() -> Result<()> {
 
 fn run_status() -> Result<()> {
     let repo = git2::Repository::discover(".")?;
-    let repo_root = repo.workdir()
+    let repo_root = repo
+        .workdir()
         .ok_or_else(|| anyhow::anyhow!("No working directory"))?;
 
     let hook_handler = crate::capture::CaptureHook::new(repo_root)?;
@@ -110,7 +113,10 @@ fn run_status() -> Result<()> {
 
     if status.has_pending {
         println!("Pending AI attribution:");
-        println!("  Session: {}", status.session_id.as_deref().unwrap_or("unknown"));
+        println!(
+            "  Session: {}",
+            status.session_id.as_deref().unwrap_or("unknown")
+        );
         println!("  Files: {}", status.file_count);
         println!("  Edits: {}", status.edit_count);
         println!("  Lines: {}", status.line_count);
@@ -133,7 +139,8 @@ fn run_status() -> Result<()> {
 
 fn run_clear() -> Result<()> {
     let repo = git2::Repository::discover(".")?;
-    let repo_root = repo.workdir()
+    let repo_root = repo
+        .workdir()
         .ok_or_else(|| anyhow::anyhow!("No working directory"))?;
 
     let hook_handler = crate::capture::CaptureHook::new(repo_root)?;
@@ -145,14 +152,13 @@ fn run_clear() -> Result<()> {
 }
 
 fn run_init() -> Result<()> {
-    let repo = git2::Repository::discover(".")
-        .context("Not in a git repository")?;
-    let repo_root = repo.workdir()
+    let repo = git2::Repository::discover(".").context("Not in a git repository")?;
+    let repo_root = repo
+        .workdir()
         .ok_or_else(|| anyhow::anyhow!("No working directory"))?;
 
     let hooks_dir = repo_root.join(".git/hooks");
-    fs::create_dir_all(&hooks_dir)
-        .context("Failed to create hooks directory")?;
+    fs::create_dir_all(&hooks_dir).context("Failed to create hooks directory")?;
 
     // Install post-commit hook (attaches attribution to commits)
     install_post_commit_hook(&hooks_dir)?;
@@ -246,6 +252,8 @@ fi
     Ok(())
 }
 
+/// Make a file executable (Unix only - no-op on Windows)
+#[cfg(unix)]
 fn make_executable(path: &std::path::Path) -> Result<()> {
     let mut perms = fs::metadata(path)?.permissions();
     perms.set_mode(0o755);
@@ -253,10 +261,16 @@ fn make_executable(path: &std::path::Path) -> Result<()> {
     Ok(())
 }
 
+/// Make a file executable (no-op on Windows - scripts are executable by default)
+#[cfg(not(unix))]
+fn make_executable(_path: &std::path::Path) -> Result<()> {
+    // On Windows, scripts don't need execute permission
+    Ok(())
+}
+
 /// Configure git to automatically fetch ai-blame notes
 fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
-    let mut config = repo.config()
-        .context("Failed to open git config")?;
+    let mut config = repo.config().context("Failed to open git config")?;
 
     let fetch_refspec = "+refs/notes/ai-blame:refs/notes/ai-blame";
     let fetch_configured = config
@@ -265,10 +279,9 @@ fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
         .unwrap_or(false);
 
     if !fetch_configured {
-        config.set_multivar("remote.origin.fetch", "^$", fetch_refspec)
-            .or_else(|_| {
-                config.set_str("remote.origin.fetch", fetch_refspec)
-            })
+        config
+            .set_multivar("remote.origin.fetch", "^$", fetch_refspec)
+            .or_else(|_| config.set_str("remote.origin.fetch", fetch_refspec))
             .context("Failed to configure fetch refspec")?;
         println!("✓ Configured git to fetch ai-blame notes automatically.");
     } else {
@@ -277,4 +290,3 @@ fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
 
     Ok(())
 }
-

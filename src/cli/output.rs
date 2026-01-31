@@ -1,12 +1,15 @@
+use clap::ValueEnum;
 use colored::Colorize;
 
 use crate::capture::snapshot::LineSource;
 use crate::core::attribution::BlameResult;
+use crate::utils::{truncate, truncate_or_pad};
 
 /// Output format options
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, ValueEnum)]
 pub enum OutputFormat {
     /// Human-readable terminal output with colors
+    #[default]
     Pretty,
     /// JSON output for machine consumption
     Json,
@@ -135,24 +138,6 @@ fn format_blame_json(result: &BlameResult) -> String {
         }
     }))
     .unwrap_or_else(|_| "{}".to_string())
-}
-
-/// Truncate string to max length
-fn truncate(s: &str, max: usize) -> String {
-    if s.len() <= max {
-        s.to_string()
-    } else {
-        format!("{}...", &s[..max.saturating_sub(3)])
-    }
-}
-
-/// Truncate or pad string to exact length
-fn truncate_or_pad(s: &str, len: usize) -> String {
-    if s.len() > len {
-        format!("{}…", &s[..len - 1])
-    } else {
-        format!("{:<width$}", s, width = len)
-    }
 }
 
 #[cfg(test)]

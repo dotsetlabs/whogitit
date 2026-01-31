@@ -15,9 +15,9 @@ pub struct BlameArgs {
     #[arg(short, long)]
     pub revision: Option<String>,
 
-    /// Output format (pretty or json)
-    #[arg(long, default_value = "pretty")]
-    pub format: String,
+    /// Output format
+    #[arg(long, value_enum, default_value_t = OutputFormat::Pretty)]
+    pub format: OutputFormat,
 
     /// Show only AI-generated lines
     #[arg(long)]
@@ -47,12 +47,7 @@ pub fn run(args: BlameArgs) -> Result<()> {
     }
 
     // Format output
-    let format = match args.format.to_lowercase().as_str() {
-        "json" => OutputFormat::Json,
-        _ => OutputFormat::Pretty,
-    };
-
-    let output = format_blame(&result, format);
+    let output = format_blame(&result, args.format);
     print!("{}", output);
 
     Ok(())
