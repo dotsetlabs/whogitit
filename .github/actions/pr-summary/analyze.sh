@@ -124,7 +124,8 @@ else
     fi
   done
 
-  TOTAL_LINES=$((TOTAL_AI + TOTAL_AI_MODIFIED + TOTAL_HUMAN + TOTAL_ORIGINAL))
+  # Changed lines = AI + AI_modified + Human (NOT including original/unchanged)
+  CHANGED_LINES=$((TOTAL_AI + TOTAL_AI_MODIFIED + TOTAL_HUMAN))
 
   if [ "$COMMITS_WITH_AI" -eq 0 ]; then
     echo "No commits with AI attribution found"
@@ -132,8 +133,9 @@ else
     exit 0
   fi
 
-  if [ "$TOTAL_LINES" -gt 0 ]; then
-    AI_PERCENT=$(echo "scale=1; ($TOTAL_AI + $TOTAL_AI_MODIFIED) * 100 / $TOTAL_LINES" | bc)
+  # AI percentage is of CHANGED lines only
+  if [ "$CHANGED_LINES" -gt 0 ]; then
+    AI_PERCENT=$(echo "scale=1; ($TOTAL_AI + $TOTAL_AI_MODIFIED) * 100 / $CHANGED_LINES" | bc)
   else
     AI_PERCENT="0"
   fi

@@ -35,6 +35,7 @@ struct AggregateSummary {
 }
 
 impl AggregateSummary {
+    /// Total lines including unchanged (for showing full breakdown)
     fn total_lines(&self) -> usize {
         self.total_ai_lines
             + self.total_ai_modified_lines
@@ -42,12 +43,18 @@ impl AggregateSummary {
             + self.total_original_lines
     }
 
+    /// Only lines that were actually changed (not original/unchanged)
+    fn changed_lines(&self) -> usize {
+        self.total_ai_lines + self.total_ai_modified_lines + self.total_human_lines
+    }
+
+    /// AI involvement as percentage of CHANGED lines (not including original)
     fn ai_percentage(&self) -> f64 {
-        let total = self.total_lines();
-        if total == 0 {
+        let changed = self.changed_lines();
+        if changed == 0 {
             0.0
         } else {
-            ((self.total_ai_lines + self.total_ai_modified_lines) as f64 / total as f64) * 100.0
+            ((self.total_ai_lines + self.total_ai_modified_lines) as f64 / changed as f64) * 100.0
         }
     }
 }
