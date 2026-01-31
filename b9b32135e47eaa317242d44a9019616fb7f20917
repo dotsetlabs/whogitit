@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "session": {
+    "session_id": "0c4eb0ac-664b-42b1-ab89-02d0fe38deeb",
+    "model": {
+      "id": "claude-opus-4-5-20251101",
+      "provider": "anthropic"
+    },
+    "started_at": "2026-01-31T18:02:42.779723+00:00",
+    "prompt_count": 1
+  },
+  "prompts": [
+    {
+      "index": 0,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T18:02:42.780057+00:00",
+      "affected_files": [
+        "/Users/gregking/.claude/hooks/ai-blame-capture.sh"
+      ]
+    }
+  ],
+  "files": []
+}
