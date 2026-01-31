@@ -76,6 +76,10 @@ jobs:
 
           # Collect per-commit data
           COMMIT_DETAILS=""
+          # Track unique prompts (deduplicated across commits)
+          declare -A SEEN_PROMPTS
+          PROMPT_LIST=""
+          PROMPT_COUNT=0
 
           for COMMIT in $COMMITS; do
             COMMIT_COUNT=$((COMMIT_COUNT + 1))
@@ -107,6 +111,39 @@ jobs:
 
                 COMMIT_DETAILS="${COMMIT_DETAILS}| \`${SHORT}\` | ${MSG} | ${AI} | ${AI_MOD} | ${HUMAN} | ${FILES} |
           "
+
+                # Extract prompts from this commit (deduplicated)
+                PROMPTS=$(echo "$ATTR" | jq -r '.prompts[]? | @base64' 2>/dev/null || true)
+                for PROMPT_B64 in $PROMPTS; do
+                  # Decode and extract prompt text
+                  PROMPT_TEXT=$(echo "$PROMPT_B64" | base64 -d | jq -r '.text // ""' | head -c 200)
+                  PROMPT_FILES=$(echo "$PROMPT_B64" | base64 -d | jq -r '.affected_files | join(", ")' 2>/dev/null || echo "")
+
+                  # Skip empty prompts
+                  if [ -z "$PROMPT_TEXT" ]; then
+                    continue
+                  fi
+
+                  # Create a hash key for deduplication (first 50 chars)
+                  PROMPT_KEY=$(echo "$PROMPT_TEXT" | head -c 50 | md5sum | cut -d' ' -f1)
+
+                  if [ -z "${SEEN_PROMPTS[$PROMPT_KEY]:-}" ]; then
+                    SEEN_PROMPTS[$PROMPT_KEY]=1
+                    PROMPT_COUNT=$((PROMPT_COUNT + 1))
+
+                    # Truncate prompt for display (max 150 chars)
+                    PROMPT_DISPLAY=$(echo "$PROMPT_TEXT" | tr '\n' ' ' | head -c 150)
+                    if [ ${#PROMPT_TEXT} -gt 150 ]; then
+                      PROMPT_DISPLAY="${PROMPT_DISPLAY}..."
+                    fi
+
+                    # Escape pipe characters for markdown table
+                    PROMPT_DISPLAY=$(echo "$PROMPT_DISPLAY" | sed 's/|/\\|/g')
+
+                    PROMPT_LIST="${PROMPT_LIST}| ${PROMPT_COUNT} | ${PROMPT_DISPLAY} | ${PROMPT_FILES} |
+          "
+                  fi
+                done
               fi
             fi
           done
@@ -138,6 +175,10 @@ jobs:
 
           # Write commit details to file for multi-line output
           echo "$COMMIT_DETAILS" > /tmp/commit_details.txt
+
+          # Write prompts to file
+          echo "$PROMPT_LIST" > /tmp/prompts.txt
+          echo "prompt_count=$PROMPT_COUNT" >> "$GITHUB_OUTPUT"
           SCRIPT
 
           chmod +x /tmp/analyze.sh
@@ -154,6 +195,7 @@ jobs:
           COMMITS_WITH_AI: ${{ steps.analyze.outputs.commits_with_ai }}
           COMMIT_COUNT: ${{ steps.analyze.outputs.commit_count }}
           AI_PERCENT: ${{ steps.analyze.outputs.ai_percent }}
+          PROMPT_COUNT: ${{ steps.analyze.outputs.prompt_count }}
         with:
           script: |
             const fs = require('fs');
@@ -165,6 +207,7 @@ jobs:
             const commitsWithAI = parseInt(process.env.COMMITS_WITH_AI) || 0;
             const commitCount = parseInt(process.env.COMMIT_COUNT) || 0;
             const aiPercent = process.env.AI_PERCENT || '0';
+            const promptCount = parseInt(process.env.PROMPT_COUNT) || 0;
 
             // Read commit details
             let commitDetails = '';
@@ -172,6 +215,14 @@ jobs:
               commitDetails = fs.readFileSync('/tmp/commit_details.txt', 'utf8').trim();
             } catch (e) {
               console.log('No commit details file found');
+            }
+
+            // Read prompts
+            let promptDetails = '';
+            try {
+              promptDetails = fs.readFileSync('/tmp/prompts.txt', 'utf8').trim();
+            } catch (e) {
+              console.log('No prompts file found');
             }
 
             // Determine emoji based on AI percentage
@@ -208,6 +259,20 @@ jobs:
             | Commit | Message | AI | Modified | Human | Files |
             |--------|---------|---:|--------:|------:|------:|
             ${commitDetails}
+            `;
+            }
+
+            if (promptDetails && promptCount > 0) {
+              body += `### Prompts Used (${promptCount})
+
+            <details>
+            <summary>Click to expand prompts</summary>
+
+            | # | Prompt | Files Affected |
+            |--:|--------|----------------|
+            ${promptDetails}
+
+            </details>
             `;
             }
 
