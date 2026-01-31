@@ -1,6 +1,7 @@
 #!/bin/bash
 # ai-blame capture hook for Claude Code
 # This script captures file changes for AI attribution tracking
+# It reads the conversation transcript to extract actual user prompts
 
 set -o pipefail
 
@@ -149,25 +150,17 @@ TRANSCRIPT_PATH=$(echo "$INPUT" | jq -r '.transcript_path // ""' 2>/dev/null)
 PROMPT=""
 if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
     # Extract the most recent user message from the transcript
-    # The transcript is an array of conversation turns
-    PROMPT=$(jq -r '
-        [.[] | select(.type == "human" or .role == "user")] |
+    # The transcript is a JSONL file (one JSON object per line)
+    # User messages have type="user" and no toolUseResult (those are tool responses)
+    # The actual prompt is in .message.content (can be string or array)
+    PROMPT=$(jq -s '
+        [.[] | select(.type == "user" and .toolUseResult == null)] |
         last |
-        if .message then
-            # Handle structured message format
-            if (.message | type) == "array" then
-                [.message[] | select(.type == "text") | .text] | join(" ")
-            elif (.message | type) == "string" then
-                .message
-            else
-                .message.content // .message.text // ""
-            end
-        elif .content then
-            # Handle simple content format
-            if (.content | type) == "array" then
-                [.content[] | select(.type == "text") | .text] | join(" ")
-            elif (.content | type) == "string" then
-                .content
+        if .message.content then
+            if (.message.content | type) == "string" then
+                .message.content
+            elif (.message.content | type) == "array" then
+                [.message.content[] | select(.type == "text") | .text] | join(" ")
             else
                 ""
             end
