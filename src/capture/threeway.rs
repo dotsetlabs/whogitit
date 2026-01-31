@@ -9,6 +9,7 @@ use crate::capture::snapshot::{
 /// Normalize a line for comparison purposes.
 /// - Trims trailing whitespace (but preserves leading indentation)
 /// - Normalizes line endings
+/// - Handles cross-platform line ending differences
 fn normalize_line(line: &str) -> String {
     line.trim_end().to_string()
 }
@@ -148,9 +149,30 @@ impl ThreeWayAnalyzer {
             }
         }
 
-        // Third pass: check for AI-modified lines
+        // Third pass: check unmapped lines against AI content
+        // This is critical - the diff may not map lines even if they're identical
+        // (e.g., when surrounding context changes, diff sees Delete+Insert instead of Equal)
         for (idx, line) in final_lines.iter().enumerate() {
             if final_line_sources.contains_key(&idx) {
+                continue;
+            }
+
+            let normalized = normalize_for_key(line);
+
+            // First check for exact match in AI map - this is the key fix!
+            // Lines that exist verbatim in AI output should be attributed to AI
+            // even if the diff algorithm didn't map them as "Equal"
+            if let Some((edit_id, prompt_idx)) = ai_line_map.get(&normalized) {
+                final_line_sources.insert(
+                    idx,
+                    (
+                        LineSource::AI {
+                            edit_id: edit_id.clone(),
+                        },
+                        Some(edit_id.clone()),
+                        Some(*prompt_idx),
+                    ),
+                );
                 continue;
             }
 
@@ -169,10 +191,17 @@ impl ThreeWayAnalyzer {
                         Some(prompt_idx),
                     ),
                 );
-            } else {
-                // New line added by human
-                final_line_sources.insert(idx, (LineSource::Human, None, None));
+                continue;
             }
+
+            // Check if line exists in original (untouched by AI or human)
+            if line_in_content(line, &history.original.content) {
+                final_line_sources.insert(idx, (LineSource::Original, None, None));
+                continue;
+            }
+
+            // New line added by human
+            final_line_sources.insert(idx, (LineSource::Human, None, None));
         }
 
         // Build final attributions
@@ -676,5 +705,81 @@ mod tests {
 
         assert_eq!(result.summary.ai_lines, 3);
         assert_eq!(result.summary.human_lines, 0);
+    }
+
+    #[test]
+    fn test_diff_unmapped_lines_still_attributed_to_ai() {
+        // This test covers the critical bug fix:
+        // When the diff algorithm sees structural changes, it may not map identical lines
+        // (treating them as Delete+Insert instead of Equal). We need to still attribute
+        // those lines to AI if they exist in the AI output.
+        let original = "fn foo() {\n    old_code();\n}\n";
+        let mut history = FileEditHistory::new("test.rs", Some(original));
+
+        // AI rewrites the function with new content
+        // The closing brace "}" exists in both, but diff might not map it
+        let ai_output = "fn foo() {\n    new_code();\n    more_code();\n}\n";
+        history.add_edit(AIEdit::new(
+            "Rewrite function",
+            0,
+            "Edit",
+            original,
+            ai_output,
+        ));
+
+        // Final content matches AI output exactly
+        let result = ThreeWayAnalyzer::analyze_with_diff(&history, ai_output);
+
+        // All lines should be AI - especially the closing brace
+        assert_eq!(result.summary.ai_lines, 4, "All lines should be AI");
+        assert_eq!(result.summary.human_lines, 0, "No human lines expected");
+        assert_eq!(result.summary.original_lines, 0, "No original lines (all in AI output)");
+
+        // Verify the closing brace specifically is AI
+        let closing_brace = result.lines.iter().find(|l| l.content == "}").unwrap();
+        assert!(
+            matches!(closing_brace.source, LineSource::AI { .. }),
+            "Closing brace should be AI, got {:?}",
+            closing_brace.source
+        );
+    }
+
+    #[test]
+    fn test_common_patterns_attributed_to_ai() {
+        // Test that common patterns like empty lines, closing braces, and doc comments
+        // are properly attributed to AI when they appear in AI output
+        let original = "";
+        let mut history = FileEditHistory::new("test.rs", Some(original));
+
+        // AI generates code with common patterns
+        let ai_output = r#"/// A test function
+#[test]
+fn test() {
+    assert!(true);
+}
+"#;
+        history.add_edit(AIEdit::new(
+            "Generate test",
+            0,
+            "Write",
+            original,
+            ai_output,
+        ));
+
+        let result = ThreeWayAnalyzer::analyze_with_diff(&history, ai_output);
+
+        // All lines should be AI
+        assert_eq!(result.summary.ai_lines, 5, "All 5 lines should be AI");
+        assert_eq!(result.summary.human_lines, 0, "No human lines");
+
+        // Check each line individually
+        for line in &result.lines {
+            assert!(
+                matches!(line.source, LineSource::AI { .. }),
+                "Line '{}' should be AI, got {:?}",
+                line.content,
+                line.source
+            );
+        }
     }
 }
