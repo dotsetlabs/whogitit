@@ -156,9 +156,10 @@ if [[ -n "$TRANSCRIPT_PATH" && -f "$TRANSCRIPT_PATH" ]]; then
     # Extract the most recent user message from the transcript
     # The transcript is a JSONL file (one JSON object per line)
     # User messages have type="user" and no toolUseResult (those are tool responses)
+    # Filter out automatic compaction messages (isCompactSummary == true)
     # The actual prompt is in .message.content (can be string or array)
     PROMPT=$(jq -s '
-        [.[] | select(.type == "user" and .toolUseResult == null)] |
+        [.[] | select(.type == "user" and .toolUseResult == null and .isCompactSummary != true)] |
         last |
         if .message.content then
             if (.message.content | type) == "string" then

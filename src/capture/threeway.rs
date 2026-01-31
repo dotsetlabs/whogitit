@@ -235,6 +235,9 @@ impl ThreeWayAnalyzer {
             });
         }
 
+        // Post-process: improve attribution using context and block matching
+        improve_attributions_with_context(&mut attributions, history, final_content);
+
         let summary = FileAttributionResult::compute_summary(&attributions);
 
         FileAttributionResult {
@@ -482,25 +485,21 @@ fn longest_common_subsequence(a: &str, b: &str) -> usize {
 /// Improve attributions using contextual information
 fn improve_attributions_with_context(
     attributions: &mut [LineAttribution],
-    _history: &FileEditHistory,
+    history: &FileEditHistory,
     _final_content: &str,
 ) {
-    // If we have unknown lines surrounded by AI lines from the same edit,
-    // they might be AI lines that were modified
-
     let len = attributions.len();
-    if len < 3 {
+    if len < 2 {
         return;
     }
 
+    // First pass: handle unknown lines surrounded by AI lines
     for i in 1..len - 1 {
         if attributions[i].source == LineSource::Unknown {
-            // Check surrounding lines
             let prev_edit = attributions[i - 1].edit_id.clone();
             let next_edit = attributions[i + 1].edit_id.clone();
 
             if prev_edit.is_some() && prev_edit == next_edit {
-                // Likely an AI line that was modified
                 attributions[i].source = LineSource::AIModified {
                     edit_id: prev_edit.clone().unwrap(),
                     similarity: 0.5,
@@ -510,6 +509,143 @@ fn improve_attributions_with_context(
                 attributions[i].confidence = 0.5;
             }
         }
+    }
+
+    // Second pass: block-level matching for reformatted code
+    // This handles cases where formatters (rustfmt, prettier, etc.) split
+    // a single AI-generated line into multiple lines
+    improve_attributions_with_block_matching(attributions, history);
+}
+
+/// Normalize a string for block comparison by collapsing whitespace
+fn normalize_for_block_comparison(s: &str) -> String {
+    s.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// Improve attributions by matching blocks of consecutive Human lines
+/// against AI-generated content.
+///
+/// This handles the case where code formatters split a single line into multiple lines.
+/// For example, rustfmt might split:
+///   `let x = foo.bar().baz().qux();`
+/// into:
+///   `let x = foo`
+///   `    .bar()`
+///   `    .baz()`
+///   `    .qux();`
+///
+/// Each individual line doesn't match the AI output, but when joined they do.
+fn improve_attributions_with_block_matching(
+    attributions: &mut [LineAttribution],
+    history: &FileEditHistory,
+) {
+    if attributions.is_empty() || history.edits.is_empty() {
+        return;
+    }
+
+    // Build normalized AI lines for comparison
+    // We normalize each AI line and also create joined versions of consecutive AI lines
+    let mut ai_normalized_lines: Vec<(String, String, u32)> = Vec::new(); // (normalized, edit_id, prompt_idx)
+
+    for edit in &history.edits {
+        for line in edit.after.content.lines() {
+            let normalized = normalize_for_block_comparison(line);
+            if !normalized.is_empty() {
+                ai_normalized_lines.push((normalized, edit.edit_id.clone(), edit.prompt_index));
+            }
+        }
+    }
+
+    // Also create joined versions of consecutive AI lines (2-8 lines joined)
+    for edit in &history.edits {
+        let lines: Vec<&str> = edit.after.content.lines().collect();
+        for window_size in 2..=8.min(lines.len()) {
+            for start in 0..=lines.len().saturating_sub(window_size) {
+                let joined: String = lines[start..start + window_size]
+                    .iter()
+                    .map(|l| normalize_for_block_comparison(l))
+                    .collect::<Vec<_>>()
+                    .join(" ");
+                if !joined.is_empty() {
+                    ai_normalized_lines.push((joined, edit.edit_id.clone(), edit.prompt_index));
+                }
+            }
+        }
+    }
+
+    // Find blocks of consecutive unmatched lines (Human or low-confidence AIModified)
+    // Low-confidence AIModified lines are likely false positives from partial similarity matching
+    let is_unmatched = |attr: &LineAttribution| -> bool {
+        match &attr.source {
+            LineSource::Human => true,
+            LineSource::Unknown => true,
+            // Include AIModified with similarity < 0.85 as potentially misattributed
+            LineSource::AIModified { similarity, .. } => *similarity < 0.85,
+            _ => false,
+        }
+    };
+
+    let mut i = 0;
+    while i < attributions.len() {
+        // Find start of an unmatched block
+        if !is_unmatched(&attributions[i]) {
+            i += 1;
+            continue;
+        }
+
+        // Find the extent of the unmatched block
+        let block_start = i;
+        let mut block_end = i;
+        while block_end < attributions.len() && is_unmatched(&attributions[block_end]) {
+            block_end += 1;
+        }
+
+        let block_len = block_end - block_start;
+
+        // Only process blocks of 1-8 lines
+        if (1..=8).contains(&block_len) {
+            // Join the block content
+            let block_content: String = attributions[block_start..block_end]
+                .iter()
+                .map(|a| normalize_for_block_comparison(&a.content))
+                .collect::<Vec<_>>()
+                .join(" ");
+
+            // Find best matching AI line/block
+            let mut best_match: Option<(f64, String, u32)> = None;
+
+            for (ai_normalized, edit_id, prompt_idx) in &ai_normalized_lines {
+                let similarity = compute_similarity(&block_content, ai_normalized);
+
+                // Require higher similarity for longer blocks (more confidence needed)
+                let threshold = match block_len {
+                    1 => 0.85,
+                    2 => 0.80,
+                    3..=4 => 0.75,
+                    _ => 0.70,
+                };
+
+                if similarity >= threshold
+                    && (best_match.is_none() || similarity > best_match.as_ref().unwrap().0)
+                {
+                    best_match = Some((similarity, edit_id.clone(), *prompt_idx));
+                }
+            }
+
+            // If we found a match, re-attribute all lines in the block
+            if let Some((similarity, edit_id, prompt_idx)) = best_match {
+                for attr in attributions.iter_mut().take(block_end).skip(block_start) {
+                    attr.source = LineSource::AI {
+                        edit_id: edit_id.clone(),
+                    };
+                    attr.edit_id = Some(edit_id.clone());
+                    attr.prompt_index = Some(prompt_idx);
+                    attr.confidence = similarity;
+                }
+            }
+        }
+
+        i = block_end;
     }
 }
 
@@ -926,5 +1062,149 @@ fn test() {
                 line.source
             );
         }
+    }
+
+    #[test]
+    fn test_block_matching_reformatted_method_chain() {
+        // Test that a method chain split by rustfmt is still attributed to AI
+        let original = "";
+        let mut history = FileEditHistory::new("test.rs", Some(original));
+
+        // AI generates a single-line method chain
+        let ai_output = "let result = foo.bar().baz().qux().unwrap();\n";
+        history.add_edit(AIEdit::new(
+            "Generate code",
+            0,
+            "Write",
+            original,
+            ai_output,
+        ));
+
+        // But the committed code has it split by rustfmt
+        let final_content = r#"let result = foo
+    .bar()
+    .baz()
+    .qux()
+    .unwrap();
+"#;
+
+        let result = ThreeWayAnalyzer::analyze_with_diff(&history, final_content);
+
+        println!("\nBlock matching test:");
+        for line in &result.lines {
+            let source_str = match &line.source {
+                LineSource::AI { .. } => "AI",
+                LineSource::Human => "Human",
+                _ => "Other",
+            };
+            println!(
+                "  Line {}: {} - '{}'",
+                line.line_number, source_str, line.content
+            );
+        }
+
+        // All lines should be attributed to AI via block matching
+        assert_eq!(
+            result.summary.human_lines, 0,
+            "No human lines - block matching should attribute all to AI"
+        );
+        assert!(
+            result.summary.ai_lines >= 4,
+            "Most lines should be AI (got {})",
+            result.summary.ai_lines
+        );
+    }
+
+    #[test]
+    fn test_block_matching_split_assignment() {
+        // Test an assignment split across two lines
+        let original = "";
+        let mut history = FileEditHistory::new("test.rs", Some(original));
+
+        // AI generates a single-line assignment
+        let ai_output =
+            "let commit_time = DateTime::from_timestamp(commit.time().seconds(), 0).unwrap();\n";
+        history.add_edit(AIEdit::new(
+            "Generate code",
+            0,
+            "Write",
+            original,
+            ai_output,
+        ));
+
+        // But rustfmt splits it
+        let final_content = r#"let commit_time =
+    DateTime::from_timestamp(commit.time().seconds(), 0).unwrap();
+"#;
+
+        let result = ThreeWayAnalyzer::analyze_with_diff(&history, final_content);
+
+        println!("\nSplit assignment test:");
+        for line in &result.lines {
+            let source_str = match &line.source {
+                LineSource::AI { .. } => "AI",
+                LineSource::Human => "Human",
+                LineSource::Original => "Original",
+                LineSource::AIModified { .. } => "AIModified",
+                LineSource::Unknown => "Unknown",
+            };
+            println!(
+                "  Line {}: {} - '{}'",
+                line.line_number, source_str, line.content
+            );
+        }
+
+        // Both lines should be AI
+        assert_eq!(
+            result.summary.human_lines, 0,
+            "Both lines should be AI via block matching"
+        );
+        assert_eq!(result.summary.ai_lines, 2, "Both lines should be AI");
+    }
+
+    #[test]
+    fn test_block_matching_closure_formatting() {
+        // Test a closure that gets reformatted across multiple lines
+        let original = "";
+        let mut history = FileEditHistory::new("test.rs", Some(original));
+
+        // AI generates compact closure
+        let ai_output = ".map(|t| { t.with_timezone(&Utc).format(\"%Y-%m-%d\").to_string() })\n";
+        history.add_edit(AIEdit::new(
+            "Generate code",
+            0,
+            "Write",
+            original,
+            ai_output,
+        ));
+
+        // Rustfmt expands it
+        let final_content = r#".map(|t| {
+    t.with_timezone(&Utc)
+        .format("%Y-%m-%d")
+        .to_string()
+})
+"#;
+
+        let result = ThreeWayAnalyzer::analyze_with_diff(&history, final_content);
+
+        println!("\nClosure formatting test:");
+        for line in &result.lines {
+            let source_str = match &line.source {
+                LineSource::AI { .. } => "AI",
+                LineSource::Human => "Human",
+                _ => "Other",
+            };
+            println!(
+                "  Line {}: {} - '{}'",
+                line.line_number, source_str, line.content
+            );
+        }
+
+        // All lines should be AI
+        assert_eq!(
+            result.summary.human_lines, 0,
+            "All lines should be AI via block matching"
+        );
     }
 }
