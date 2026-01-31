@@ -1,0 +1,4436 @@
+{
+  "version": 2,
+  "session": {
+    "session_id": "8aac48a0-780a-4831-98b9-86931eb95186",
+    "model": {
+      "id": "claude-opus-4-5-20251101",
+      "provider": "anthropic"
+    },
+    "started_at": "2026-01-31T17:33:48.666098+00:00",
+    "prompt_count": 2
+  },
+  "prompts": [
+    {
+      "index": 0,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T17:33:48.666138+00:00",
+      "affected_files": [
+        "src/cli/show.rs"
+      ]
+    },
+    {
+      "index": 1,
+      "text": "AI-assisted code change",
+      "timestamp": "2026-01-31T17:34:00.847715+00:00",
+      "affected_files": [
+        ".github/workflows/ai-attribution.yml"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "src/cli/show.rs",
+      "lines": [
+        {
+          "line_number": 1,
+          "content": "use anyhow::{Context, Result};",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 2,
+          "content": "use clap::Args;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 3,
+          "content": "use colored::Colorize;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 4,
+          "content": "use git2::Repository;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 5,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 6,
+          "content": "use crate::cli::output::OutputFormat;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 7,
+          "content": "use crate::storage::notes::NotesStore;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 8,
+          "content": "use crate::utils::{truncate, SHORT_COMMIT_LEN};",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 9,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 10,
+          "content": "/// Show command arguments",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 11,
+          "content": "#[derive(Debug, Args)]",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 12,
+          "content": "pub struct ShowArgs {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 13,
+          "content": "    /// Commit to show (default: HEAD)",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 14,
+          "content": "    #[arg(default_value = \"HEAD\")]",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 15,
+          "content": "    pub commit: String,",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 16,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 17,
+          "content": "    /// Output format",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 18,
+          "content": "    #[arg(long, value_enum, default_value_t = OutputFormat::Pretty)]",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 19,
+          "content": "    pub format: OutputFormat,",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 20,
+          "content": "}",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 21,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 22,
+          "content": "/// Run the show command",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 23,
+          "content": "pub fn run(args: ShowArgs) -> Result<()> {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 24,
+          "content": "    // Open repository",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 25,
+          "content": "    let repo = Repository::discover(\".\").context(\"Not in a git repository\")?;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 26,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 27,
+          "content": "    // Resolve commit reference",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 28,
+          "content": "    let obj = repo",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 29,
+          "content": "        .revparse_single(&args.commit)",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 30,
+          "content": "        .with_context(|| format!(\"Failed to resolve: {}\", args.commit))?;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 31,
+          "content": "    let commit = obj",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 32,
+          "content": "        .peel_to_commit()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 33,
+          "content": "        .with_context(|| format!(\"Not a valid commit: {}\", args.commit))?;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 34,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 35,
+          "content": "    let commit_id = commit.id().to_string();",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 36,
+          "content": "    // Safe substring: commit IDs are hex strings (ASCII), but we still use min() for safety",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 37,
+          "content": "    let commit_short = &commit_id[..commit_id.len().min(SHORT_COMMIT_LEN)];",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 38,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 39,
+          "content": "    // Get attribution",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 40,
+          "content": "    let notes_store = NotesStore::new(&repo)?;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 41,
+          "content": "    let attribution = notes_store.fetch_attribution(commit.id())?;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 42,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 43,
+          "content": "    match attribution {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 44,
+          "content": "        Some(attr) => {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 45,
+          "content": "            if args.format == OutputFormat::Json {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 46,
+          "content": "                println!(\"{}\", serde_json::to_string_pretty(&attr)?);",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 47,
+          "content": "            } else {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 48,
+          "content": "                print_summary(commit_short, &attr);",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 49,
+          "content": "            }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 50,
+          "content": "        }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 51,
+          "content": "        None => {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 52,
+          "content": "            if args.format == OutputFormat::Json {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 53,
+          "content": "                // Output null JSON for programmatic consumption",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 54,
+          "content": "                println!(\"null\");",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 55,
+          "content": "            } else {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 56,
+          "content": "                println!(\"No AI attribution found for commit {}\", commit_short);",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 57,
+          "content": "                println!(\"This commit was not made with AI assistance tracked by ai-blame.\");",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 58,
+          "content": "            }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 59,
+          "content": "        }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 60,
+          "content": "    }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 61,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 62,
+          "content": "    Ok(())",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 63,
+          "content": "}",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 64,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 65,
+          "content": "fn print_summary(commit_short: &str, attr: &crate::core::attribution::AIAttribution) {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 66,
+          "content": "    println!(\"{}: {}\", \"Commit\".bold(), commit_short.yellow());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 67,
+          "content": "    println!(\"{}: {}\", \"Session\".bold(), attr.session.session_id.cyan());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 68,
+          "content": "    println!(\"{}: {}\", \"Model\".bold(), attr.session.model.id);",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 69,
+          "content": "    println!(\"{}: {}\", \"Started\".bold(), attr.session.started_at.dimmed());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 70,
+          "content": "    println!();",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 71,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 72,
+          "content": "    // Show prompts",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 73,
+          "content": "    if !attr.prompts.is_empty() {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 74,
+          "content": "        println!(\"{}\", \"Prompts used:\".bold());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 75,
+          "content": "        for prompt in &attr.prompts {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 76,
+          "content": "            let preview = truncate(&prompt.text, 60);",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 77,
+          "content": "            println!(\"  #{}: \\\"{}\\\"\", prompt.index, preview.dimmed());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 78,
+          "content": "        }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 79,
+          "content": "        println!();",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 80,
+          "content": "    }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 81,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 82,
+          "content": "    // Show files with detailed breakdown",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 83,
+          "content": "    println!(\"{}\", \"Files with AI changes:\".bold());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 84,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 85,
+          "content": "    let mut total_ai = 0usize;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 86,
+          "content": "    let mut total_ai_modified = 0usize;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 87,
+          "content": "    let mut total_human = 0usize;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 88,
+          "content": "    let mut total_original = 0usize;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 89,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 90,
+          "content": "    for file in &attr.files {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 91,
+          "content": "        let s = &file.summary;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 92,
+          "content": "        total_ai += s.ai_lines;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 93,
+          "content": "        total_ai_modified += s.ai_modified_lines;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 94,
+          "content": "        total_human += s.human_lines;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 95,
+          "content": "        total_original += s.original_lines;",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 96,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 97,
+          "content": "        // Color-coded breakdown",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 98,
+          "content": "        let ai_str = format!(\"{} AI\", s.ai_lines).green();",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 99,
+          "content": "        let modified_str = if s.ai_modified_lines > 0 {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 100,
+          "content": "            format!(\", {} modified\", s.ai_modified_lines)",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 101,
+          "content": "                .yellow()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 102,
+          "content": "                .to_string()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 103,
+          "content": "        } else {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 104,
+          "content": "            String::new()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 105,
+          "content": "        };",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 106,
+          "content": "        let human_str = if s.human_lines > 0 {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 107,
+          "content": "            format!(\", {} human\", s.human_lines).blue().to_string()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 108,
+          "content": "        } else {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 109,
+          "content": "            String::new()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 110,
+          "content": "        };",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 111,
+          "content": "        let original_str = if s.original_lines > 0 {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 112,
+          "content": "            format!(\", {} original\", s.original_lines)",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 113,
+          "content": "                .dimmed()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 114,
+          "content": "                .to_string()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 115,
+          "content": "        } else {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 116,
+          "content": "            String::new()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 117,
+          "content": "        };",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 118,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 119,
+          "content": "        println!(",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 120,
+          "content": "            \"  {} ({}{}{}{}) - {} total lines\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 121,
+          "content": "            file.path, ai_str, modified_str, human_str, original_str, s.total_lines",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 122,
+          "content": "        );",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 123,
+          "content": "    }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 124,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 125,
+          "content": "    println!();",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 126,
+          "content": "    println!(\"{}\", \"Summary:\".bold());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 127,
+          "content": "    println!(\"  {} AI-generated lines\", total_ai.to_string().green());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 128,
+          "content": "    if total_ai_modified > 0 {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 129,
+          "content": "        println!(",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 130,
+          "content": "            \"  {} AI lines modified by human\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 131,
+          "content": "            total_ai_modified.to_string().yellow()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 132,
+          "content": "        );",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 133,
+          "content": "    }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 134,
+          "content": "    if total_human > 0 {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 135,
+          "content": "        println!(\"  {} human-added lines\", total_human.to_string().blue());",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 136,
+          "content": "    }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 137,
+          "content": "    if total_original > 0 {",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 138,
+          "content": "        println!(",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 139,
+          "content": "            \"  {} original/unchanged lines\",",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 140,
+          "content": "            total_original.to_string().dimmed()",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 141,
+          "content": "        );",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 142,
+          "content": "    }",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 143,
+          "content": "}",
+          "source": {
+            "type": "AI",
+            "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa"
+          },
+          "edit_id": "1344d86f-ef89-4699-a792-72f5fa7c3caa",
+          "prompt_index": 0,
+          "confidence": 1.0
+        }
+      ],
+      "summary": {
+        "total_lines": 143,
+        "ai_lines": 143,
+        "ai_modified_lines": 0,
+        "human_lines": 0,
+        "original_lines": 0,
+        "unknown_lines": 0
+      }
+    },
+    {
+      "path": ".github/workflows/ai-attribution.yml",
+      "lines": [
+        {
+          "line_number": 1,
+          "content": "name: AI Attribution Summary",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 2,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 3,
+          "content": "on:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 4,
+          "content": "  pull_request:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 5,
+          "content": "    types: [opened, synchronize, reopened]",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 6,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 7,
+          "content": "permissions:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 8,
+          "content": "  contents: read",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 9,
+          "content": "  pull-requests: write",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 10,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 11,
+          "content": "jobs:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 12,
+          "content": "  analyze:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 13,
+          "content": "    runs-on: ubuntu-latest",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 14,
+          "content": "    steps:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 15,
+          "content": "      - name: Checkout repository",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 16,
+          "content": "        uses: actions/checkout@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 17,
+          "content": "        with:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 18,
+          "content": "          fetch-depth: 0  # Full history for git notes",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 19,
+          "content": "          ref: ${{ github.event.pull_request.head.sha }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 20,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 21,
+          "content": "      - name: Fetch git notes",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 22,
+          "content": "        run: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 23,
+          "content": "          git fetch origin refs/notes/ai-blame:refs/notes/ai-blame || echo \"No ai-blame notes found\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 24,
+          "content": "        continue-on-error: true",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 25,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 26,
+          "content": "      - name: Setup Rust",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 27,
+          "content": "        uses: dtolnay/rust-toolchain@stable",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 28,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 29,
+          "content": "      - name: Cache cargo",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 30,
+          "content": "        uses: actions/cache@v4",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 31,
+          "content": "        with:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 32,
+          "content": "          path: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 33,
+          "content": "            ~/.cargo/bin/",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 34,
+          "content": "            ~/.cargo/registry/index/",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 35,
+          "content": "            ~/.cargo/registry/cache/",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 36,
+          "content": "            ~/.cargo/git/db/",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 37,
+          "content": "            target/",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 38,
+          "content": "          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 39,
+          "content": "          restore-keys: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 40,
+          "content": "            ${{ runner.os }}-cargo-",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 41,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 42,
+          "content": "      - name: Build ai-blame",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 43,
+          "content": "        run: cargo build --release",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 44,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 45,
+          "content": "      - name: Analyze PR commits",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 46,
+          "content": "        id: analyze",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 47,
+          "content": "        env:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 48,
+          "content": "          BASE_SHA: ${{ github.event.pull_request.base.sha }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 49,
+          "content": "          HEAD_SHA: ${{ github.event.pull_request.head.sha }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 50,
+          "content": "        run: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 51,
+          "content": "          # Create analysis script",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 52,
+          "content": "          cat > /tmp/analyze.sh << 'SCRIPT'",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 53,
+          "content": "          #!/bin/bash",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 54,
+          "content": "          set -e",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 55,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 56,
+          "content": "          BASE_SHA=\"$1\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 57,
+          "content": "          HEAD_SHA=\"$2\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 58,
+          "content": "          AI_BLAME=\"./target/release/ai-blame\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 59,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 60,
+          "content": "          # Get list of commits in PR",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 61,
+          "content": "          COMMITS=$(git rev-list --reverse \"$BASE_SHA\"..\"$HEAD_SHA\")",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 62,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 63,
+          "content": "          if [ -z \"$COMMITS\" ]; then",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 64,
+          "content": "            echo \"No commits to analyze\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 65,
+          "content": "            echo \"has_data=false\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 66,
+          "content": "            exit 0",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 67,
+          "content": "          fi",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 68,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 69,
+          "content": "          # Initialize counters",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 70,
+          "content": "          TOTAL_AI=0",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 71,
+          "content": "          TOTAL_AI_MODIFIED=0",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 72,
+          "content": "          TOTAL_HUMAN=0",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 73,
+          "content": "          TOTAL_ORIGINAL=0",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 74,
+          "content": "          COMMITS_WITH_AI=0",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 75,
+          "content": "          COMMIT_COUNT=0",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 76,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 77,
+          "content": "          # Collect per-commit data",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 78,
+          "content": "          COMMIT_DETAILS=\"\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 79,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 80,
+          "content": "          for COMMIT in $COMMITS; do",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 81,
+          "content": "            COMMIT_COUNT=$((COMMIT_COUNT + 1))",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 82,
+          "content": "            SHORT=$(echo \"$COMMIT\" | cut -c1-7)",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 83,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 84,
+          "content": "            # Try to get attribution for this commit",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 85,
+          "content": "            if ATTR=$(\"$AI_BLAME\" show \"$COMMIT\" --format json 2>/dev/null); then",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 86,
+          "content": "              # Skip if no attribution (null output)",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 87,
+          "content": "              if [ \"$ATTR\" = \"null\" ]; then",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 88,
+          "content": "                continue",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 89,
+          "content": "              fi",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 90,
+          "content": "              # Parse JSON output",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 91,
+          "content": "              AI=$(echo \"$ATTR\" | jq -r '[.files[].summary.ai_lines] | add // 0')",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 92,
+          "content": "              AI_MOD=$(echo \"$ATTR\" | jq -r '[.files[].summary.ai_modified_lines] | add // 0')",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 93,
+          "content": "              HUMAN=$(echo \"$ATTR\" | jq -r '[.files[].summary.human_lines] | add // 0')",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 94,
+          "content": "              ORIGINAL=$(echo \"$ATTR\" | jq -r '[.files[].summary.original_lines] | add // 0')",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 95,
+          "content": "              MODEL=$(echo \"$ATTR\" | jq -r '.session.model.id // \"unknown\"')",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 96,
+          "content": "              FILES=$(echo \"$ATTR\" | jq -r '.files | length')",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 97,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 98,
+          "content": "              if [ \"$AI\" != \"0\" ] || [ \"$AI_MOD\" != \"0\" ]; then",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 99,
+          "content": "                COMMITS_WITH_AI=$((COMMITS_WITH_AI + 1))",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 100,
+          "content": "                TOTAL_AI=$((TOTAL_AI + AI))",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 101,
+          "content": "                TOTAL_AI_MODIFIED=$((TOTAL_AI_MODIFIED + AI_MOD))",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 102,
+          "content": "                TOTAL_HUMAN=$((TOTAL_HUMAN + HUMAN))",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 103,
+          "content": "                TOTAL_ORIGINAL=$((TOTAL_ORIGINAL + ORIGINAL))",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 104,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 105,
+          "content": "                # Get commit message (first line)",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 106,
+          "content": "                MSG=$(git log -1 --format=%s \"$COMMIT\" | head -c 50)",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 107,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 108,
+          "content": "                COMMIT_DETAILS=\"${COMMIT_DETAILS}| \\`${SHORT}\\` | ${MSG} | ${AI} | ${AI_MOD} | ${HUMAN} | ${FILES} |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 109,
+          "content": "          \"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 110,
+          "content": "              fi",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 111,
+          "content": "            fi",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 112,
+          "content": "          done",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 113,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 114,
+          "content": "          # Changed lines = AI + AI_modified + Human (NOT including original/unchanged)",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 115,
+          "content": "          CHANGED_LINES=$((TOTAL_AI + TOTAL_AI_MODIFIED + TOTAL_HUMAN))",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 116,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 117,
+          "content": "          if [ \"$COMMITS_WITH_AI\" -eq 0 ]; then",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 118,
+          "content": "            echo \"has_data=false\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 119,
+          "content": "            exit 0",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 120,
+          "content": "          fi",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 121,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 122,
+          "content": "          # AI percentage is of CHANGED lines only",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 123,
+          "content": "          if [ \"$CHANGED_LINES\" -gt 0 ]; then",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 124,
+          "content": "            AI_PERCENT=$(echo \"scale=1; ($TOTAL_AI + $TOTAL_AI_MODIFIED) * 100 / $CHANGED_LINES\" | bc)",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 125,
+          "content": "          else",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 126,
+          "content": "            AI_PERCENT=\"0\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 127,
+          "content": "          fi",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 128,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 129,
+          "content": "          # Build summary",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 130,
+          "content": "          echo \"has_data=true\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 131,
+          "content": "          echo \"total_ai=$TOTAL_AI\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 132,
+          "content": "          echo \"total_ai_modified=$TOTAL_AI_MODIFIED\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 133,
+          "content": "          echo \"total_human=$TOTAL_HUMAN\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 134,
+          "content": "          echo \"total_original=$TOTAL_ORIGINAL\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 135,
+          "content": "          echo \"commits_with_ai=$COMMITS_WITH_AI\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 136,
+          "content": "          echo \"commit_count=$COMMIT_COUNT\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 137,
+          "content": "          echo \"ai_percent=$AI_PERCENT\" >> \"$GITHUB_OUTPUT\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 138,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 139,
+          "content": "          # Write commit details to file for multi-line output",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 140,
+          "content": "          echo \"$COMMIT_DETAILS\" > /tmp/commit_details.txt",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 141,
+          "content": "          SCRIPT",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 142,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 143,
+          "content": "          chmod +x /tmp/analyze.sh",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 144,
+          "content": "          /tmp/analyze.sh \"$BASE_SHA\" \"$HEAD_SHA\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 145,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 146,
+          "content": "      - name: Post PR comment",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 147,
+          "content": "        if: steps.analyze.outputs.has_data == 'true'",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 148,
+          "content": "        uses: actions/github-script@v7",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 149,
+          "content": "        env:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 150,
+          "content": "          TOTAL_AI: ${{ steps.analyze.outputs.total_ai }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 151,
+          "content": "          TOTAL_AI_MODIFIED: ${{ steps.analyze.outputs.total_ai_modified }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 152,
+          "content": "          TOTAL_HUMAN: ${{ steps.analyze.outputs.total_human }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 153,
+          "content": "          TOTAL_ORIGINAL: ${{ steps.analyze.outputs.total_original }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 154,
+          "content": "          COMMITS_WITH_AI: ${{ steps.analyze.outputs.commits_with_ai }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 155,
+          "content": "          COMMIT_COUNT: ${{ steps.analyze.outputs.commit_count }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 156,
+          "content": "          AI_PERCENT: ${{ steps.analyze.outputs.ai_percent }}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 157,
+          "content": "        with:",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 158,
+          "content": "          script: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 159,
+          "content": "            const fs = require('fs');",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 160,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 161,
+          "content": "            const totalAI = parseInt(process.env.TOTAL_AI) || 0;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 162,
+          "content": "            const totalAIMod = parseInt(process.env.TOTAL_AI_MODIFIED) || 0;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 163,
+          "content": "            const totalHuman = parseInt(process.env.TOTAL_HUMAN) || 0;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 164,
+          "content": "            const totalOriginal = parseInt(process.env.TOTAL_ORIGINAL) || 0;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 165,
+          "content": "            const commitsWithAI = parseInt(process.env.COMMITS_WITH_AI) || 0;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 166,
+          "content": "            const commitCount = parseInt(process.env.COMMIT_COUNT) || 0;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 167,
+          "content": "            const aiPercent = process.env.AI_PERCENT || '0';",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 168,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 169,
+          "content": "            // Read commit details",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 170,
+          "content": "            let commitDetails = '';",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 171,
+          "content": "            try {",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 172,
+          "content": "              commitDetails = fs.readFileSync('/tmp/commit_details.txt', 'utf8').trim();",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 173,
+          "content": "            } catch (e) {",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 174,
+          "content": "              console.log('No commit details file found');",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 175,
+          "content": "            }",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 176,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 177,
+          "content": "            // Determine emoji based on AI percentage",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 178,
+          "content": "            let emoji = '🤖';",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 179,
+          "content": "            const pct = parseFloat(aiPercent);",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 180,
+          "content": "            if (pct >= 80) emoji = '🤖🤖🤖';",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 181,
+          "content": "            else if (pct >= 50) emoji = '🤖🤖';",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 182,
+          "content": "            else if (pct >= 20) emoji = '🤖';",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 183,
+          "content": "            else emoji = '👤';",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 184,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 185,
+          "content": "            const totalLines = totalAI + totalAIMod + totalHuman + totalOriginal;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 186,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 187,
+          "content": "            let body = `## ${emoji} AI Attribution Summary",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 188,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 189,
+          "content": "            This PR contains **${commitsWithAI}** of **${commitCount}** commits with AI-assisted changes.",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 190,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 191,
+          "content": "            ### Overview",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 192,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 193,
+          "content": "            | Metric | Lines | Percentage |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 194,
+          "content": "            |--------|------:|----------:|",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 195,
+          "content": "            | 🟢 AI-generated | ${totalAI} | ${totalLines > 0 ? ((totalAI / totalLines) * 100).toFixed(1) : 0}% |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 196,
+          "content": "            | 🟡 AI-modified by human | ${totalAIMod} | ${totalLines > 0 ? ((totalAIMod / totalLines) * 100).toFixed(1) : 0}% |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 197,
+          "content": "            | 🔵 Human-added | ${totalHuman} | ${totalLines > 0 ? ((totalHuman / totalLines) * 100).toFixed(1) : 0}% |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 198,
+          "content": "            | ⚪ Original/unchanged | ${totalOriginal} | ${totalLines > 0 ? ((totalOriginal / totalLines) * 100).toFixed(1) : 0}% |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 199,
+          "content": "            | **Total** | **${totalLines}** | **100%** |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 200,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 201,
+          "content": "            **AI involvement: ${aiPercent}%** of changed lines",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 202,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 203,
+          "content": "            `;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 204,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 205,
+          "content": "            if (commitDetails) {",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 206,
+          "content": "              body += `### Commits with AI Attribution",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 207,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 208,
+          "content": "            | Commit | Message | AI | Modified | Human | Files |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 209,
+          "content": "            |--------|---------|---:|--------:|------:|------:|",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 210,
+          "content": "            ${commitDetails}",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 211,
+          "content": "            `;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 212,
+          "content": "            }",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 213,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 214,
+          "content": "            body += `",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 215,
+          "content": "            ---",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 216,
+          "content": "            <sub>Generated by [ai-blame](https://github.com/dotsetlabs/ai-blame) • [View detailed attribution](command:ai-blame show HEAD)</sub>",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 217,
+          "content": "            `;",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 218,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 219,
+          "content": "            // Find existing comment",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 220,
+          "content": "            const { data: comments } = await github.rest.issues.listComments({",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 221,
+          "content": "              owner: context.repo.owner,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 222,
+          "content": "              repo: context.repo.repo,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 223,
+          "content": "              issue_number: context.issue.number,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 224,
+          "content": "            });",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 225,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 226,
+          "content": "            const botComment = comments.find(c =>",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 227,
+          "content": "              c.user.type === 'Bot' &&",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 228,
+          "content": "              c.body.includes('AI Attribution Summary')",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 229,
+          "content": "            );",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 230,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 231,
+          "content": "            if (botComment) {",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 232,
+          "content": "              // Update existing comment",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 233,
+          "content": "              await github.rest.issues.updateComment({",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 234,
+          "content": "                owner: context.repo.owner,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 235,
+          "content": "                repo: context.repo.repo,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 236,
+          "content": "                comment_id: botComment.id,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 237,
+          "content": "                body: body",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 238,
+          "content": "              });",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 239,
+          "content": "              console.log('Updated existing comment');",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 240,
+          "content": "            } else {",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 241,
+          "content": "              // Create new comment",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 242,
+          "content": "              await github.rest.issues.createComment({",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 243,
+          "content": "                owner: context.repo.owner,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 244,
+          "content": "                repo: context.repo.repo,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 245,
+          "content": "                issue_number: context.issue.number,",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 246,
+          "content": "                body: body",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 247,
+          "content": "              });",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 248,
+          "content": "              console.log('Created new comment');",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 249,
+          "content": "            }",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 250,
+          "content": "",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 251,
+          "content": "      - name: No AI attribution found",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 252,
+          "content": "        if: steps.analyze.outputs.has_data != 'true'",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 253,
+          "content": "        run: |",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 254,
+          "content": "          echo \"No AI attribution data found in this PR's commits.\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 255,
+          "content": "          echo \"This is normal if the commits were not made with ai-blame tracking enabled.\"",
+          "source": {
+            "type": "AI",
+            "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859"
+          },
+          "edit_id": "66662f2b-7714-4715-9fe9-13e2342f1859",
+          "prompt_index": 1,
+          "confidence": 1.0
+        }
+      ],
+      "summary": {
+        "total_lines": 255,
+        "ai_lines": 255,
+        "ai_modified_lines": 0,
+        "human_lines": 0,
+        "original_lines": 0,
+        "unknown_lines": 0
+      }
+    }
+  ]
+}
