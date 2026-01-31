@@ -11,6 +11,9 @@ Track AI-generated code at line-level granularity. Know exactly which lines were
 - **Claude Code integration** - Automatic capture via hooks
 - **GitHub Action** - PR comments showing AI attribution summaries with prompts
 - **Privacy protection** - Automatic redaction of API keys, passwords, and sensitive data
+- **Data retention policies** - Configurable age limits and auto-purge for compliance
+- **Audit logging** - Track deletions, exports, and configuration changes
+- **Export capabilities** - Bulk export attribution data as JSON or CSV
 
 ## Installation
 
@@ -190,6 +193,84 @@ Discard pending changes without committing:
 
 ```bash
 whogitit clear
+```
+
+### `whogitit export`
+
+Export attribution data for multiple commits:
+
+```bash
+whogitit export                           # JSON to stdout
+whogitit export --format csv -o data.csv  # CSV to file
+whogitit export --since 2026-01-01        # Filter by date
+whogitit export --full-prompts            # Include full prompt text
+```
+
+Options:
+- `--format json|csv` - Output format (default: json)
+- `--since <date>` - Only commits after date (YYYY-MM-DD)
+- `--until <date>` - Only commits before date
+- `-o, --output <file>` - Output file (default: stdout)
+- `--full-prompts` - Include full prompt text (default: truncated)
+
+### `whogitit retention`
+
+Manage data retention policies:
+
+```bash
+whogitit retention config   # Show current retention settings
+whogitit retention preview  # Preview what would be deleted
+whogitit retention apply    # Dry-run deletion
+whogitit retention apply --execute  # Actually delete old data
+```
+
+### `whogitit audit`
+
+View the audit log (tracks deletions, exports, config changes):
+
+```bash
+whogitit audit                    # Show last 50 events
+whogitit audit --limit 100        # Show more events
+whogitit audit --since 2026-01-01 # Filter by date
+whogitit audit --event-type delete # Filter by type
+whogitit audit --json             # JSON output
+```
+
+### `whogitit redact-test`
+
+Test redaction patterns against text or files:
+
+```bash
+whogitit redact-test "text with api_key=secret123"
+whogitit redact-test --file config.txt
+```
+
+## Configuration
+
+Create `.whogitit.toml` in your repository root to configure privacy and retention:
+
+```toml
+[privacy]
+# Enable audit logging for compliance
+audit_log = true
+# Disable specific builtin patterns
+disabled_patterns = ["EMAIL"]
+
+# Additional custom redaction patterns
+[[privacy.custom_patterns]]
+name = "INTERNAL_ID"
+pattern = "INTERNAL-\\d+"
+description = "Internal tracking IDs"
+
+[retention]
+# Delete attribution older than 365 days
+max_age_days = 365
+# Keep at least 100 commits regardless of age
+min_commits = 100
+# Never delete attribution for these refs
+retain_refs = ["refs/heads/main"]
+# Auto-purge on commit (default: false)
+auto_purge = false
 ```
 
 ## GitHub Action

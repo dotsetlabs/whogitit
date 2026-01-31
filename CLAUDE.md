@@ -93,6 +93,7 @@ Git Notes (refs/notes/whogitit)
   - `pending.rs`: PendingBuffer - stores snapshots until commit
   - `threeway.rs`: ThreeWayAnalyzer - core attribution algorithm
   - `snapshot.rs`: Data structures (ContentSnapshot, AIEdit, FileEditHistory, LineAttribution)
+  - `diff.rs`: Diff utilities
 
 - **core/**: Attribution data models and blame engine
   - `attribution.rs`: AIAttribution, PromptInfo, SessionMetadata, ModelInfo
@@ -101,13 +102,19 @@ Git Notes (refs/notes/whogitit)
 - **storage/**: Git notes persistence
   - `notes.rs`: NotesStore - read/write attribution to `refs/notes/whogitit`
   - `trailers.rs`: TrailerGenerator - git trailers from attribution
+  - `audit.rs`: AuditLog, AuditEvent - compliance event logging
 
 - **cli/**: Command implementations
-  - `blame.rs`, `show.rs`, `prompt.rs`, `summary.rs`
+  - `blame.rs`, `show.rs`, `prompt.rs`, `summary.rs` - core commands
+  - `export.rs`: Bulk attribution export (JSON/CSV)
+  - `retention.rs`: Data retention policy management
+  - `audit.rs`: Audit log viewing
+  - `redact.rs`: Redaction pattern testing
   - `output.rs`: Formatting (Pretty, JSON, Markdown)
 
 - **privacy/**: Sensitive data protection
   - `redaction.rs`: Redactor - regex patterns for API keys, emails, passwords, etc.
+  - `config.rs`: WhogititConfig, PrivacyConfig, RetentionConfig - `.whogitit.toml` parsing
 
 ### Line Attribution Types
 
