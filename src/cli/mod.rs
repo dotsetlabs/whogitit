@@ -140,29 +140,44 @@ fn run_init() -> Result<()> {
     let repo_root = repo.workdir()
         .ok_or_else(|| anyhow::anyhow!("No working directory"))?;
 
-    // Install post-commit hook
     let hooks_dir = repo_root.join(".git/hooks");
     fs::create_dir_all(&hooks_dir)
         .context("Failed to create hooks directory")?;
 
+    // Install post-commit hook (attaches attribution to commits)
+    install_post_commit_hook(&hooks_dir)?;
+
+    // Install pre-push hook (auto-pushes notes with regular git push)
+    install_pre_push_hook(&hooks_dir)?;
+
+    // Configure git to auto-fetch notes
+    configure_git_fetch(&repo)?;
+
+    println!("\nSetup complete! AI attribution will be tracked for commits in this repo.");
+    println!("Notes will be automatically pushed with 'git push' and fetched with 'git fetch'.");
+    println!("\nMake sure Claude Code hooks are configured in ~/.claude/settings.json");
+
+    Ok(())
+}
+
+fn install_post_commit_hook(hooks_dir: &std::path::Path) -> Result<()> {
     let hook_path = hooks_dir.join("post-commit");
 
-    // Check if hook already exists
     if hook_path.exists() {
         let content = fs::read_to_string(&hook_path)?;
         if content.contains("ai-blame") {
             println!("✓ ai-blame post-commit hook already installed.");
-        } else {
-            // Append to existing hook
-            let new_content = format!(
-                "{}\n\n# ai-blame post-commit hook\nif command -v ai-blame &> /dev/null; then\n    ai-blame post-commit 2>/dev/null || true\nfi\n",
-                content.trim_end()
-            );
-            fs::write(&hook_path, new_content)?;
-            println!("✓ Added ai-blame to existing post-commit hook.");
+            return Ok(());
         }
+
+        // Append to existing hook
+        let new_content = format!(
+            "{}\n\n# ai-blame post-commit hook\nif command -v ai-blame &> /dev/null; then\n    ai-blame post-commit 2>/dev/null || true\nfi\n",
+            content.trim_end()
+        );
+        fs::write(&hook_path, new_content)?;
+        println!("✓ Added ai-blame to existing post-commit hook.");
     } else {
-        // Create new hook
         let hook_content = r#"#!/bin/bash
 # ai-blame post-commit hook
 # Attaches AI attribution notes to the commit
@@ -174,51 +189,65 @@ elif [[ -x "$HOME/.cargo/bin/ai-blame" ]]; then
 fi
 "#;
         fs::write(&hook_path, hook_content)?;
-
-        // Make executable
-        let mut perms = fs::metadata(&hook_path)?.permissions();
-        perms.set_mode(0o755);
-        fs::set_permissions(&hook_path, perms)?;
-
+        make_executable(&hook_path)?;
         println!("✓ Installed ai-blame post-commit hook.");
     }
-
-    // Configure git to auto-push/fetch notes with regular push/pull
-    configure_git_notes(&repo)?;
-
-    println!("\nSetup complete! AI attribution will be tracked for commits in this repo.");
-    println!("Notes will be automatically pushed/fetched with 'git push' and 'git fetch'.");
-    println!("\nMake sure Claude Code hooks are configured in ~/.claude/settings.json");
 
     Ok(())
 }
 
-/// Configure git to automatically push and fetch ai-blame notes
-fn configure_git_notes(repo: &git2::Repository) -> Result<()> {
+fn install_pre_push_hook(hooks_dir: &std::path::Path) -> Result<()> {
+    let hook_path = hooks_dir.join("pre-push");
+
+    if hook_path.exists() {
+        let content = fs::read_to_string(&hook_path)?;
+        if content.contains("ai-blame") {
+            println!("✓ ai-blame pre-push hook already installed.");
+            return Ok(());
+        }
+
+        // Append to existing hook
+        let new_content = format!(
+            "{}\n\n# ai-blame pre-push hook - automatically push notes\n# Skip if already pushing notes (prevent recursion)\n[[ \"$AI_BLAME_PUSHING_NOTES\" == \"1\" ]] && exit 0\nremote=\"$1\"\nif git notes --ref=ai-blame list &>/dev/null; then\n    AI_BLAME_PUSHING_NOTES=1 git push \"$remote\" refs/notes/ai-blame 2>/dev/null || true\nfi\n",
+            content.trim_end()
+        );
+        fs::write(&hook_path, new_content)?;
+        println!("✓ Added ai-blame to existing pre-push hook.");
+    } else {
+        let hook_content = r#"#!/bin/bash
+# ai-blame pre-push hook
+# Automatically pushes ai-blame notes alongside regular pushes
+
+# Prevent recursion - skip if we're already pushing notes
+[[ "$AI_BLAME_PUSHING_NOTES" == "1" ]] && exit 0
+
+remote="$1"
+
+# Only push notes if they exist
+if git notes --ref=ai-blame list &>/dev/null; then
+    AI_BLAME_PUSHING_NOTES=1 git push "$remote" refs/notes/ai-blame 2>/dev/null || true
+fi
+"#;
+        fs::write(&hook_path, hook_content)?;
+        make_executable(&hook_path)?;
+        println!("✓ Installed ai-blame pre-push hook.");
+    }
+
+    Ok(())
+}
+
+fn make_executable(path: &std::path::Path) -> Result<()> {
+    let mut perms = fs::metadata(path)?.permissions();
+    perms.set_mode(0o755);
+    fs::set_permissions(path, perms)?;
+    Ok(())
+}
+
+/// Configure git to automatically fetch ai-blame notes
+fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
     let mut config = repo.config()
         .context("Failed to open git config")?;
 
-    // Check if push refspec already configured
-    let push_refspec = "refs/notes/ai-blame";
-    let push_configured = config
-        .get_string("remote.origin.push")
-        .map(|v| v.contains("ai-blame"))
-        .unwrap_or(false);
-
-    if !push_configured {
-        // Use multivar to add without replacing existing push configs
-        config.set_multivar("remote.origin.push", "^$", push_refspec)
-            .or_else(|_| {
-                // If multivar fails, try regular set (might be first entry)
-                config.set_str("remote.origin.push", push_refspec)
-            })
-            .context("Failed to configure push refspec")?;
-        println!("✓ Configured git to push ai-blame notes automatically.");
-    } else {
-        println!("✓ Git already configured to push ai-blame notes.");
-    }
-
-    // Check if fetch refspec already configured
     let fetch_refspec = "+refs/notes/ai-blame:refs/notes/ai-blame";
     let fetch_configured = config
         .get_string("remote.origin.fetch")
@@ -238,3 +267,4 @@ fn configure_git_notes(repo: &git2::Repository) -> Result<()> {
 
     Ok(())
 }
+
