@@ -17,8 +17,27 @@ Track AI-generated code at line-level granularity. Know exactly which lines were
 
 ## Installation
 
+### Quick Install (Recommended)
+
+**macOS / Linux:**
 ```bash
-# From source
+curl -sSL https://github.com/dotsetlabs/whogitit/releases/latest/download/install.sh | sh
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://github.com/dotsetlabs/whogitit/releases/latest/download/install.ps1 | iex
+```
+
+### Via Cargo
+
+```bash
+cargo install whogitit
+```
+
+### From Source
+
+```bash
 git clone https://github.com/dotsetlabs/whogitit
 cd whogitit
 cargo install --path .

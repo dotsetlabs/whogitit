@@ -13,6 +13,7 @@ rust-version = "1.70"
 
 [dependencies]
 git2 = "0.18"
+openssl = { version = "0.10", features = ["vendored"] }
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -38,3 +39,33 @@ lto = "thin"
 codegen-units = 1
 strip = true
 opt-level = 3
+
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Conditions to При)
+cargo-dist-version = "0.27.0"
+# CI backends to support
+ci = "github"
+# The installers to generate for each app
+installers = ["shell", "powershell", "homebrew"]
+# Target platforms to build for
+targets = [
+    "aarch64-apple-darwin",
+    "x86_64-apple-darwin",
+    "aarch64-unknown-linux-gnu",
+    "x86_64-unknown-linux-gnu",
+    "x86_64-pc-windows-msvc",
+]
+# Path that installers should place binaries in
+install-path = "CARGO_HOME"
+# Whether to install an updater program
+install-updater = false
+# Publish jobs to run in CI
+pr-run-mode = "plan"
+# Whether to auto-include files like README, LICENSE, CHANGELOG
+auto-includes = true
+
+# Homebrew tap configuration
+[workspace.metadata.dist.homebrew]
+tap = "dotsetlabs/homebrew-tap"
+formula = "whogitit"

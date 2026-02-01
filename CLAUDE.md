@@ -2,19 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Development Status
-
-This is an **unpublished, pre-release package** under active development. There are no external consumers or backward compatibility requirements.
-
-When making changes:
-- **Replace, don't deprecate** - Remove old code entirely when implementing new approaches
-- **No legacy support needed** - Don't maintain old APIs, patterns, or data formats alongside new ones
-- **Refactor freely** - Rename, restructure, and rewrite without compatibility shims
-- **Delete unused code** - If something is no longer needed, remove it completely
-- **Schema migrations not required** - Update data formats in place; don't version or migrate
-
-The goal is a clean, minimal codebase. Avoid accumulating dead code, `#[deprecated]` markers, or "v1/v2" parallel implementations.
-
 ## Build & Test Commands
 
 ```bash

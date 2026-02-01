@@ -2,14 +2,39 @@
 
 ## Prerequisites
 
-- **Rust** (1.70 or later) - [Install Rust](https://rustup.rs/)
 - **Git** (2.25 or later)
 - **jq** - JSON processor used by capture hook
   - macOS: `brew install jq`
   - Linux: `apt install jq` or `dnf install jq`
 - **Claude Code** - For automatic AI attribution capture
 
+## Quick Install (Recommended)
+
+**macOS / Linux:**
+```bash
+curl -sSL https://github.com/dotsetlabs/whogitit/releases/latest/download/install.sh | sh
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://github.com/dotsetlabs/whogitit/releases/latest/download/install.ps1 | iex
+```
+
+This downloads the latest pre-built binary and installs it to `~/.cargo/bin`.
+
+## Install via Cargo
+
+If you have Rust installed:
+
+```bash
+cargo install whogitit
+```
+
 ## Install from Source
+
+For development or to build from the latest code:
+
+**Prerequisites:** [Rust](https://rustup.rs/) 1.70 or later
 
 ```bash
 # Clone the repository

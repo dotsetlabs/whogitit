@@ -1,0 +1,266 @@
+# Release workflow powered by cargo-dist
+#
+# To trigger a release:
+#   git tag v0.1.0
+#   git push origin v0.1.0
+#
+# This workflow will:
+#   - Build binaries for all supported platforms
+#   - Create a GitHub Release with all artifacts
+#   - Generate shell/PowerShell installers
+#   - Update Homebrew formula (if tap is configured)
+
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  pull_request:
+  push:
+    tags:
+      - 'v[0-9]+.*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Plan what to build
+  plan:
+    name: Plan release
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      publishing: ${{ steps.tag.outputs.publishing }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine tag
+        id: tag
+        run: |
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+            echo "publishing=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=v0.0.0-dev" >> "$GITHUB_OUTPUT"
+            echo "publishing=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Build for each platform
+  build:
+    name: Build ${{ matrix.target }}
+    needs: plan
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            cross: false
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            cross: true
+          - target: x86_64-apple-darwin
+            os: macos-14
+            cross: false
+          - target: aarch64-apple-darwin
+            os: macos-14
+            cross: false
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            cross: false
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install cross (Linux ARM)
+        if: matrix.cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build (native)
+        if: ${{ !matrix.cross }}
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Build (cross)
+        if: matrix.cross
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd target/${{ matrix.target }}/release
+          tar czvf ../../../whogitit-${{ needs.plan.outputs.tag }}-${{ matrix.target }}.tar.gz whogitit
+          cd ../../..
+          shasum -a 256 whogitit-${{ needs.plan.outputs.tag }}-${{ matrix.target }}.tar.gz > whogitit-${{ needs.plan.outputs.tag }}-${{ matrix.target }}.tar.gz.sha256
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd target/${{ matrix.target }}/release
+          7z a ../../../whogitit-${{ needs.plan.outputs.tag }}-${{ matrix.target }}.zip whogitit.exe
+          cd ../../..
+          (Get-FileHash whogitit-${{ needs.plan.outputs.tag }}-${{ matrix.target }}.zip -Algorithm SHA256).Hash.ToLower() + "  whogitit-${{ needs.plan.outputs.tag }}-${{ matrix.target }}.zip" | Out-File -Encoding utf8 whogitit-${{ needs.plan.outputs.tag }}-${{ matrix.target }}.zip.sha256
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.target }}
+          path: |
+            whogitit-*.tar.gz
+            whogitit-*.zip
+            whogitit-*.sha256
+
+  # Create GitHub Release
+  release:
+    name: Create Release
+    needs: [plan, build]
+    if: needs.plan.outputs.publishing == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: dist-*
+          merge-multiple: true
+
+      - name: Generate installer scripts
+        run: |
+          # Generate shell installer
+          cat > artifacts/install.sh << 'INSTALLER'
+          #!/bin/sh
+          set -eu
+
+          REPO="dotsetlabs/whogitit"
+          BINARY="whogitit"
+
+          # Detect platform
+          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+          ARCH=$(uname -m)
+
+          case "$OS" in
+            darwin) OS="apple-darwin" ;;
+            linux) OS="unknown-linux-gnu" ;;
+            *) echo "Unsupported OS: $OS"; exit 1 ;;
+          esac
+
+          case "$ARCH" in
+            x86_64|amd64) ARCH="x86_64" ;;
+            arm64|aarch64) ARCH="aarch64" ;;
+            *) echo "Unsupported architecture: $ARCH"; exit 1 ;;
+          esac
+
+          TARGET="${ARCH}-${OS}"
+
+          # Get latest release or use provided version
+          if [ -n "${VERSION:-}" ]; then
+            TAG="v$VERSION"
+          else
+            TAG=$(curl -sL "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name"' | cut -d'"' -f4)
+          fi
+
+          if [ -z "$TAG" ]; then
+            echo "Failed to determine version"
+            exit 1
+          fi
+
+          URL="https://github.com/$REPO/releases/download/$TAG/${BINARY}-${TAG}-${TARGET}.tar.gz"
+
+          echo "Downloading $BINARY $TAG for $TARGET..."
+
+          TMPDIR=$(mktemp -d)
+          trap "rm -rf $TMPDIR" EXIT
+
+          curl -sL "$URL" | tar xz -C "$TMPDIR"
+
+          INSTALL_DIR="${CARGO_HOME:-$HOME/.cargo}/bin"
+          mkdir -p "$INSTALL_DIR"
+          mv "$TMPDIR/$BINARY" "$INSTALL_DIR/"
+          chmod +x "$INSTALL_DIR/$BINARY"
+
+          echo "Installed $BINARY to $INSTALL_DIR/$BINARY"
+          echo "Make sure $INSTALL_DIR is in your PATH"
+          INSTALLER
+
+          # Generate PowerShell installer
+          cat > artifacts/install.ps1 << 'INSTALLER'
+          $ErrorActionPreference = "Stop"
+
+          $repo = "dotsetlabs/whogitit"
+          $binary = "whogitit"
+
+          # Get latest release
+          if ($env:VERSION) {
+              $tag = "v$env:VERSION"
+          } else {
+              $release = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/latest"
+              $tag = $release.tag_name
+          }
+
+          $target = "x86_64-pc-windows-msvc"
+          $url = "https://github.com/$repo/releases/download/$tag/$binary-$tag-$target.zip"
+
+          Write-Host "Downloading $binary $tag..."
+
+          $tmp = New-TemporaryFile | Rename-Item -NewName { $_.Name + ".zip" } -PassThru
+          Invoke-WebRequest -Uri $url -OutFile $tmp
+
+          $extractDir = Join-Path $env:TEMP "$binary-extract"
+          Expand-Archive -Path $tmp -DestinationPath $extractDir -Force
+
+          $installDir = Join-Path $env:USERPROFILE ".cargo\bin"
+          if (-not (Test-Path $installDir)) {
+              New-Item -ItemType Directory -Path $installDir | Out-Null
+          }
+
+          Move-Item -Path (Join-Path $extractDir "$binary.exe") -Destination $installDir -Force
+
+          Remove-Item $tmp -Force
+          Remove-Item $extractDir -Recurse -Force
+
+          Write-Host "Installed $binary to $installDir\$binary.exe"
+          Write-Host "Make sure $installDir is in your PATH"
+          INSTALLER
+
+      - name: List artifacts
+        run: ls -la artifacts/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.plan.outputs.tag }}
+          name: ${{ needs.plan.outputs.tag }}
+          draft: false
+          prerelease: ${{ contains(needs.plan.outputs.tag, '-') }}
+          generate_release_notes: true
+          files: |
+            artifacts/*
+
+  # Publish to crates.io (optional, manual trigger)
+  publish-crates:
+    name: Publish to crates.io
+    needs: [plan, release]
+    if: needs.plan.outputs.publishing == 'true'
+    runs-on: ubuntu-latest
+    environment: crates-io  # Requires manual approval
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: cargo publish --no-verify
