@@ -1,0 +1,135 @@
+{
+  "name": "whogitit",
+  "displayName": "whogitit - AI Attribution",
+  "description": "Track and visualize AI-generated code at line level",
+  "version": "0.1.0",
+  "publisher": "dotsetlabs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dotsetlabs/whogitit"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization"
+  ],
+  "keywords": [
+    "git",
+    "ai",
+    "attribution",
+    "blame",
+    "claude",
+    "copilot",
+    "tracking"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "whogitit.showPrompt",
+        "title": "Show AI Prompt for Line",
+        "category": "whogitit"
+      },
+      {
+        "command": "whogitit.toggleDecorations",
+        "title": "Toggle AI Attribution Decorations",
+        "category": "whogitit"
+      },
+      {
+        "command": "whogitit.refreshBlame",
+        "title": "Refresh AI Attribution",
+        "category": "whogitit"
+      },
+      {
+        "command": "whogitit.showFileStats",
+        "title": "Show AI Statistics for File",
+        "category": "whogitit"
+      }
+    ],
+    "configuration": {
+      "title": "whogitit",
+      "properties": {
+        "whogitit.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable AI attribution decorations"
+        },
+        "whogitit.showGutterMarkers": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show attribution markers in the gutter"
+        },
+        "whogitit.showHoverTooltips": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show AI attribution details on hover"
+        },
+        "whogitit.showCodeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show CodeLens above AI-generated regions"
+        },
+        "whogitit.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show AI percentage in status bar"
+        },
+        "whogitit.whogititPath": {
+          "type": "string",
+          "default": "whogitit",
+          "description": "Path to whogitit binary (defaults to PATH lookup)"
+        }
+      }
+    },
+    "colors": [
+      {
+        "id": "whogitit.aiGenerated",
+        "description": "Color for AI-generated lines",
+        "defaults": {
+          "dark": "#4CAF50",
+          "light": "#2E7D32"
+        }
+      },
+      {
+        "id": "whogitit.aiModified",
+        "description": "Color for AI-generated lines modified by human",
+        "defaults": {
+          "dark": "#FFC107",
+          "light": "#F57C00"
+        }
+      },
+      {
+        "id": "whogitit.human",
+        "description": "Color for human-written lines",
+        "defaults": {
+          "dark": "#2196F3",
+          "light": "#1565C0"
+        }
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "node ./out/test/runTest.js",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.56.0",
+    "typescript": "^5.3.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}

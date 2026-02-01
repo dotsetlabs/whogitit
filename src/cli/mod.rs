@@ -1,7 +1,9 @@
+pub mod annotations;
 pub mod audit;
 pub mod blame;
 pub mod export;
 pub mod output;
+pub mod pager;
 pub mod prompt;
 pub mod redact;
 pub mod retention;
@@ -41,6 +43,12 @@ pub enum Commands {
 
     /// Generate summary for a range of commits (useful for PRs)
     Summary(summary::SummaryArgs),
+
+    /// Generate annotations for GitHub Checks API
+    Annotations(annotations::AnnotationsArgs),
+
+    /// Annotate git diff output with AI attribution (for use as git pager)
+    Pager(pager::PagerArgs),
 
     /// Test redaction patterns against text or files
     RedactTest(redact::RedactArgs),
@@ -113,6 +121,8 @@ pub fn run() -> Result<()> {
         Commands::Prompt(args) => prompt::run(args),
         Commands::Show(args) => show::run(args),
         Commands::Summary(args) => summary::run(args),
+        Commands::Annotations(args) => annotations::run(args),
+        Commands::Pager(args) => pager::run(args),
         Commands::RedactTest(args) => redact::run(args),
         Commands::Export(args) => export::run(args),
         Commands::Retention(args) => retention::run(args),

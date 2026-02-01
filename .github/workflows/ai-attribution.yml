@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
+  checks: write
 
 jobs:
   analyze:
@@ -276,6 +277,118 @@ jobs:
 
           chmod +x /tmp/analyze.sh
           /tmp/analyze.sh "$BASE_SHA" "$HEAD_SHA"
+
+      - name: Generate annotations
+        if: steps.analyze.outputs.has_data == 'true'
+        id: annotations
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Generate annotations JSON using the new annotations command
+          ./target/release/whogitit annotations \
+            --base "$BASE_SHA" \
+            --head "$HEAD_SHA" \
+            --format github-checks \
+            --max-annotations 50 > /tmp/annotations.json 2>/dev/null || echo '{"annotations":[],"summary":{}}' > /tmp/annotations.json
+
+          # Check if we have annotations
+          ANNOTATION_COUNT=$(jq '.annotations | length' /tmp/annotations.json 2>/dev/null || echo "0")
+          echo "annotation_count=$ANNOTATION_COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Create Check Run with Annotations
+        if: steps.analyze.outputs.has_data == 'true' && steps.annotations.outputs.annotation_count != '0'
+        uses: actions/github-script@v7
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AI_PERCENT: ${{ steps.analyze.outputs.ai_percent }}
+          TOTAL_AI: ${{ steps.analyze.outputs.total_ai }}
+          TOTAL_AI_MODIFIED: ${{ steps.analyze.outputs.total_ai_modified }}
+          FILE_COUNT: ${{ steps.analyze.outputs.file_count }}
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Read annotations from file
+            let annotationsData;
+            try {
+              annotationsData = JSON.parse(fs.readFileSync('/tmp/annotations.json', 'utf8'));
+            } catch (e) {
+              console.log('Failed to read annotations:', e.message);
+              return;
+            }
+
+            const annotations = annotationsData.annotations || [];
+            if (annotations.length === 0) {
+              console.log('No annotations to create');
+              return;
+            }
+
+            const aiPercent = process.env.AI_PERCENT || '0';
+            const totalAI = parseInt(process.env.TOTAL_AI) || 0;
+            const totalAIMod = parseInt(process.env.TOTAL_AI_MODIFIED) || 0;
+            const fileCount = parseInt(process.env.FILE_COUNT) || 0;
+            const model = annotationsData.summary?.model || 'unknown';
+
+            // Create check run
+            const checkRun = await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'AI Attribution',
+              head_sha: process.env.HEAD_SHA,
+              status: 'completed',
+              conclusion: 'neutral',
+              output: {
+                title: `${aiPercent}% AI-generated (${totalAI + totalAIMod} lines)`,
+                summary: `This PR contains AI-generated code tracked by whogitit.\n\n` +
+                  `- **AI-generated lines:** ${totalAI}\n` +
+                  `- **AI-modified lines:** ${totalAIMod}\n` +
+                  `- **Files with AI code:** ${fileCount}\n` +
+                  `- **Model:** ${model}\n\n` +
+                  `Click on individual annotations in the "Files changed" tab to see attribution details.`,
+                annotations: annotations.slice(0, 50).map(a => ({
+                  path: a.path,
+                  start_line: a.start_line,
+                  end_line: a.end_line,
+                  annotation_level: a.annotation_level,
+                  title: a.title,
+                  message: a.message,
+                  raw_details: a.raw_details || undefined
+                }))
+              }
+            });
+
+            console.log(`Created check run with ${annotations.length} annotations`);
+
+            // If more than 50 annotations, update with additional batches
+            // GitHub allows up to 50 annotations per API call
+            for (let i = 50; i < annotations.length; i += 50) {
+              const batch = annotations.slice(i, i + 50);
+              await github.rest.checks.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                check_run_id: checkRun.data.id,
+                output: {
+                  title: `${aiPercent}% AI-generated (${totalAI + totalAIMod} lines)`,
+                  summary: `This PR contains AI-generated code tracked by whogitit.\n\n` +
+                    `- **AI-generated lines:** ${totalAI}\n` +
+                    `- **AI-modified lines:** ${totalAIMod}\n` +
+                    `- **Files with AI code:** ${fileCount}\n` +
+                    `- **Model:** ${model}\n\n` +
+                    `Click on individual annotations in the "Files changed" tab to see attribution details.`,
+                  annotations: batch.map(a => ({
+                    path: a.path,
+                    start_line: a.start_line,
+                    end_line: a.end_line,
+                    annotation_level: a.annotation_level,
+                    title: a.title,
+                    message: a.message,
+                    raw_details: a.raw_details || undefined
+                  }))
+                }
+              });
+              console.log(`Added batch of ${batch.length} annotations`);
+            }
 
       - name: Post PR comment
         if: steps.analyze.outputs.has_data == 'true'

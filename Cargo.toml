@@ -25,6 +25,7 @@ regex = "1"
 uuid = { version = "1", features = ["v4"] }
 toml = "0.8"
 dirs = "5"
+atty = "0.2"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
