@@ -111,12 +111,26 @@ pub struct ExportSummary {
 
 /// Run the export command
 pub fn run(args: ExportArgs) -> Result<()> {
-    let repo = git2::Repository::discover(".").context("Not in a git repository")?;
+    let repo = git2::Repository::discover(".").context(
+        "Not in a git repository. \
+         Run 'git init' to create one, or 'cd' to a directory containing a .git folder.",
+    )?;
     let notes_store = NotesStore::new(&repo)?;
 
     // Parse date filters
     let since = parse_date(&args.since)?;
     let until = parse_date(&args.until)?;
+
+    // Validate date range
+    if let (Some(ref since_date), Some(ref until_date)) = (&since, &until) {
+        if since_date > until_date {
+            anyhow::bail!(
+                "Invalid date range: --since ({}) must be before --until ({})",
+                args.since.as_ref().unwrap(),
+                args.until.as_ref().unwrap()
+            );
+        }
+    }
 
     // Get all commits with attribution
     let attributed_commits = notes_store.list_attributed_commits()?;
@@ -173,7 +187,10 @@ pub fn run(args: ExportArgs) -> Result<()> {
     match args.format.as_str() {
         "json" => write_json(&output_data, &args.output)?,
         "csv" => write_csv(&output_data, &args.output)?,
-        _ => anyhow::bail!("Unsupported format: {}", args.format),
+        other => anyhow::bail!(
+            "Unsupported format: '{}'. Supported formats: json, csv",
+            other
+        ),
     }
 
     Ok(())
@@ -183,9 +200,12 @@ fn parse_date(date_str: &Option<String>) -> Result<Option<DateTime<Utc>>> {
     match date_str {
         Some(s) => {
             // Parse YYYY-MM-DD format
-            let date =
-                chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d").context("Invalid date format")?;
-            Ok(Some(date.and_hms_opt(0, 0, 0).unwrap().and_utc()))
+            let date = chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d")
+                .with_context(|| format!("Invalid date format '{}'. Use YYYY-MM-DD.", s))?;
+            let datetime = date
+                .and_hms_opt(0, 0, 0)
+                .ok_or_else(|| anyhow::anyhow!("Invalid time for date {}", s))?;
+            Ok(Some(datetime.and_utc()))
         }
         None => Ok(None),
     }

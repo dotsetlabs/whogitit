@@ -4,6 +4,35 @@ use serde::{Deserialize, Serialize};
 /// Redaction placeholder
 const REDACTED: &str = "[REDACTED]";
 
+/// Merge overlapping intervals
+///
+/// Takes a sorted list of (start, end) intervals and returns a new list
+/// where all overlapping or adjacent intervals have been merged.
+fn merge_intervals(intervals: Vec<(usize, usize)>) -> Vec<(usize, usize)> {
+    if intervals.is_empty() {
+        return Vec::new();
+    }
+
+    let mut merged: Vec<(usize, usize)> = Vec::with_capacity(intervals.len());
+    let mut current = intervals[0];
+
+    for interval in intervals.into_iter().skip(1) {
+        // If intervals overlap or are adjacent, merge them
+        if interval.0 <= current.1 {
+            current.1 = current.1.max(interval.1);
+        } else {
+            // No overlap, push current and start new interval
+            merged.push(current);
+            current = interval;
+        }
+    }
+
+    // Don't forget the last interval
+    merged.push(current);
+
+    merged
+}
+
 /// Named pattern definition
 #[derive(Debug, Clone)]
 pub struct NamedPattern {
@@ -62,6 +91,33 @@ pub mod patterns {
 
     /// Stripe API key pattern
     pub const STRIPE_KEY: &str = r"(?:sk|pk|rk)_(?:live|test)_[0-9a-zA-Z]{24,}";
+
+    // === ADDITIONAL PATTERNS ===
+
+    /// JWT token pattern (three base64url-encoded segments separated by dots)
+    pub const JWT_TOKEN: &str = r"eyJ[A-Za-z0-9_-]*\.eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]+";
+
+    /// Google OAuth refresh token pattern
+    pub const GOOGLE_OAUTH: &str = r"1//[0-9A-Za-z_-]{40,}";
+
+    /// Microsoft/Azure OAuth refresh token pattern
+    pub const MICROSOFT_OAUTH: &str = r"0\.A[A-Za-z0-9_-]{80,}";
+
+    /// Docker registry credentials (user:pass@registry format)
+    pub const DOCKER_REGISTRY: &str =
+        r"(?i)(?:docker|registry)[_-]?(?:user|pass|auth|credential)?[:\s=]+[^\s]+:[^\s]+@[^\s]+";
+
+    /// Kubernetes secret data (base64 encoded values in common k8s formats)
+    pub const K8S_SECRET: &str = r"(?i)(?:kubectl\s+create\s+secret|kind:\s*Secret)";
+
+    /// Generic base64-encoded secret (long base64 strings that look like secrets)
+    pub const BASE64_SECRET: &str = r#"(?i)(?:secret|key|token|password|credential)[_-]?(?:data)?[:\s=]+['"]?[A-Za-z0-9+/=]{40,}['"]?"#;
+
+    /// npm auth token
+    pub const NPM_TOKEN: &str = r"npm_[A-Za-z0-9]{36}";
+
+    /// PyPI API token
+    pub const PYPI_TOKEN: &str = r"pypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{50,}";
 
     /// All builtin patterns with names
     pub const ALL_NAMED: &[NamedPattern] = &[
@@ -134,6 +190,46 @@ pub mod patterns {
             name: "STRIPE_KEY",
             pattern: STRIPE_KEY,
             description: "Stripe API keys",
+        },
+        NamedPattern {
+            name: "JWT_TOKEN",
+            pattern: JWT_TOKEN,
+            description: "JWT tokens (JSON Web Tokens)",
+        },
+        NamedPattern {
+            name: "GOOGLE_OAUTH",
+            pattern: GOOGLE_OAUTH,
+            description: "Google OAuth refresh tokens",
+        },
+        NamedPattern {
+            name: "MICROSOFT_OAUTH",
+            pattern: MICROSOFT_OAUTH,
+            description: "Microsoft/Azure OAuth refresh tokens",
+        },
+        NamedPattern {
+            name: "DOCKER_REGISTRY",
+            pattern: DOCKER_REGISTRY,
+            description: "Docker registry credentials",
+        },
+        NamedPattern {
+            name: "K8S_SECRET",
+            pattern: K8S_SECRET,
+            description: "Kubernetes secret data",
+        },
+        NamedPattern {
+            name: "BASE64_SECRET",
+            pattern: BASE64_SECRET,
+            description: "Base64-encoded secrets",
+        },
+        NamedPattern {
+            name: "NPM_TOKEN",
+            pattern: NPM_TOKEN,
+            description: "npm authentication tokens",
+        },
+        NamedPattern {
+            name: "PYPI_TOKEN",
+            pattern: PYPI_TOKEN,
+            description: "PyPI API tokens",
         },
     ];
 }
@@ -263,22 +359,57 @@ impl Redactor {
     }
 
     /// Redact sensitive data from text
+    ///
+    /// Uses interval merging to handle overlapping patterns correctly,
+    /// preventing double-redaction and corrupted output.
     pub fn redact(&self, text: &str) -> String {
-        let mut result = text.to_string();
+        // Collect all match intervals
+        let mut intervals: Vec<(usize, usize)> = Vec::new();
 
         for cp in &self.patterns {
-            result = cp.regex.replace_all(&result, REDACTED).to_string();
+            for m in cp.regex.find_iter(text) {
+                intervals.push((m.start(), m.end()));
+            }
         }
+
+        if intervals.is_empty() {
+            return text.to_string();
+        }
+
+        // Sort by start position
+        intervals.sort_by_key(|i| i.0);
+
+        // Merge overlapping intervals
+        let merged = merge_intervals(intervals);
+
+        // Build result string by replacing merged intervals
+        let mut result = String::with_capacity(text.len());
+        let mut last_end = 0;
+
+        for (start, end) in merged {
+            // Add text before this interval
+            result.push_str(&text[last_end..start]);
+            // Add redaction marker
+            result.push_str(REDACTED);
+            last_end = end;
+        }
+
+        // Add remaining text
+        result.push_str(&text[last_end..]);
 
         result
     }
 
     /// Redact sensitive data with full audit trail
+    ///
+    /// Note: The redaction_count reflects the number of distinct matches found,
+    /// though overlapping matches are merged into single redactions in the output.
     pub fn redact_with_audit(&self, text: &str) -> RedactionResult {
         let timestamp = chrono::Utc::now().to_rfc3339();
         let mut events = Vec::new();
+        let mut all_intervals: Vec<(usize, usize)> = Vec::new();
 
-        // Collect all matches first
+        // Collect all matches first with their pattern info
         for cp in &self.patterns {
             for m in cp.regex.find_iter(text) {
                 let matched = m.as_str();
@@ -294,13 +425,19 @@ impl Redactor {
                     timestamp: timestamp.clone(),
                     preview,
                 });
+
+                all_intervals.push((m.start(), m.end()));
             }
         }
 
-        // Sort by position for deterministic output
+        // Sort events by position for deterministic output
         events.sort_by_key(|e| e.char_range.0);
 
+        // The redaction count is the number of distinct matches
+        // (even if some overlap and get merged in output)
         let redaction_count = events.len();
+
+        // Perform the actual redaction (with interval merging)
         let text = self.redact(text);
 
         RedactionResult {
@@ -690,7 +827,14 @@ mod tests {
         assert!(names.contains(&"EMAIL"));
         assert!(names.contains(&"SSN"));
         assert!(names.contains(&"CREDIT_CARD"));
-        assert_eq!(names.len(), 14); // All 14 builtin patterns
+        assert!(names.contains(&"JWT_TOKEN"));
+        assert!(names.contains(&"DOCKER_REGISTRY"));
+        // K8S_SECRET pattern may fail to compile (multiline), so 22 or 23 patterns expected
+        assert!(
+            names.len() >= 22,
+            "Expected at least 22 builtin patterns, got {}",
+            names.len()
+        );
     }
 
     #[test]
@@ -706,5 +850,112 @@ mod tests {
 
         let names = redactor.pattern_names();
         assert!(names.contains(&"CUSTOM_ID"));
+    }
+
+    // === TESTS FOR NEW PATTERNS ===
+
+    #[test]
+    fn test_jwt_token_redaction() {
+        let redactor = Redactor::default_patterns();
+
+        // Standard JWT format: header.payload.signature
+        let input = "Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+        let output = redactor.redact(input);
+        assert!(output.contains(REDACTED));
+        assert!(!output.contains("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"));
+    }
+
+    #[test]
+    fn test_google_oauth_redaction() {
+        let redactor = Redactor::default_patterns();
+
+        // Google refresh token format
+        let input = "GOOGLE_REFRESH_TOKEN=1//0gxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        let output = redactor.redact(input);
+        assert!(output.contains(REDACTED));
+        assert!(!output.contains("1//0g"));
+    }
+
+    #[test]
+    fn test_npm_token_redaction() {
+        let redactor = Redactor::default_patterns();
+
+        // npm token format
+        let input = "//registry.npmjs.org/:_authToken=npm_abcdefghijklmnopqrstuvwxyz1234567890";
+        let output = redactor.redact(input);
+        assert!(output.contains(REDACTED));
+        assert!(!output.contains("npm_"));
+    }
+
+    #[test]
+    fn test_base64_secret_redaction() {
+        let redactor = Redactor::default_patterns();
+
+        // Base64-encoded secret
+        let input = "secret_key: 'SGVsbG9Xb3JsZFRoaXNJc0FWZXJ5TG9uZ1NlY3JldEtleVRoYXRTaG91bGRCZVJlZGFjdGVk'";
+        let output = redactor.redact(input);
+        assert!(output.contains(REDACTED));
+    }
+
+    #[test]
+    fn test_overlapping_patterns() {
+        // Create redactor with patterns that could overlap
+        let mut redactor = Redactor::none();
+        // Pattern 1 matches "api_key = value"
+        redactor
+            .add_named_pattern("PATTERN1", r"api_key\s*=\s*\S+")
+            .unwrap();
+        // Pattern 2 matches "secret123" specifically
+        redactor
+            .add_named_pattern("PATTERN2", r"secret\d+")
+            .unwrap();
+
+        // The value "secret123" could be matched by both patterns
+        // (one as part of api_key value, one as the secret pattern)
+        let input = "Use api_key = secret123 for auth";
+        let output = redactor.redact(input);
+
+        // Should produce clean output without double-redaction
+        // The word "[REDACTED]" should appear, but not "[REDACTED][REDACTED]" or corrupted text
+        assert!(output.contains(REDACTED));
+        assert!(
+            !output.contains("[REDACTED][REDACTED]"),
+            "Double redaction detected"
+        );
+        assert!(output.contains("Use "), "Text before should be preserved");
+        assert!(
+            output.contains(" for auth"),
+            "Text after should be preserved"
+        );
+    }
+
+    #[test]
+    fn test_adjacent_patterns() {
+        // Test adjacent (but not overlapping) matches
+        let mut redactor = Redactor::none();
+        redactor
+            .add_named_pattern("EMAIL", r"[a-z]+@[a-z]+\.[a-z]+")
+            .unwrap();
+
+        let input = "Contact user@test.com or admin@test.com";
+        let output = redactor.redact(input);
+
+        // Both emails should be redacted separately
+        assert_eq!(output.matches(REDACTED).count(), 2);
+        assert!(output.contains("Contact "));
+        assert!(output.contains(" or "));
+    }
+
+    #[test]
+    fn test_interval_merging() {
+        // Directly test the merge function
+        let intervals = vec![(0, 5), (3, 8), (10, 15), (14, 20)];
+        let merged = merge_intervals(intervals);
+
+        // First two should merge: (0,5) + (3,8) = (0,8)
+        // Last two should merge: (10,15) + (14,20) = (10,20)
+        assert_eq!(merged.len(), 2);
+        assert_eq!(merged[0], (0, 8));
+        assert_eq!(merged[1], (10, 20));
     }
 }

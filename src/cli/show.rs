@@ -22,15 +22,26 @@ pub struct ShowArgs {
 /// Run the show command
 pub fn run(args: ShowArgs) -> Result<()> {
     // Open repository
-    let repo = Repository::discover(".").context("Not in a git repository")?;
+    let repo = Repository::discover(".").context(
+        "Not in a git repository. \
+         Run 'git init' to create one, or 'cd' to a directory containing a .git folder.",
+    )?;
 
     // Resolve commit reference
-    let obj = repo
-        .revparse_single(&args.commit)
-        .with_context(|| format!("Failed to resolve: {}", args.commit))?;
+    let obj = repo.revparse_single(&args.commit).with_context(|| {
+        format!(
+            "Failed to resolve '{}'. \n\
+                 Suggestions:\n  \
+                 - Use a valid commit SHA: whogitit show abc1234\n  \
+                 - Use HEAD for latest: whogitit show HEAD\n  \
+                 - Use a branch name: whogitit show main\n  \
+                 - Use HEAD~N for parent: whogitit show HEAD~1",
+            args.commit
+        )
+    })?;
     let commit = obj
         .peel_to_commit()
-        .with_context(|| format!("Not a valid commit: {}", args.commit))?;
+        .with_context(|| format!("'{}' is not a valid commit reference", args.commit))?;
 
     let commit_id = commit.id().to_string();
     // Safe substring: commit IDs are hex strings (ASCII), but we still use min() for safety

@@ -128,6 +128,23 @@ impl CaptureHook {
         if relative_path.is_empty() {
             anyhow::bail!("Empty file path");
         }
+
+        // Check for path traversal attempts
+        if relative_path.contains("..") {
+            anyhow::bail!(
+                "Path traversal detected in file path: '{}'. Paths containing '..' are not allowed.",
+                relative_path
+            );
+        }
+
+        // Check for absolute paths that escaped normalization
+        if relative_path.starts_with('/') {
+            anyhow::bail!(
+                "Absolute path not allowed: '{}'. Paths must be relative to repository root.",
+                relative_path
+            );
+        }
+
         if input.new_content.is_empty() && input.tool != "Delete" {
             eprintln!("whogitit: Warning - empty new_content for non-delete operation");
         }
@@ -171,14 +188,71 @@ impl CaptureHook {
     }
 
     /// Get file content from git HEAD (the last committed version)
+    ///
+    /// Returns None for new files or if git operations fail.
+    /// Logs warnings for unexpected failures to aid debugging.
     fn get_content_from_git_head(&self, path: &str) -> Option<String> {
-        let repo = Repository::open(&self.repo_root).ok()?;
-        let head = repo.head().ok()?.peel_to_commit().ok()?;
-        let tree = head.tree().ok()?;
-        let entry = tree.get_path(std::path::Path::new(path)).ok()?;
-        let blob = repo.find_blob(entry.id()).ok()?;
-        let content = std::str::from_utf8(blob.content()).ok()?;
-        Some(content.to_string())
+        let repo = match Repository::open(&self.repo_root) {
+            Ok(r) => r,
+            Err(e) => {
+                eprintln!(
+                    "whogitit: Warning - failed to open repository at '{}': {}",
+                    self.repo_root.display(),
+                    e
+                );
+                return None;
+            }
+        };
+
+        let head = match repo.head() {
+            Ok(h) => h,
+            Err(e) => {
+                // HEAD not existing is normal for new repos with no commits
+                if e.code() != git2::ErrorCode::UnbornBranch {
+                    eprintln!("whogitit: Warning - failed to get HEAD: {}", e);
+                }
+                return None;
+            }
+        };
+
+        let commit = match head.peel_to_commit() {
+            Ok(c) => c,
+            Err(e) => {
+                eprintln!("whogitit: Warning - failed to peel HEAD to commit: {}", e);
+                return None;
+            }
+        };
+
+        let tree = match commit.tree() {
+            Ok(t) => t,
+            Err(e) => {
+                eprintln!("whogitit: Warning - failed to get commit tree: {}", e);
+                return None;
+            }
+        };
+
+        // File not existing in HEAD is normal for new files - don't warn
+        let entry = match tree.get_path(std::path::Path::new(path)) {
+            Ok(e) => e,
+            Err(_) => return None, // New file, not in HEAD
+        };
+
+        let blob = match repo.find_blob(entry.id()) {
+            Ok(b) => b,
+            Err(e) => {
+                eprintln!(
+                    "whogitit: Warning - failed to read blob for '{}': {}",
+                    path, e
+                );
+                return None;
+            }
+        };
+
+        // Non-UTF8 content is valid for binary files - don't treat as error
+        match std::str::from_utf8(blob.content()) {
+            Ok(content) => Some(content.to_string()),
+            Err(_) => None, // Binary file
+        }
     }
 
     /// Handle post-commit: perform three-way analysis, attach notes, and clean up

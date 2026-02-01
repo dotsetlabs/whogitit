@@ -241,25 +241,35 @@ fn run_init(args: InitArgs) -> Result<()> {
     Ok(())
 }
 
+/// Marker comment to identify whogitit hook sections
+const WHOGITIT_MARKER_START: &str = "# >>> whogitit hook start >>>";
+const WHOGITIT_MARKER_END: &str = "# <<< whogitit hook end <<<";
+
 fn install_post_commit_hook(hooks_dir: &std::path::Path) -> Result<()> {
     let hook_path = hooks_dir.join("post-commit");
 
     if hook_path.exists() {
         let content = fs::read_to_string(&hook_path)?;
-        if content.contains("whogitit") {
+
+        // Check for marker-based or legacy whogitit hook
+        if content.contains(WHOGITIT_MARKER_START) || content.contains("whogitit post-commit") {
             println!("✓ whogitit post-commit hook already installed.");
             return Ok(());
         }
 
-        // Append to existing hook
-        let new_content = format!(
-            "{}\n\n# whogitit post-commit hook\nif command -v whogitit &> /dev/null; then\n    whogitit post-commit 2>/dev/null || true\nfi\n",
-            content.trim_end()
+        // Append to existing hook with markers for idempotency
+        let whogitit_section = format!(
+            "\n\n{}\n# whogitit post-commit hook - Attaches AI attribution notes\nif command -v whogitit &> /dev/null; then\n    whogitit post-commit 2>/dev/null || true\nfi\n{}\n",
+            WHOGITIT_MARKER_START,
+            WHOGITIT_MARKER_END
         );
+        let new_content = format!("{}{}", content.trim_end(), whogitit_section);
         fs::write(&hook_path, new_content)?;
         println!("✓ Added whogitit to existing post-commit hook.");
     } else {
-        let hook_content = r#"#!/bin/bash
+        let hook_content = format!(
+            r#"#!/bin/bash
+{}
 # whogitit post-commit hook
 # Attaches AI attribution notes to the commit
 
@@ -268,7 +278,10 @@ if command -v whogitit &> /dev/null; then
 elif [[ -x "$HOME/.cargo/bin/whogitit" ]]; then
     "$HOME/.cargo/bin/whogitit" post-commit 2>/dev/null || true
 fi
-"#;
+{}
+"#,
+            WHOGITIT_MARKER_START, WHOGITIT_MARKER_END
+        );
         fs::write(&hook_path, hook_content)?;
         make_executable(&hook_path)?;
         println!("✓ Installed whogitit post-commit hook.");
@@ -282,20 +295,26 @@ fn install_pre_push_hook(hooks_dir: &std::path::Path) -> Result<()> {
 
     if hook_path.exists() {
         let content = fs::read_to_string(&hook_path)?;
-        if content.contains("whogitit") {
+
+        // Check for marker-based or legacy whogitit hook
+        if content.contains(WHOGITIT_MARKER_START) || content.contains("WHOGITIT_PUSHING_NOTES") {
             println!("✓ whogitit pre-push hook already installed.");
             return Ok(());
         }
 
-        // Append to existing hook
-        let new_content = format!(
-            "{}\n\n# whogitit pre-push hook - automatically push notes\n# Skip if already pushing notes (prevent recursion)\n[[ \"$WHOGITIT_PUSHING_NOTES\" == \"1\" ]] && exit 0\nremote=\"$1\"\nif git notes --ref=whogitit list &>/dev/null; then\n    WHOGITIT_PUSHING_NOTES=1 git push \"$remote\" refs/notes/whogitit 2>/dev/null || true\nfi\n",
-            content.trim_end()
+        // Append to existing hook with markers for idempotency
+        let whogitit_section = format!(
+            "\n\n{}\n# whogitit pre-push hook - automatically push notes\n# Skip if already pushing notes (prevent recursion)\n[[ \"$WHOGITIT_PUSHING_NOTES\" == \"1\" ]] && exit 0\nremote=\"$1\"\nif git notes --ref=whogitit list &>/dev/null; then\n    WHOGITIT_PUSHING_NOTES=1 git push \"$remote\" refs/notes/whogitit 2>/dev/null || true\nfi\n{}\n",
+            WHOGITIT_MARKER_START,
+            WHOGITIT_MARKER_END
         );
+        let new_content = format!("{}{}", content.trim_end(), whogitit_section);
         fs::write(&hook_path, new_content)?;
         println!("✓ Added whogitit to existing pre-push hook.");
     } else {
-        let hook_content = r#"#!/bin/bash
+        let hook_content = format!(
+            r#"#!/bin/bash
+{}
 # whogitit pre-push hook
 # Automatically pushes whogitit notes alongside regular pushes
 
@@ -308,7 +327,10 @@ remote="$1"
 if git notes --ref=whogitit list &>/dev/null; then
     WHOGITIT_PUSHING_NOTES=1 git push "$remote" refs/notes/whogitit 2>/dev/null || true
 fi
-"#;
+{}
+"#,
+            WHOGITIT_MARKER_START, WHOGITIT_MARKER_END
+        );
         fs::write(&hook_path, hook_content)?;
         make_executable(&hook_path)?;
         println!("✓ Installed whogitit pre-push hook.");

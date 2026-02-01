@@ -6,6 +6,10 @@ use crate::capture::snapshot::{
     FileAttributionResult, FileEditHistory, LineAttribution, LineSource,
 };
 
+/// Default similarity threshold for AIModified detection
+/// This can be overridden via config (analysis.similarity_threshold)
+pub const DEFAULT_SIMILARITY_THRESHOLD: f64 = 0.6;
+
 /// Normalize a line for comparison purposes.
 /// - Trims trailing whitespace (but preserves leading indentation)
 /// - Normalizes line endings
@@ -189,7 +193,7 @@ impl ThreeWayAnalyzer {
 
             // Check if this is similar to an AI line (modified)
             if let Some((edit_id, prompt_idx, similarity)) =
-                find_similar_ai_line(line, &ai_line_map, 0.6)
+                find_similar_ai_line(line, &ai_line_map, DEFAULT_SIMILARITY_THRESHOLD)
             {
                 final_line_sources.insert(
                     idx,

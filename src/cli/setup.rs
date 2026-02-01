@@ -19,25 +19,34 @@ use std::os::unix::fs::PermissionsExt;
 pub const CAPTURE_HOOK_SCRIPT: &str = include_str!("../../hooks/whogitit-capture.sh");
 
 /// Get the Claude configuration directory path
-pub fn claude_config_dir() -> PathBuf {
-    dirs::home_dir()
-        .expect("Could not determine home directory")
-        .join(".claude")
+///
+/// Returns None if home directory cannot be determined (e.g., in containerized environments).
+pub fn claude_config_dir() -> Option<PathBuf> {
+    dirs::home_dir().map(|h| h.join(".claude"))
+}
+
+/// Get the Claude configuration directory path, or error if unavailable
+pub fn claude_config_dir_required() -> Result<PathBuf> {
+    claude_config_dir().ok_or_else(|| {
+        anyhow::anyhow!(
+            "Could not determine home directory. Set HOME environment variable or run with --help for alternatives."
+        )
+    })
 }
 
 /// Get the Claude hooks directory path
-pub fn claude_hooks_dir() -> PathBuf {
-    claude_config_dir().join("hooks")
+pub fn claude_hooks_dir() -> Option<PathBuf> {
+    claude_config_dir().map(|c| c.join("hooks"))
 }
 
 /// Get the Claude settings.json path
-pub fn claude_settings_path() -> PathBuf {
-    claude_config_dir().join("settings.json")
+pub fn claude_settings_path() -> Option<PathBuf> {
+    claude_config_dir().map(|c| c.join("settings.json"))
 }
 
 /// Get the capture hook script path
-pub fn capture_hook_path() -> PathBuf {
-    claude_hooks_dir().join("whogitit-capture.sh")
+pub fn capture_hook_path() -> Option<PathBuf> {
+    claude_hooks_dir().map(|h| h.join("whogitit-capture.sh"))
 }
 
 /// The hook configuration that needs to be in settings.json
@@ -159,9 +168,20 @@ impl SetupStatus {
 
 /// Check the current setup status
 pub fn check_setup_status() -> SetupStatus {
-    let claude_dir = claude_config_dir();
-    let hook_path = capture_hook_path();
-    let settings_path = claude_settings_path();
+    let claude_dir = match claude_config_dir() {
+        Some(dir) => dir,
+        None => {
+            return SetupStatus {
+                hook_script_installed: false,
+                hook_script_executable: false,
+                settings_configured: false,
+                claude_dir_exists: false,
+            };
+        }
+    };
+
+    let hook_path = claude_dir.join("hooks").join("whogitit-capture.sh");
+    let settings_path = claude_dir.join("settings.json");
 
     let claude_dir_exists = claude_dir.exists();
     let hook_script_installed = hook_path.exists();
@@ -201,8 +221,9 @@ pub fn check_setup_status() -> SetupStatus {
 
 /// Install the capture hook script
 fn install_hook_script() -> Result<bool> {
-    let hooks_dir = claude_hooks_dir();
-    let hook_path = capture_hook_path();
+    let hooks_dir =
+        claude_hooks_dir().ok_or_else(|| anyhow::anyhow!("Could not determine home directory"))?;
+    let hook_path = hooks_dir.join("whogitit-capture.sh");
 
     // Create hooks directory if needed
     if !hooks_dir.exists() {
@@ -233,8 +254,9 @@ fn install_hook_script() -> Result<bool> {
 
 /// Configure Claude Code settings.json
 fn configure_settings() -> Result<bool> {
-    let settings_path = claude_settings_path();
-    let claude_dir = claude_config_dir();
+    let claude_dir =
+        claude_config_dir().ok_or_else(|| anyhow::anyhow!("Could not determine home directory"))?;
+    let settings_path = claude_dir.join("settings.json");
 
     // Create .claude directory if needed
     if !claude_dir.exists() {
@@ -372,7 +394,18 @@ fn check_binary() -> DoctorCheck {
 }
 
 fn check_hook_installed() -> DoctorCheck {
-    let hook_path = capture_hook_path();
+    let hook_path = match capture_hook_path() {
+        Some(p) => p,
+        None => {
+            return DoctorCheck {
+                name: "Capture hook",
+                passed: false,
+                message: "Cannot determine home directory".to_string(),
+                fix_hint: Some("Set HOME environment variable".to_string()),
+            }
+        }
+    };
+
     if hook_path.exists() {
         // Also check if it's the current version
         let is_current = fs::read_to_string(&hook_path)
@@ -405,7 +438,18 @@ fn check_hook_installed() -> DoctorCheck {
 }
 
 fn check_hook_executable() -> DoctorCheck {
-    let hook_path = capture_hook_path();
+    let hook_path = match capture_hook_path() {
+        Some(p) => p,
+        None => {
+            return DoctorCheck {
+                name: "Hook permissions",
+                passed: false,
+                message: "Cannot determine home directory".to_string(),
+                fix_hint: Some("Set HOME environment variable".to_string()),
+            }
+        }
+    };
+
     if !hook_path.exists() {
         return DoctorCheck {
             name: "Hook permissions",
@@ -450,7 +494,17 @@ fn check_hook_executable() -> DoctorCheck {
 }
 
 fn check_settings_configured() -> DoctorCheck {
-    let settings_path = claude_settings_path();
+    let settings_path = match claude_settings_path() {
+        Some(p) => p,
+        None => {
+            return DoctorCheck {
+                name: "Claude Code settings",
+                passed: false,
+                message: "Cannot determine home directory".to_string(),
+                fix_hint: Some("Set HOME environment variable".to_string()),
+            }
+        }
+    };
 
     if !settings_path.exists() {
         return DoctorCheck {

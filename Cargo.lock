@@ -1086,6 +1086,7 @@ dependencies = [
  "colored",
  "dirs",
  "git2",
+ "libc",
  "regex",
  "serde",
  "serde_json",

@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
 use super::redaction::{patterns, Redactor};
+use regex;
 
 /// Privacy configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -66,6 +67,33 @@ pub struct WhogititConfig {
     /// Retention settings (for Phase 3)
     #[serde(default)]
     pub retention: Option<RetentionConfig>,
+
+    /// Analysis settings
+    #[serde(default)]
+    pub analysis: AnalysisConfig,
+}
+
+/// Analysis configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct AnalysisConfig {
+    /// Maximum age in hours before a pending buffer is considered stale
+    /// Default: 24 hours
+    pub max_pending_age_hours: u32,
+
+    /// Similarity threshold (0.0-1.0) for detecting AIModified lines
+    /// Lower values mean more aggressive matching, higher values require more similarity
+    /// Default: 0.6
+    pub similarity_threshold: f64,
+}
+
+impl Default for AnalysisConfig {
+    fn default() -> Self {
+        Self {
+            max_pending_age_hours: 24,
+            similarity_threshold: 0.6,
+        }
+    }
 }
 
 /// Data retention configuration (Phase 3)
@@ -144,12 +172,31 @@ impl WhogititConfig {
 
 impl PrivacyConfig {
     /// Build a Redactor from this configuration
+    ///
+    /// Validates all patterns and logs warnings for invalid ones.
+    /// Invalid custom patterns are skipped (with warning).
+    /// Invalid disabled pattern names are also warned about.
     pub fn build_redactor(&self) -> Redactor {
         if !self.enabled {
             return Redactor::none();
         }
 
         let mut named_patterns: Vec<(String, String)> = Vec::new();
+
+        // Validate disabled pattern names
+        let valid_builtin_names: Vec<&str> = patterns::ALL_NAMED.iter().map(|np| np.name).collect();
+        for disabled_name in &self.disabled_patterns {
+            if !valid_builtin_names.contains(&disabled_name.as_str()) {
+                eprintln!(
+                    "whogitit: Warning - disabled pattern '{}' is not a valid builtin pattern name",
+                    disabled_name
+                );
+                eprintln!(
+                    "whogitit: Valid builtin patterns: {}",
+                    valid_builtin_names.join(", ")
+                );
+            }
+        }
 
         // Add builtin patterns (unless disabled)
         if self.use_builtin_patterns {
@@ -160,9 +207,21 @@ impl PrivacyConfig {
             }
         }
 
-        // Add custom patterns
+        // Validate and add custom patterns
         for custom in &self.custom_patterns {
-            named_patterns.push((custom.name.clone(), custom.pattern.clone()));
+            // Validate the regex pattern
+            match regex::Regex::new(&custom.pattern) {
+                Ok(_) => {
+                    named_patterns.push((custom.name.clone(), custom.pattern.clone()));
+                }
+                Err(e) => {
+                    eprintln!(
+                        "whogitit: Warning - invalid custom pattern '{}': {}",
+                        custom.name, e
+                    );
+                    eprintln!("whogitit: Pattern '{}' will be skipped", custom.name);
+                }
+            }
         }
 
         Redactor::with_named_patterns(&named_patterns)
@@ -348,5 +407,50 @@ min_commits = 50
         assert!(!retention.auto_purge);
         assert_eq!(retention.retain_refs.len(), 2);
         assert_eq!(retention.min_commits, Some(50));
+    }
+
+    #[test]
+    fn test_invalid_custom_pattern_validation() {
+        // Config with an invalid regex pattern
+        let config = PrivacyConfig {
+            custom_patterns: vec![
+                PatternConfig {
+                    name: "VALID".to_string(),
+                    pattern: r"\d+".to_string(),
+                    description: None,
+                },
+                PatternConfig {
+                    name: "INVALID".to_string(),
+                    pattern: r"[invalid(".to_string(), // Invalid regex
+                    description: None,
+                },
+            ],
+            ..Default::default()
+        };
+
+        // Build should succeed (skipping invalid pattern)
+        let redactor = config.build_redactor();
+
+        // Only the valid custom pattern should be added (plus builtins)
+        let names = redactor.pattern_names();
+        assert!(names.contains(&"VALID"));
+        assert!(!names.contains(&"INVALID"));
+    }
+
+    #[test]
+    fn test_invalid_disabled_pattern_name() {
+        // Config with an invalid disabled pattern name
+        let config = PrivacyConfig {
+            disabled_patterns: vec!["NOT_A_REAL_PATTERN".to_string()],
+            ..Default::default()
+        };
+
+        // Build should succeed (with warning logged)
+        let redactor = config.build_redactor();
+
+        // Should still have all builtin patterns (nothing was actually disabled)
+        let names = redactor.pattern_names();
+        assert!(names.contains(&"API_KEY"));
+        assert!(names.contains(&"EMAIL"));
     }
 }

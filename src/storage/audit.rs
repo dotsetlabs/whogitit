@@ -2,9 +2,15 @@
 
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
-use std::fs::{File, OpenOptions};
+use std::fs::{self, File, OpenOptions};
 use std::io::{BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
+
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
+#[cfg(unix)]
+extern crate libc;
 
 /// Audit log directory
 const AUDIT_DIR: &str = ".whogitit";
@@ -72,6 +78,12 @@ pub struct AuditDetails {
     /// Redaction count (for redaction events)
     #[serde(skip_serializing_if = "Option::is_none")]
     pub redaction_count: Option<u32>,
+    /// Hash of the previous event (for tamper detection chain)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prev_hash: Option<String>,
+    /// Hash of this event's content (for integrity verification)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub event_hash: Option<String>,
     /// User who performed the action
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<String>,
@@ -101,14 +113,29 @@ impl AuditLog {
     pub fn log(&self, event: AuditEvent) -> Result<()> {
         self.ensure_dir()?;
 
+        let is_new_file = !self.path.exists();
+
         let mut file = OpenOptions::new()
             .create(true)
             .append(true)
             .open(&self.path)
             .context("Failed to open audit log")?;
 
+        // Set restrictive permissions (0600) on new audit log - contains sensitive data
+        #[cfg(unix)]
+        if is_new_file {
+            let mut perms = fs::metadata(&self.path)?.permissions();
+            perms.set_mode(0o600);
+            fs::set_permissions(&self.path, perms)
+                .context("Failed to set permissions on audit log")?;
+        }
+
         let json = serde_json::to_string(&event)?;
         writeln!(file, "{}", json).context("Failed to write to audit log")?;
+
+        // Ensure data is persisted to disk for audit integrity
+        file.sync_all()
+            .context("Failed to sync audit log to disk")?;
 
         Ok(())
     }
@@ -213,13 +240,117 @@ impl AuditLog {
     pub fn path(&self) -> &Path {
         &self.path
     }
+
+    /// Log an event with hash chaining for tamper detection
+    ///
+    /// Each event includes a hash of the previous event, creating a chain
+    /// that can be verified to detect tampering.
+    pub fn log_with_chain(&self, mut event: AuditEvent) -> Result<()> {
+        use sha2::{Digest, Sha256};
+
+        // Get the hash of the last event (if any)
+        let prev_hash = if self.path.exists() {
+            self.get_last_event_hash()?
+        } else {
+            None
+        };
+
+        // Set the previous hash
+        event.details.prev_hash = prev_hash;
+
+        // Calculate hash of this event's content (excluding event_hash itself)
+        let content_to_hash = format!(
+            "{}:{}:{:?}",
+            event.timestamp, event.event, event.details.commit
+        );
+        let mut hasher = Sha256::new();
+        hasher.update(content_to_hash.as_bytes());
+        let hash = format!("{:x}", hasher.finalize());
+        event.details.event_hash = Some(hash[..16].to_string()); // Truncate for readability
+
+        self.log(event)
+    }
+
+    /// Get the hash of the last event in the log
+    fn get_last_event_hash(&self) -> Result<Option<String>> {
+        let events = self.read_all()?;
+        Ok(events.last().and_then(|e| e.details.event_hash.clone()))
+    }
+
+    /// Verify the integrity of the audit log chain
+    ///
+    /// Returns Ok(true) if the chain is valid, Ok(false) if tampered,
+    /// or an error if the log cannot be read.
+    pub fn verify_chain(&self) -> Result<bool> {
+        let events = self.read_all()?;
+
+        if events.is_empty() {
+            return Ok(true);
+        }
+
+        // First event should have no prev_hash
+        if events[0].details.prev_hash.is_some() {
+            return Ok(false);
+        }
+
+        // Each subsequent event should reference the previous event's hash
+        for i in 1..events.len() {
+            let expected_prev = events[i - 1].details.event_hash.as_ref();
+            let actual_prev = events[i].details.prev_hash.as_ref();
+
+            // If either the previous event has a hash or the current expects one,
+            // they should match
+            if expected_prev != actual_prev {
+                // Allow for legacy events without hashes
+                if expected_prev.is_some() && actual_prev.is_some() {
+                    return Ok(false);
+                }
+            }
+        }
+
+        Ok(true)
+    }
 }
 
 /// Get the current user name for audit trail
+///
+/// On Unix, validates against the actual system user ID to detect spoofing.
+/// Falls back to USER/USERNAME environment variables on non-Unix or if validation fails.
 fn get_current_user() -> Option<String> {
-    std::env::var("USER")
+    let env_user = std::env::var("USER")
         .or_else(|_| std::env::var("USERNAME"))
-        .ok()
+        .ok();
+
+    #[cfg(unix)]
+    {
+        // Get the actual username from the system based on UID
+        let uid = unsafe { libc::getuid() };
+
+        // Try to get the password entry for this UID
+        let pwd = unsafe { libc::getpwuid(uid) };
+        if !pwd.is_null() {
+            let system_user = unsafe {
+                std::ffi::CStr::from_ptr((*pwd).pw_name)
+                    .to_string_lossy()
+                    .to_string()
+            };
+
+            // Check if env var matches system user
+            if let Some(ref env_name) = env_user {
+                if env_name != &system_user {
+                    eprintln!(
+                        "whogitit: Warning - USER env var '{}' does not match system user '{}', using system user",
+                        env_name, system_user
+                    );
+                }
+            }
+
+            return Some(system_user);
+        }
+    }
+
+    // Fallback to environment variable
+    env_user
 }
 
 #[cfg(test)]

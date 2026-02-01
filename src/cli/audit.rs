@@ -50,9 +50,12 @@ pub fn run(args: AuditArgs) -> Result<()> {
 
     // Read events
     let mut events = if let Some(since_str) = &args.since {
-        let since_date =
-            chrono::NaiveDate::parse_from_str(since_str, "%Y-%m-%d").context("Invalid date")?;
-        let since = since_date.and_hms_opt(0, 0, 0).unwrap().and_utc();
+        let since_date = chrono::NaiveDate::parse_from_str(since_str, "%Y-%m-%d")
+            .context("Invalid date format. Use YYYY-MM-DD.")?;
+        let since = since_date
+            .and_hms_opt(0, 0, 0)
+            .ok_or_else(|| anyhow::anyhow!("Invalid time for date {}", since_str))?
+            .and_utc();
         audit_log.read_since(since)?
     } else {
         audit_log.read_all()?

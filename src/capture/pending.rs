@@ -3,6 +3,15 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+#[cfg(unix)]
+use std::os::unix::fs::PermissionsExt;
+
+#[cfg(unix)]
+use std::os::unix::io::AsRawFd;
+
+#[cfg(unix)]
+extern crate libc;
+
 use anyhow::{Context, Result};
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
@@ -15,8 +24,9 @@ use crate::privacy::redaction::{RedactionEvent, Redactor};
 /// Pending change buffer filename (v2 format with full snapshots)
 const PENDING_FILE: &str = ".whogitit-pending.json";
 
-/// Maximum age in hours before a pending buffer is considered stale
-const MAX_PENDING_AGE_HOURS: i64 = 24;
+/// Default maximum age in hours before a pending buffer is considered stale
+/// This can be overridden via config (analysis.max_pending_age_hours)
+pub const DEFAULT_MAX_PENDING_AGE_HOURS: i64 = 24;
 
 /// Session metadata for the current AI session
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -296,11 +306,16 @@ impl PendingBuffer {
         self.session.prompts.iter().find(|p| p.index == index)
     }
 
-    /// Check if this buffer is stale (older than MAX_PENDING_AGE_HOURS)
+    /// Check if this buffer is stale (older than specified hours)
     pub fn is_stale(&self) -> bool {
+        self.is_stale_hours(DEFAULT_MAX_PENDING_AGE_HOURS)
+    }
+
+    /// Check if this buffer is stale with a custom hour threshold
+    pub fn is_stale_hours(&self, max_hours: i64) -> bool {
         if let Ok(started) = DateTime::parse_from_rfc3339(&self.session.started_at) {
             let age = Utc::now().signed_duration_since(started);
-            age > Duration::hours(MAX_PENDING_AGE_HOURS)
+            age > Duration::hours(max_hours)
         } else {
             // If we can't parse the timestamp, consider it stale
             true
@@ -355,12 +370,76 @@ impl PendingBuffer {
     }
 }
 
+/// Lock file name for concurrent access protection
+const LOCK_FILE: &str = ".whogitit-pending.lock";
+
+/// Acquire an exclusive file lock (Unix only)
+/// Returns a guard that releases the lock when dropped
+#[cfg(unix)]
+fn acquire_lock(lock_path: &Path) -> Result<File> {
+    use std::io::ErrorKind;
+
+    // Create or open lock file
+    let lock_file = File::create(lock_path).context("Failed to create lock file")?;
+
+    // Try to acquire exclusive lock with timeout
+    // Use non-blocking first to detect contention
+    let fd = lock_file.as_raw_fd();
+
+    // First try non-blocking
+    let result = unsafe { libc::flock(fd, libc::LOCK_EX | libc::LOCK_NB) };
+
+    if result != 0 {
+        let err = std::io::Error::last_os_error();
+        if err.kind() == ErrorKind::WouldBlock {
+            eprintln!(
+                "whogitit: Warning - another process is accessing the pending buffer, waiting..."
+            );
+            // Now do a blocking lock
+            let result = unsafe { libc::flock(fd, libc::LOCK_EX) };
+            if result != 0 {
+                return Err(std::io::Error::last_os_error())
+                    .context("Failed to acquire lock on pending buffer");
+            }
+        } else {
+            return Err(err).context("Failed to acquire lock on pending buffer");
+        }
+    }
+
+    Ok(lock_file)
+}
+
+/// No-op lock acquisition for non-Unix platforms
+#[cfg(not(unix))]
+fn acquire_lock(_lock_path: &Path) -> Result<File> {
+    // On non-Unix platforms, create a marker file but don't actually lock
+    // This provides some protection via file existence check
+    File::create(_lock_path).context("Failed to create lock file")
+}
+
+/// Release a file lock
+#[cfg(unix)]
+fn release_lock(lock_file: &File) {
+    let fd = lock_file.as_raw_fd();
+    unsafe {
+        libc::flock(fd, libc::LOCK_UN);
+    }
+}
+
+/// No-op lock release for non-Unix platforms
+#[cfg(not(unix))]
+fn release_lock(_lock_file: &File) {
+    // No-op on non-Unix
+}
+
 /// Manager for persisting pending buffer to disk
 pub struct PendingStore {
     /// Path to the pending file
     file_path: PathBuf,
     /// Path to the repo root
     repo_root: PathBuf,
+    /// Path to the lock file
+    lock_path: PathBuf,
 }
 
 impl PendingStore {
@@ -369,6 +448,7 @@ impl PendingStore {
         Self {
             file_path: repo_root.join(PENDING_FILE),
             repo_root: repo_root.to_path_buf(),
+            lock_path: repo_root.join(LOCK_FILE),
         }
     }
 
@@ -378,8 +458,14 @@ impl PendingStore {
             return Ok(None);
         }
 
+        // Acquire lock for concurrent access protection
+        let lock_file = acquire_lock(&self.lock_path)?;
+
         let content =
             fs::read_to_string(&self.file_path).context("Failed to read pending buffer file")?;
+
+        // Release lock before returning
+        release_lock(&lock_file);
 
         // Try to parse as v2 format
         match serde_json::from_str::<PendingBuffer>(&content) {
@@ -406,9 +492,37 @@ impl PendingStore {
             }
             Err(e) => {
                 eprintln!("whogitit: Warning - failed to parse pending buffer: {}", e);
-                eprintln!("whogitit: The file may be corrupted. Run 'whogitit clear' to reset.");
-                // Return None to allow fresh start, but don't delete the file
-                // in case the user wants to recover it
+
+                // Create a backup of the corrupted file for recovery
+                let backup_name = format!(
+                    ".whogitit-pending.corrupted.{}",
+                    chrono::Utc::now().format("%Y%m%d-%H%M%S")
+                );
+                let backup_path = self.repo_root.join(&backup_name);
+                if let Err(backup_err) = fs::copy(&self.file_path, &backup_path) {
+                    eprintln!(
+                        "whogitit: Warning - failed to backup corrupted file: {}",
+                        backup_err
+                    );
+                } else {
+                    eprintln!(
+                        "whogitit: Corrupted file backed up to: {}",
+                        backup_path.display()
+                    );
+
+                    // Set restrictive permissions on backup
+                    #[cfg(unix)]
+                    {
+                        if let Ok(metadata) = fs::metadata(&backup_path) {
+                            let mut perms = metadata.permissions();
+                            perms.set_mode(0o600);
+                            let _ = fs::set_permissions(&backup_path, perms);
+                        }
+                    }
+                }
+
+                eprintln!("whogitit: Run 'whogitit clear' to reset and start fresh.");
+                // Return None to allow fresh start
                 Ok(None)
             }
         }
@@ -433,11 +547,15 @@ impl PendingStore {
     ///
     /// Uses write-to-temp-then-rename pattern to prevent corruption
     /// if the process is interrupted during write.
+    /// Also uses file locking for concurrent access protection.
     pub fn save(&self, buffer: &PendingBuffer) -> Result<()> {
         // Validate before saving
         if let Err(e) = buffer.validate() {
             anyhow::bail!("Cannot save invalid buffer: {}", e);
         }
+
+        // Acquire lock for concurrent access protection
+        let lock_file = acquire_lock(&self.lock_path)?;
 
         let content =
             serde_json::to_string_pretty(buffer).context("Failed to serialize pending buffer")?;
@@ -461,6 +579,18 @@ impl PendingStore {
         // Atomically rename temp file to final path
         fs::rename(&temp_path, &self.file_path)
             .context("Failed to rename temporary pending buffer file")?;
+
+        // Set restrictive permissions (0600) - pending buffer contains sensitive data
+        #[cfg(unix)]
+        {
+            let mut perms = fs::metadata(&self.file_path)?.permissions();
+            perms.set_mode(0o600);
+            fs::set_permissions(&self.file_path, perms)
+                .context("Failed to set permissions on pending buffer file")?;
+        }
+
+        // Release lock
+        release_lock(&lock_file);
 
         Ok(())
     }
@@ -503,6 +633,15 @@ impl PendingStore {
 
         fs::copy(&self.file_path, &backup_path)
             .context("Failed to create backup of pending buffer")?;
+
+        // Set restrictive permissions (0600) on backup - contains sensitive data
+        #[cfg(unix)]
+        {
+            let mut perms = fs::metadata(&backup_path)?.permissions();
+            perms.set_mode(0o600);
+            fs::set_permissions(&backup_path, perms)
+                .context("Failed to set permissions on backup file")?;
+        }
 
         Ok(Some(backup_path))
     }
