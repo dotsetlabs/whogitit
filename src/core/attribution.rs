@@ -323,4 +323,209 @@ mod tests {
         assert_eq!(parsed.files.len(), 1);
         assert_eq!(parsed.prompts.len(), 1);
     }
+
+    #[test]
+    fn test_blame_result_ai_percentage() {
+        let result = BlameResult {
+            path: "test.rs".to_string(),
+            revision: "HEAD".to_string(),
+            lines: vec![
+                create_test_line(
+                    1,
+                    LineSource::AI {
+                        edit_id: "e1".to_string(),
+                    },
+                ),
+                create_test_line(
+                    2,
+                    LineSource::AI {
+                        edit_id: "e1".to_string(),
+                    },
+                ),
+                create_test_line(3, LineSource::Human),
+                create_test_line(4, LineSource::Original),
+            ],
+        };
+
+        // 2 AI out of 4 = 50%
+        assert!((result.ai_percentage() - 50.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_blame_result_ai_percentage_empty() {
+        let result = BlameResult {
+            path: "test.rs".to_string(),
+            revision: "HEAD".to_string(),
+            lines: vec![],
+        };
+
+        assert!((result.ai_percentage() - 0.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_blame_result_ai_percentage_all_ai() {
+        let result = BlameResult {
+            path: "test.rs".to_string(),
+            revision: "HEAD".to_string(),
+            lines: vec![
+                create_test_line(
+                    1,
+                    LineSource::AI {
+                        edit_id: "e1".to_string(),
+                    },
+                ),
+                create_test_line(
+                    2,
+                    LineSource::AIModified {
+                        edit_id: "e1".to_string(),
+                        similarity: 0.8,
+                    },
+                ),
+            ],
+        };
+
+        // Both are AI (AI + AIModified)
+        assert!((result.ai_percentage() - 100.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_blame_result_pure_ai_vs_modified() {
+        let result = BlameResult {
+            path: "test.rs".to_string(),
+            revision: "HEAD".to_string(),
+            lines: vec![
+                create_test_line(
+                    1,
+                    LineSource::AI {
+                        edit_id: "e1".to_string(),
+                    },
+                ),
+                create_test_line(
+                    2,
+                    LineSource::AI {
+                        edit_id: "e1".to_string(),
+                    },
+                ),
+                create_test_line(
+                    3,
+                    LineSource::AIModified {
+                        edit_id: "e2".to_string(),
+                        similarity: 0.9,
+                    },
+                ),
+            ],
+        };
+
+        assert_eq!(result.pure_ai_line_count(), 2);
+        assert_eq!(result.ai_modified_line_count(), 1);
+        assert_eq!(result.ai_line_count(), 3); // Total AI involvement
+    }
+
+    #[test]
+    fn test_get_prompt() {
+        let attribution = AIAttribution {
+            version: 2,
+            session: SessionMetadata {
+                session_id: "test-123".to_string(),
+                model: ModelInfo::claude("claude-opus-4-5-20251101"),
+                started_at: "2026-01-30T10:00:00Z".to_string(),
+                prompt_count: 2,
+                used_plan_mode: false,
+                subagent_count: 0,
+            },
+            prompts: vec![
+                PromptInfo {
+                    index: 0,
+                    text: "First prompt".to_string(),
+                    timestamp: "2026-01-30T10:00:00Z".to_string(),
+                    affected_files: vec!["file1.rs".to_string()],
+                },
+                PromptInfo {
+                    index: 1,
+                    text: "Second prompt".to_string(),
+                    timestamp: "2026-01-30T10:01:00Z".to_string(),
+                    affected_files: vec!["file2.rs".to_string()],
+                },
+            ],
+            files: vec![],
+        };
+
+        assert!(attribution.get_prompt(0).is_some());
+        assert_eq!(attribution.get_prompt(0).unwrap().text, "First prompt");
+
+        assert!(attribution.get_prompt(1).is_some());
+        assert_eq!(attribution.get_prompt(1).unwrap().text, "Second prompt");
+
+        assert!(attribution.get_prompt(2).is_none());
+        assert!(attribution.get_prompt(99).is_none());
+    }
+
+    #[test]
+    fn test_model_info_claude() {
+        let model = ModelInfo::claude("claude-opus-4-5-20251101");
+        assert_eq!(model.id, "claude-opus-4-5-20251101");
+        assert_eq!(model.provider, "anthropic");
+    }
+
+    #[test]
+    fn test_attribution_multiple_files() {
+        let attribution = AIAttribution {
+            version: 2,
+            session: SessionMetadata {
+                session_id: "multi-file".to_string(),
+                model: ModelInfo::claude("claude-opus-4-5-20251101"),
+                started_at: "2026-01-30T10:00:00Z".to_string(),
+                prompt_count: 1,
+                used_plan_mode: false,
+                subagent_count: 0,
+            },
+            prompts: vec![],
+            files: vec![
+                FileAttributionResult {
+                    path: "file1.rs".to_string(),
+                    lines: vec![],
+                    summary: AttributionSummary {
+                        total_lines: 10,
+                        ai_lines: 5,
+                        ai_modified_lines: 2,
+                        human_lines: 2,
+                        original_lines: 1,
+                        unknown_lines: 0,
+                    },
+                },
+                FileAttributionResult {
+                    path: "file2.rs".to_string(),
+                    lines: vec![],
+                    summary: AttributionSummary {
+                        total_lines: 20,
+                        ai_lines: 10,
+                        ai_modified_lines: 3,
+                        human_lines: 5,
+                        original_lines: 2,
+                        unknown_lines: 0,
+                    },
+                },
+            ],
+        };
+
+        // Aggregates across all files
+        assert_eq!(attribution.total_ai_lines(), 15); // 5 + 10
+        assert_eq!(attribution.total_ai_modified_lines(), 5); // 2 + 3
+        assert_eq!(attribution.total_human_lines(), 7); // 2 + 5
+        assert_eq!(attribution.total_original_lines(), 3); // 1 + 2
+    }
+
+    // Helper function
+    fn create_test_line(line_num: u32, source: LineSource) -> BlameLineResult {
+        BlameLineResult {
+            line_number: line_num,
+            content: format!("line{}", line_num),
+            commit_id: "abc123".to_string(),
+            commit_short: "abc123".to_string(),
+            author: "Test".to_string(),
+            source,
+            prompt_index: None,
+            prompt_preview: None,
+        }
+    }
 }

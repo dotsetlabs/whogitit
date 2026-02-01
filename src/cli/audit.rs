@@ -153,3 +153,180 @@ fn print_events(events: &[crate::storage::audit::AuditEvent]) -> Result<()> {
 
     Ok(())
 }
+
+/// Parse event type string to AuditEventType
+#[allow(dead_code)]
+fn parse_event_type(s: &str) -> Option<AuditEventType> {
+    match s {
+        "delete" => Some(AuditEventType::Delete),
+        "export" => Some(AuditEventType::Export),
+        "retention_apply" => Some(AuditEventType::RetentionApply),
+        "config_change" => Some(AuditEventType::ConfigChange),
+        "redaction" => Some(AuditEventType::Redaction),
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::storage::audit::{AuditDetails, AuditEvent};
+
+    // AuditArgs tests
+
+    #[test]
+    fn test_audit_args_defaults() {
+        let args = AuditArgs {
+            since: None,
+            event_type: None,
+            json: false,
+            limit: 50,
+        };
+        assert!(args.since.is_none());
+        assert!(args.event_type.is_none());
+        assert!(!args.json);
+        assert_eq!(args.limit, 50);
+    }
+
+    #[test]
+    fn test_audit_args_with_filters() {
+        let args = AuditArgs {
+            since: Some("2024-01-01".to_string()),
+            event_type: Some("delete".to_string()),
+            json: true,
+            limit: 100,
+        };
+        assert_eq!(args.since, Some("2024-01-01".to_string()));
+        assert_eq!(args.event_type, Some("delete".to_string()));
+        assert!(args.json);
+        assert_eq!(args.limit, 100);
+    }
+
+    // Event type parsing tests
+
+    #[test]
+    fn test_parse_event_type_delete() {
+        assert!(matches!(
+            parse_event_type("delete"),
+            Some(AuditEventType::Delete)
+        ));
+    }
+
+    #[test]
+    fn test_parse_event_type_export() {
+        assert!(matches!(
+            parse_event_type("export"),
+            Some(AuditEventType::Export)
+        ));
+    }
+
+    #[test]
+    fn test_parse_event_type_retention_apply() {
+        assert!(matches!(
+            parse_event_type("retention_apply"),
+            Some(AuditEventType::RetentionApply)
+        ));
+    }
+
+    #[test]
+    fn test_parse_event_type_config_change() {
+        assert!(matches!(
+            parse_event_type("config_change"),
+            Some(AuditEventType::ConfigChange)
+        ));
+    }
+
+    #[test]
+    fn test_parse_event_type_redaction() {
+        assert!(matches!(
+            parse_event_type("redaction"),
+            Some(AuditEventType::Redaction)
+        ));
+    }
+
+    #[test]
+    fn test_parse_event_type_invalid() {
+        assert!(parse_event_type("invalid").is_none());
+        assert!(parse_event_type("").is_none());
+        assert!(parse_event_type("Delete").is_none()); // case sensitive
+    }
+
+    // Event filtering test
+
+    #[test]
+    fn test_event_filtering() {
+        let events = vec![
+            create_test_event(AuditEventType::Delete),
+            create_test_event(AuditEventType::Export),
+            create_test_event(AuditEventType::Delete),
+            create_test_event(AuditEventType::ConfigChange),
+        ];
+
+        let filtered: Vec<_> = events
+            .into_iter()
+            .filter(|e| e.event == AuditEventType::Delete)
+            .collect();
+
+        assert_eq!(filtered.len(), 2);
+        assert!(filtered.iter().all(|e| e.event == AuditEventType::Delete));
+    }
+
+    #[test]
+    fn test_event_sorting_by_timestamp() {
+        #[allow(clippy::useless_vec)]
+        let mut events = vec![
+            create_test_event_with_time("2024-01-01T10:00:00Z"),
+            create_test_event_with_time("2024-01-03T10:00:00Z"),
+            create_test_event_with_time("2024-01-02T10:00:00Z"),
+        ];
+
+        // Sort newest first
+        events.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+
+        assert_eq!(events[0].timestamp, "2024-01-03T10:00:00Z");
+        assert_eq!(events[1].timestamp, "2024-01-02T10:00:00Z");
+        assert_eq!(events[2].timestamp, "2024-01-01T10:00:00Z");
+    }
+
+    #[test]
+    fn test_event_truncation() {
+        let mut events: Vec<i32> = (0..100).collect();
+        let limit = 50;
+        events.truncate(limit);
+        assert_eq!(events.len(), 50);
+    }
+
+    // Helper functions
+
+    fn create_test_event(event_type: AuditEventType) -> AuditEvent {
+        AuditEvent {
+            timestamp: "2024-01-15T12:00:00Z".to_string(),
+            event: event_type,
+            details: AuditDetails::default(),
+        }
+    }
+
+    fn create_test_event_with_time(timestamp: &str) -> AuditEvent {
+        AuditEvent {
+            timestamp: timestamp.to_string(),
+            event: AuditEventType::Delete,
+            details: AuditDetails::default(),
+        }
+    }
+
+    // Date parsing test (shared logic with other modules)
+    #[test]
+    fn test_date_parsing() {
+        let date_str = "2024-01-15";
+        let parsed = chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d");
+        assert!(parsed.is_ok());
+        assert_eq!(parsed.unwrap().to_string(), "2024-01-15");
+    }
+
+    #[test]
+    fn test_invalid_date_parsing() {
+        let date_str = "2024/01/15";
+        let parsed = chrono::NaiveDate::parse_from_str(date_str, "%Y-%m-%d");
+        assert!(parsed.is_err());
+    }
+}

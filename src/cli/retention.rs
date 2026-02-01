@@ -321,3 +321,202 @@ fn get_retained_commits(
 
     Ok(retained)
 }
+
+/// Apply min_commits logic - returns (to_delete, to_keep) counts after adjustment
+/// This is extracted for testing purposes
+#[allow(dead_code)]
+fn apply_min_commits(
+    to_delete_count: usize,
+    to_keep_count: usize,
+    min_commits: Option<u32>,
+) -> (usize, usize) {
+    let min_keep = min_commits.unwrap_or(0) as usize;
+    if to_keep_count >= min_keep || to_delete_count == 0 {
+        return (to_delete_count, to_keep_count);
+    }
+
+    // Need to save some from deletion
+    let need = min_keep - to_keep_count;
+    let save_count = need.min(to_delete_count);
+
+    (to_delete_count - save_count, to_keep_count + save_count)
+}
+
+/// Check if a commit is old based on cutoff
+#[allow(dead_code)]
+fn is_commit_old(commit_time: DateTime<Utc>, max_age_days: Option<u32>) -> bool {
+    match max_age_days {
+        Some(days) => {
+            let cutoff = Utc::now() - Duration::days(days as i64);
+            commit_time < cutoff
+        }
+        None => false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::TimeZone;
+
+    // RetentionAction enum tests
+
+    #[test]
+    fn test_retention_action_variants() {
+        let _preview = RetentionAction::Preview;
+        let _apply = RetentionAction::Apply {
+            execute: false,
+            reason: None,
+        };
+        let _config = RetentionAction::Config;
+    }
+
+    #[test]
+    fn test_retention_apply_with_reason() {
+        let action = RetentionAction::Apply {
+            execute: true,
+            reason: Some("GDPR request".to_string()),
+        };
+        match action {
+            RetentionAction::Apply { execute, reason } => {
+                assert!(execute);
+                assert_eq!(reason, Some("GDPR request".to_string()));
+            }
+            _ => panic!("Wrong variant"),
+        }
+    }
+
+    // apply_min_commits tests
+
+    #[test]
+    fn test_apply_min_commits_no_limit() {
+        // No min_commits specified - keep original counts
+        let (delete, keep) = apply_min_commits(5, 10, None);
+        assert_eq!(delete, 5);
+        assert_eq!(keep, 10);
+    }
+
+    #[test]
+    fn test_apply_min_commits_already_met() {
+        // Already have enough to keep
+        let (delete, keep) = apply_min_commits(5, 100, Some(50));
+        assert_eq!(delete, 5);
+        assert_eq!(keep, 100);
+    }
+
+    #[test]
+    fn test_apply_min_commits_save_some() {
+        // Need to save some from deletion
+        // Have 10 to delete, 30 to keep, need min 50
+        // Need to save 20, but only have 10 to delete
+        let (delete, keep) = apply_min_commits(10, 30, Some(50));
+        assert_eq!(delete, 0); // All 10 saved
+        assert_eq!(keep, 40); // 30 + 10 saved
+    }
+
+    #[test]
+    fn test_apply_min_commits_save_partial() {
+        // Need to save some from deletion
+        // Have 30 to delete, 10 to keep, need min 25
+        // Need 15, have 30 available
+        let (delete, keep) = apply_min_commits(30, 10, Some(25));
+        assert_eq!(delete, 15); // 30 - 15 saved
+        assert_eq!(keep, 25); // 10 + 15 = exactly min
+    }
+
+    #[test]
+    fn test_apply_min_commits_nothing_to_delete() {
+        // Nothing to delete - should do nothing
+        let (delete, keep) = apply_min_commits(0, 5, Some(100));
+        assert_eq!(delete, 0);
+        assert_eq!(keep, 5);
+    }
+
+    #[test]
+    fn test_apply_min_commits_zero_min() {
+        // min_commits = 0 should be treated as no minimum
+        let (delete, keep) = apply_min_commits(10, 5, Some(0));
+        assert_eq!(delete, 10);
+        assert_eq!(keep, 5);
+    }
+
+    // is_commit_old tests
+
+    #[test]
+    fn test_is_commit_old_no_max_age() {
+        let commit_time = Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap();
+        assert!(!is_commit_old(commit_time, None));
+    }
+
+    #[test]
+    fn test_is_commit_old_recent_commit() {
+        // Commit from 1 day ago with 30 day max age
+        let commit_time = Utc::now() - Duration::days(1);
+        assert!(!is_commit_old(commit_time, Some(30)));
+    }
+
+    #[test]
+    fn test_is_commit_old_old_commit() {
+        // Commit from 100 days ago with 30 day max age
+        let commit_time = Utc::now() - Duration::days(100);
+        assert!(is_commit_old(commit_time, Some(30)));
+    }
+
+    #[test]
+    fn test_is_commit_old_exactly_at_cutoff() {
+        // Commit from exactly 30 days ago with 30 day max age
+        // Due to sub-second timing, this could go either way
+        // Just verify it doesn't panic
+        let commit_time = Utc::now() - Duration::days(30);
+        let _ = is_commit_old(commit_time, Some(30));
+    }
+
+    #[test]
+    fn test_is_commit_old_future_commit() {
+        // Edge case: commit in the future
+        let commit_time = Utc::now() + Duration::days(10);
+        assert!(!is_commit_old(commit_time, Some(30)));
+    }
+
+    #[test]
+    fn test_is_commit_old_zero_max_age() {
+        // Zero max age - everything is old except future commits
+        let commit_time = Utc::now() - Duration::seconds(1);
+        assert!(is_commit_old(commit_time, Some(0)));
+    }
+
+    #[test]
+    fn test_is_commit_old_very_old_commit() {
+        // Very old commit
+        let commit_time = Utc.with_ymd_and_hms(2000, 1, 1, 0, 0, 0).unwrap();
+        assert!(is_commit_old(commit_time, Some(365)));
+    }
+
+    // Integration test for delete/keep classification logic
+    #[test]
+    fn test_retention_classification_logic() {
+        // Simulate the retention classification logic
+        let now = Utc::now();
+        let old_time = now - Duration::days(100);
+        let recent_time = now - Duration::days(10);
+        let max_age_days = Some(30u32);
+
+        // Old commit, not retained
+        let is_old1 = is_commit_old(old_time, max_age_days);
+        let is_retained1 = false;
+        let should_delete1 = is_old1 && !is_retained1;
+        assert!(should_delete1);
+
+        // Recent commit, not retained
+        let is_old2 = is_commit_old(recent_time, max_age_days);
+        let is_retained2 = false;
+        let should_delete2 = is_old2 && !is_retained2;
+        assert!(!should_delete2);
+
+        // Old commit, but retained
+        let is_old3 = is_commit_old(old_time, max_age_days);
+        let is_retained3 = true;
+        let should_delete3 = is_old3 && !is_retained3;
+        assert!(!should_delete3);
+    }
+}

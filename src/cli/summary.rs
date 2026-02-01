@@ -439,3 +439,232 @@ fn print_markdown(summary: &AggregateSummary) {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // FileSummary tests
+
+    #[test]
+    fn test_file_summary_additions() {
+        let summary = FileSummary {
+            path: "test.rs".to_string(),
+            ai_lines: 10,
+            ai_modified_lines: 5,
+            human_lines: 3,
+            original_lines: 100,
+            is_new_file: false,
+        };
+        assert_eq!(summary.additions(), 18); // 10 + 5 + 3
+    }
+
+    #[test]
+    fn test_file_summary_ai_additions() {
+        let summary = FileSummary {
+            path: "test.rs".to_string(),
+            ai_lines: 10,
+            ai_modified_lines: 5,
+            human_lines: 3,
+            original_lines: 100,
+            is_new_file: false,
+        };
+        assert_eq!(summary.ai_additions(), 15); // 10 + 5
+    }
+
+    #[test]
+    fn test_file_summary_ai_percent() {
+        let summary = FileSummary {
+            path: "test.rs".to_string(),
+            ai_lines: 10,
+            ai_modified_lines: 10,
+            human_lines: 0,
+            original_lines: 100,
+            is_new_file: false,
+        };
+        // 20 AI additions / 20 total additions = 100%
+        assert!((summary.ai_percent() - 100.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_file_summary_ai_percent_mixed() {
+        let summary = FileSummary {
+            path: "test.rs".to_string(),
+            ai_lines: 5,
+            ai_modified_lines: 5,
+            human_lines: 10,
+            original_lines: 100,
+            is_new_file: false,
+        };
+        // 10 AI additions / 20 total additions = 50%
+        assert!((summary.ai_percent() - 50.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_file_summary_ai_percent_zero_additions() {
+        let summary = FileSummary {
+            path: "test.rs".to_string(),
+            ai_lines: 0,
+            ai_modified_lines: 0,
+            human_lines: 0,
+            original_lines: 100,
+            is_new_file: false,
+        };
+        // Should return 0, not divide by zero
+        assert!((summary.ai_percent() - 0.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_file_summary_new_file_detection() {
+        let new_file = FileSummary {
+            path: "new.rs".to_string(),
+            ai_lines: 100,
+            ai_modified_lines: 0,
+            human_lines: 0,
+            original_lines: 0,
+            is_new_file: true,
+        };
+        assert!(new_file.is_new_file);
+        assert_eq!(new_file.additions(), 100);
+    }
+
+    // AggregateSummary tests
+
+    #[test]
+    fn test_aggregate_summary_defaults() {
+        let summary = AggregateSummary::default();
+        assert_eq!(summary.commits_analyzed, 0);
+        assert_eq!(summary.commits_with_ai, 0);
+        assert_eq!(summary.total_additions(), 0);
+        assert_eq!(summary.ai_additions(), 0);
+        assert!((summary.ai_percentage() - 0.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_aggregate_summary_total_additions() {
+        let summary = AggregateSummary {
+            commits_analyzed: 2,
+            commits_with_ai: 1,
+            total_ai_lines: 50,
+            total_ai_modified_lines: 25,
+            total_human_lines: 25,
+            total_original_lines: 200,
+            file_summaries: vec![],
+            models_used: vec![],
+        };
+        assert_eq!(summary.total_additions(), 100); // 50 + 25 + 25
+    }
+
+    #[test]
+    fn test_aggregate_summary_ai_additions() {
+        let summary = AggregateSummary {
+            commits_analyzed: 2,
+            commits_with_ai: 1,
+            total_ai_lines: 50,
+            total_ai_modified_lines: 25,
+            total_human_lines: 25,
+            total_original_lines: 200,
+            file_summaries: vec![],
+            models_used: vec![],
+        };
+        assert_eq!(summary.ai_additions(), 75); // 50 + 25
+    }
+
+    #[test]
+    fn test_aggregate_summary_ai_percentage() {
+        let summary = AggregateSummary {
+            commits_analyzed: 2,
+            commits_with_ai: 1,
+            total_ai_lines: 50,
+            total_ai_modified_lines: 25,
+            total_human_lines: 25,
+            total_original_lines: 200,
+            file_summaries: vec![],
+            models_used: vec![],
+        };
+        // 75 AI / 100 total = 75%
+        assert!((summary.ai_percentage() - 75.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_aggregate_summary_ai_percentage_zero() {
+        let summary = AggregateSummary {
+            commits_analyzed: 2,
+            commits_with_ai: 0,
+            total_ai_lines: 0,
+            total_ai_modified_lines: 0,
+            total_human_lines: 0,
+            total_original_lines: 0,
+            file_summaries: vec![],
+            models_used: vec![],
+        };
+        assert!((summary.ai_percentage() - 0.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_aggregate_summary_100_percent_ai() {
+        let summary = AggregateSummary {
+            commits_analyzed: 1,
+            commits_with_ai: 1,
+            total_ai_lines: 100,
+            total_ai_modified_lines: 0,
+            total_human_lines: 0,
+            total_original_lines: 0,
+            file_summaries: vec![],
+            models_used: vec!["claude-opus-4-5-20251101".to_string()],
+        };
+        assert!((summary.ai_percentage() - 100.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_aggregate_summary_with_file_summaries() {
+        let summary = AggregateSummary {
+            commits_analyzed: 3,
+            commits_with_ai: 2,
+            total_ai_lines: 80,
+            total_ai_modified_lines: 20,
+            total_human_lines: 50,
+            total_original_lines: 500,
+            file_summaries: vec![
+                FileSummary {
+                    path: "src/main.rs".to_string(),
+                    ai_lines: 50,
+                    ai_modified_lines: 10,
+                    human_lines: 20,
+                    original_lines: 300,
+                    is_new_file: false,
+                },
+                FileSummary {
+                    path: "src/lib.rs".to_string(),
+                    ai_lines: 30,
+                    ai_modified_lines: 10,
+                    human_lines: 30,
+                    original_lines: 200,
+                    is_new_file: false,
+                },
+            ],
+            models_used: vec!["claude-opus-4-5-20251101".to_string()],
+        };
+
+        assert_eq!(summary.file_summaries.len(), 2);
+        assert_eq!(summary.total_additions(), 150); // 80 + 20 + 50
+
+        // Check individual file summaries
+        let main_summary = &summary.file_summaries[0];
+        assert_eq!(main_summary.additions(), 80); // 50 + 10 + 20
+                                                  // 60 AI / 80 total = 75%
+        assert!((main_summary.ai_percent() - 75.0).abs() < 0.001);
+    }
+
+    #[test]
+    fn test_summary_format_values() {
+        // Ensure enum variants exist and default is Pretty
+        let _pretty = SummaryFormat::Pretty;
+        let _json = SummaryFormat::Json;
+        let _markdown = SummaryFormat::Markdown;
+
+        // Test default
+        let default = SummaryFormat::default();
+        assert!(matches!(default, SummaryFormat::Pretty));
+    }
+}

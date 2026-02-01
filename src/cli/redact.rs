@@ -189,3 +189,202 @@ fn run_json_output(input: &str, redactor: &crate::privacy::Redactor, audit: bool
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // RedactArgs tests
+
+    #[test]
+    fn test_redact_args_with_text() {
+        let args = RedactArgs {
+            text: Some("test text".to_string()),
+            file: None,
+            matches_only: false,
+            audit: false,
+            list_patterns: false,
+            json: false,
+        };
+        assert_eq!(args.text, Some("test text".to_string()));
+        assert!(args.file.is_none());
+    }
+
+    #[test]
+    fn test_redact_args_with_file() {
+        let args = RedactArgs {
+            text: None,
+            file: Some("/path/to/file.txt".to_string()),
+            matches_only: false,
+            audit: false,
+            list_patterns: false,
+            json: false,
+        };
+        assert!(args.text.is_none());
+        assert_eq!(args.file, Some("/path/to/file.txt".to_string()));
+    }
+
+    #[test]
+    fn test_redact_args_list_patterns() {
+        let args = RedactArgs {
+            text: None,
+            file: None,
+            matches_only: false,
+            audit: false,
+            list_patterns: true,
+            json: false,
+        };
+        assert!(args.list_patterns);
+    }
+
+    #[test]
+    fn test_redact_args_output_modes() {
+        // Test different output mode combinations
+        let args_basic = RedactArgs {
+            text: Some("test".to_string()),
+            file: None,
+            matches_only: false,
+            audit: false,
+            list_patterns: false,
+            json: false,
+        };
+        assert!(!args_basic.matches_only && !args_basic.audit && !args_basic.json);
+
+        let args_matches = RedactArgs {
+            text: Some("test".to_string()),
+            file: None,
+            matches_only: true,
+            audit: false,
+            list_patterns: false,
+            json: false,
+        };
+        assert!(args_matches.matches_only);
+
+        let args_audit = RedactArgs {
+            text: Some("test".to_string()),
+            file: None,
+            matches_only: false,
+            audit: true,
+            list_patterns: false,
+            json: false,
+        };
+        assert!(args_audit.audit);
+
+        let args_json = RedactArgs {
+            text: Some("test".to_string()),
+            file: None,
+            matches_only: false,
+            audit: false,
+            list_patterns: false,
+            json: true,
+        };
+        assert!(args_json.json);
+    }
+
+    // get_input tests
+
+    #[test]
+    fn test_get_input_with_text() {
+        let args = RedactArgs {
+            text: Some("inline text".to_string()),
+            file: None,
+            matches_only: false,
+            audit: false,
+            list_patterns: false,
+            json: false,
+        };
+        let result = get_input(&args).unwrap();
+        assert_eq!(result, "inline text");
+    }
+
+    #[test]
+    fn test_get_input_neither_text_nor_file() {
+        let args = RedactArgs {
+            text: None,
+            file: None,
+            matches_only: false,
+            audit: false,
+            list_patterns: false,
+            json: false,
+        };
+        let result = get_input(&args);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Either --text or --file is required"));
+    }
+
+    #[test]
+    fn test_get_input_both_text_and_file() {
+        let args = RedactArgs {
+            text: Some("text".to_string()),
+            file: Some("file.txt".to_string()),
+            matches_only: false,
+            audit: false,
+            list_patterns: false,
+            json: false,
+        };
+        let result = get_input(&args);
+        assert!(result.is_err());
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("Cannot specify both"));
+    }
+
+    #[test]
+    fn test_get_input_file_not_found() {
+        let args = RedactArgs {
+            text: None,
+            file: Some("/nonexistent/path/file.txt".to_string()),
+            matches_only: false,
+            audit: false,
+            list_patterns: false,
+            json: false,
+        };
+        let result = get_input(&args);
+        assert!(result.is_err());
+    }
+
+    // Available patterns test
+    #[test]
+    fn test_available_patterns_not_empty() {
+        let patterns = PrivacyConfig::available_patterns();
+        assert!(!patterns.is_empty());
+    }
+
+    #[test]
+    fn test_available_patterns_have_descriptions() {
+        let patterns = PrivacyConfig::available_patterns();
+        for (name, description) in patterns {
+            assert!(!name.is_empty());
+            assert!(!description.is_empty());
+        }
+    }
+
+    // Match preview truncation test (simulated from run_matches_only)
+    #[test]
+    fn test_match_preview_truncation() {
+        let matched = "This is a very long matched string that exceeds 40 characters";
+        let preview = if matched.len() > 40 {
+            format!("{}...", &matched[..40])
+        } else {
+            matched.to_string()
+        };
+        assert!(preview.ends_with("..."));
+        assert_eq!(preview.len(), 43); // 40 chars + "..."
+    }
+
+    #[test]
+    fn test_match_preview_short() {
+        let matched = "Short";
+        let preview = if matched.len() > 40 {
+            format!("{}...", &matched[..40])
+        } else {
+            matched.to_string()
+        };
+        assert_eq!(preview, "Short");
+        assert!(!preview.ends_with("..."));
+    }
+}

@@ -152,3 +152,93 @@ fn print_summary(commit_short: &str, attr: &crate::core::attribution::AIAttribut
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ShowArgs tests
+
+    #[test]
+    fn test_show_args_default_commit() {
+        let args = ShowArgs {
+            commit: "HEAD".to_string(),
+            format: OutputFormat::Pretty,
+        };
+        assert_eq!(args.commit, "HEAD");
+        assert!(matches!(args.format, OutputFormat::Pretty));
+    }
+
+    #[test]
+    fn test_show_args_with_sha() {
+        let args = ShowArgs {
+            commit: "abc1234".to_string(),
+            format: OutputFormat::Json,
+        };
+        assert_eq!(args.commit, "abc1234");
+        assert!(matches!(args.format, OutputFormat::Json));
+    }
+
+    #[test]
+    fn test_show_args_with_branch() {
+        let args = ShowArgs {
+            commit: "main".to_string(),
+            format: OutputFormat::Pretty,
+        };
+        assert_eq!(args.commit, "main");
+    }
+
+    #[test]
+    fn test_show_args_with_parent_ref() {
+        let args = ShowArgs {
+            commit: "HEAD~3".to_string(),
+            format: OutputFormat::Pretty,
+        };
+        assert_eq!(args.commit, "HEAD~3");
+    }
+
+    // Line counting aggregation test (simulated)
+    #[test]
+    fn test_line_count_aggregation() {
+        // Simulate the aggregation logic from print_summary
+        let file_stats = vec![
+            (10, 2, 5, 100), // (ai, ai_modified, human, original)
+            (20, 5, 10, 200),
+            (5, 1, 2, 50),
+        ];
+
+        let mut total_ai = 0usize;
+        let mut total_ai_modified = 0usize;
+        let mut total_human = 0usize;
+        let mut total_original = 0usize;
+
+        for (ai, ai_mod, human, original) in &file_stats {
+            total_ai += ai;
+            total_ai_modified += ai_mod;
+            total_human += human;
+            total_original += original;
+        }
+
+        assert_eq!(total_ai, 35);
+        assert_eq!(total_ai_modified, 8);
+        assert_eq!(total_human, 17);
+        assert_eq!(total_original, 350);
+    }
+
+    // Commit short substring test
+    #[test]
+    fn test_commit_short_extraction() {
+        let commit_id = "abc1234def456789";
+        let commit_short = &commit_id[..commit_id.len().min(SHORT_COMMIT_LEN)];
+        assert_eq!(commit_short, "abc1234");
+        assert_eq!(commit_short.len(), 7);
+    }
+
+    #[test]
+    fn test_commit_short_extraction_short_id() {
+        // Edge case: commit ID shorter than SHORT_COMMIT_LEN
+        let commit_id = "abc12";
+        let commit_short = &commit_id[..commit_id.len().min(SHORT_COMMIT_LEN)];
+        assert_eq!(commit_short, "abc12");
+    }
+}

@@ -108,3 +108,191 @@ pub fn run(args: BlameArgs) -> Result<()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::capture::snapshot::LineSource;
+    use crate::core::attribution::BlameLineResult;
+
+    // BlameArgs tests
+
+    #[test]
+    fn test_blame_args_defaults() {
+        // Verify default values exist in the structure
+        let args = BlameArgs {
+            file: "test.rs".to_string(),
+            revision: None,
+            format: OutputFormat::Pretty,
+            ai_only: false,
+            human_only: false,
+        };
+        assert_eq!(args.file, "test.rs");
+        assert!(args.revision.is_none());
+        assert!(matches!(args.format, OutputFormat::Pretty));
+        assert!(!args.ai_only);
+        assert!(!args.human_only);
+    }
+
+    #[test]
+    fn test_blame_args_with_revision() {
+        let args = BlameArgs {
+            file: "src/main.rs".to_string(),
+            revision: Some("abc1234".to_string()),
+            format: OutputFormat::Json,
+            ai_only: true,
+            human_only: false,
+        };
+        assert_eq!(args.revision, Some("abc1234".to_string()));
+        assert!(matches!(args.format, OutputFormat::Json));
+    }
+
+    // Filter logic tests
+
+    #[test]
+    fn test_ai_only_filter() {
+        let mut lines = vec![
+            create_test_blame_line(
+                1,
+                LineSource::AI {
+                    edit_id: "e1".to_string(),
+                },
+            ),
+            create_test_blame_line(2, LineSource::Human),
+            create_test_blame_line(
+                3,
+                LineSource::AIModified {
+                    edit_id: "e2".to_string(),
+                    similarity: 0.8,
+                },
+            ),
+            create_test_blame_line(4, LineSource::Original),
+        ];
+
+        // Apply ai_only filter
+        lines.retain(|l| l.source.is_ai());
+
+        assert_eq!(lines.len(), 2);
+        assert!(lines[0].source.is_ai());
+        assert!(lines[1].source.is_ai());
+    }
+
+    #[test]
+    fn test_human_only_filter() {
+        let mut lines = vec![
+            create_test_blame_line(
+                1,
+                LineSource::AI {
+                    edit_id: "e1".to_string(),
+                },
+            ),
+            create_test_blame_line(2, LineSource::Human),
+            create_test_blame_line(
+                3,
+                LineSource::AIModified {
+                    edit_id: "e2".to_string(),
+                    similarity: 0.8,
+                },
+            ),
+            create_test_blame_line(4, LineSource::Original),
+        ];
+
+        // Apply human_only filter
+        lines.retain(|l| l.source.is_human());
+
+        assert_eq!(lines.len(), 2);
+        assert!(lines[0].source.is_human());
+        assert!(lines[1].source.is_human());
+    }
+
+    #[test]
+    fn test_no_filter() {
+        #[allow(clippy::useless_vec)]
+        let lines = vec![
+            create_test_blame_line(
+                1,
+                LineSource::AI {
+                    edit_id: "e1".to_string(),
+                },
+            ),
+            create_test_blame_line(2, LineSource::Human),
+            create_test_blame_line(
+                3,
+                LineSource::AIModified {
+                    edit_id: "e2".to_string(),
+                    similarity: 0.8,
+                },
+            ),
+            create_test_blame_line(4, LineSource::Original),
+        ];
+
+        // No filter - all lines retained
+        assert_eq!(lines.len(), 4);
+    }
+
+    #[test]
+    fn test_filter_empty_result() {
+        let mut lines = vec![
+            create_test_blame_line(1, LineSource::Human),
+            create_test_blame_line(2, LineSource::Original),
+        ];
+
+        // Apply ai_only filter on lines with no AI
+        lines.retain(|l| l.source.is_ai());
+
+        assert!(lines.is_empty());
+    }
+
+    // Helper to create test BlameLineResult
+    fn create_test_blame_line(line_num: u32, source: LineSource) -> BlameLineResult {
+        BlameLineResult {
+            line_number: line_num,
+            commit_id: "abc1234567890".to_string(),
+            commit_short: "abc1234".to_string(),
+            author: "Test Author".to_string(),
+            source,
+            content: format!("line {} content", line_num),
+            prompt_index: None,
+            prompt_preview: None,
+        }
+    }
+
+    // OutputFormat tests
+    #[test]
+    fn test_output_format_variants() {
+        let _pretty = OutputFormat::Pretty;
+        let _json = OutputFormat::Json;
+        assert!(matches!(OutputFormat::default(), OutputFormat::Pretty));
+    }
+
+    // LineSource behavior tests
+    #[test]
+    fn test_line_source_is_ai() {
+        assert!(LineSource::AI {
+            edit_id: "e1".to_string()
+        }
+        .is_ai());
+        assert!(LineSource::AIModified {
+            edit_id: "e1".to_string(),
+            similarity: 0.9
+        }
+        .is_ai());
+        assert!(!LineSource::Human.is_ai());
+        assert!(!LineSource::Original.is_ai());
+    }
+
+    #[test]
+    fn test_line_source_is_human() {
+        assert!(!LineSource::AI {
+            edit_id: "e1".to_string()
+        }
+        .is_human());
+        assert!(!LineSource::AIModified {
+            edit_id: "e1".to_string(),
+            similarity: 0.9
+        }
+        .is_human());
+        assert!(LineSource::Human.is_human());
+        assert!(LineSource::Original.is_human());
+    }
+}

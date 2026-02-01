@@ -176,3 +176,127 @@ fn print_prompt_box(
         println!();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // FileLineRef::parse tests
+
+    #[test]
+    fn test_parse_file_with_line() {
+        let result = FileLineRef::parse("src/main.rs:42").unwrap();
+        assert_eq!(result.file, "src/main.rs");
+        assert_eq!(result.line, Some(42));
+    }
+
+    #[test]
+    fn test_parse_file_without_line() {
+        let result = FileLineRef::parse("src/main.rs").unwrap();
+        assert_eq!(result.file, "src/main.rs");
+        assert_eq!(result.line, None);
+    }
+
+    #[test]
+    fn test_parse_file_with_line_1() {
+        let result = FileLineRef::parse("test.rs:1").unwrap();
+        assert_eq!(result.file, "test.rs");
+        assert_eq!(result.line, Some(1));
+    }
+
+    #[test]
+    fn test_parse_file_with_large_line_number() {
+        let result = FileLineRef::parse("test.rs:99999").unwrap();
+        assert_eq!(result.file, "test.rs");
+        assert_eq!(result.line, Some(99999));
+    }
+
+    #[test]
+    fn test_parse_nested_path_with_line() {
+        let result = FileLineRef::parse("src/cli/blame.rs:123").unwrap();
+        assert_eq!(result.file, "src/cli/blame.rs");
+        assert_eq!(result.line, Some(123));
+    }
+
+    #[test]
+    fn test_parse_file_with_colon_in_path() {
+        // Windows-style path C:\file.rs:10 should parse correctly
+        // The last colon followed by a number is the line
+        let result = FileLineRef::parse("C:\\folder\\file.rs:10").unwrap();
+        assert_eq!(result.file, "C:\\folder\\file.rs");
+        assert_eq!(result.line, Some(10));
+    }
+
+    #[test]
+    fn test_parse_file_with_colon_not_number() {
+        // If the part after colon is not a number, treat whole thing as filename
+        let result = FileLineRef::parse("file:name.rs").unwrap();
+        assert_eq!(result.file, "file:name.rs");
+        assert_eq!(result.line, None);
+    }
+
+    #[test]
+    fn test_parse_file_trailing_colon() {
+        // Trailing colon with no number
+        let result = FileLineRef::parse("file.rs:").unwrap();
+        assert_eq!(result.file, "file.rs:");
+        assert_eq!(result.line, None);
+    }
+
+    #[test]
+    fn test_parse_file_with_zero_line() {
+        // Line 0 should still parse
+        let result = FileLineRef::parse("file.rs:0").unwrap();
+        assert_eq!(result.file, "file.rs");
+        assert_eq!(result.line, Some(0));
+    }
+
+    #[test]
+    fn test_parse_absolute_path() {
+        let result = FileLineRef::parse("/home/user/project/src/main.rs:100").unwrap();
+        assert_eq!(result.file, "/home/user/project/src/main.rs");
+        assert_eq!(result.line, Some(100));
+    }
+
+    #[test]
+    fn test_parse_relative_path() {
+        let result = FileLineRef::parse("./src/lib.rs:50").unwrap();
+        assert_eq!(result.file, "./src/lib.rs");
+        assert_eq!(result.line, Some(50));
+    }
+
+    #[test]
+    fn test_parse_parent_dir_path() {
+        let result = FileLineRef::parse("../other/file.rs:25").unwrap();
+        assert_eq!(result.file, "../other/file.rs");
+        assert_eq!(result.line, Some(25));
+    }
+
+    #[test]
+    fn test_parse_empty_string() {
+        let result = FileLineRef::parse("").unwrap();
+        assert_eq!(result.file, "");
+        assert_eq!(result.line, None);
+    }
+
+    // PromptArgs tests
+
+    #[test]
+    fn test_prompt_args_structure() {
+        let args = PromptArgs {
+            reference: "src/main.rs:42".to_string(),
+            json: false,
+        };
+        assert_eq!(args.reference, "src/main.rs:42");
+        assert!(!args.json);
+    }
+
+    #[test]
+    fn test_prompt_args_json_output() {
+        let args = PromptArgs {
+            reference: "file.rs".to_string(),
+            json: true,
+        };
+        assert!(args.json);
+    }
+}

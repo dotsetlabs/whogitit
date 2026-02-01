@@ -181,4 +181,137 @@ mod tests {
         let result = store.fetch_attribution(head.id()).unwrap();
         assert!(result.is_none());
     }
+
+    #[test]
+    fn test_has_attribution() {
+        let (_dir, repo) = create_test_repo();
+        let store = NotesStore::new(&repo).unwrap();
+
+        let head = repo.head().unwrap().peel_to_commit().unwrap();
+
+        // Before storing - should return false
+        assert!(!store.has_attribution(head.id()));
+
+        // Store attribution
+        let attribution = create_minimal_attribution("test-has");
+        store.store_attribution(head.id(), &attribution).unwrap();
+
+        // After storing - should return true
+        assert!(store.has_attribution(head.id()));
+    }
+
+    #[test]
+    fn test_remove_attribution() {
+        let (_dir, repo) = create_test_repo();
+        let store = NotesStore::new(&repo).unwrap();
+
+        let head = repo.head().unwrap().peel_to_commit().unwrap();
+
+        // Store attribution
+        let attribution = create_minimal_attribution("test-remove");
+        store.store_attribution(head.id(), &attribution).unwrap();
+        assert!(store.has_attribution(head.id()));
+
+        // Remove attribution
+        store.remove_attribution(head.id()).unwrap();
+
+        // After removal - should not have attribution
+        assert!(!store.has_attribution(head.id()));
+        assert!(store.fetch_attribution(head.id()).unwrap().is_none());
+    }
+
+    #[test]
+    fn test_list_attributed_commits_empty() {
+        let (_dir, repo) = create_test_repo();
+        let store = NotesStore::new(&repo).unwrap();
+
+        // No commits with attribution
+        let commits = store.list_attributed_commits().unwrap();
+        assert!(commits.is_empty());
+    }
+
+    #[test]
+    fn test_list_attributed_commits() {
+        let (dir, repo) = create_test_repo();
+        let store = NotesStore::new(&repo).unwrap();
+
+        // Get first commit
+        let head = repo.head().unwrap().peel_to_commit().unwrap();
+        let first_commit = head.id();
+
+        // Create another commit
+        let sig = Signature::now("Test", "test@test.com").unwrap();
+        std::fs::write(dir.path().join("test.txt"), "test content").unwrap();
+        let mut index = repo.index().unwrap();
+        index.add_path(std::path::Path::new("test.txt")).unwrap();
+        index.write().unwrap();
+        let tree_id = index.write_tree().unwrap();
+        let tree = repo.find_tree(tree_id).unwrap();
+        let second_commit = repo
+            .commit(
+                Some("HEAD"),
+                &sig,
+                &sig,
+                "Second commit",
+                &tree,
+                &[&repo.find_commit(first_commit).unwrap()],
+            )
+            .unwrap();
+
+        // Store attribution on both commits
+        let attr1 = create_minimal_attribution("session-1");
+        let attr2 = create_minimal_attribution("session-2");
+        store.store_attribution(first_commit, &attr1).unwrap();
+        store.store_attribution(second_commit, &attr2).unwrap();
+
+        // List should return both commits
+        let commits = store.list_attributed_commits().unwrap();
+        assert_eq!(commits.len(), 2);
+        assert!(commits.contains(&first_commit));
+        assert!(commits.contains(&second_commit));
+    }
+
+    #[test]
+    fn test_update_attribution() {
+        let (_dir, repo) = create_test_repo();
+        let store = NotesStore::new(&repo).unwrap();
+
+        let head = repo.head().unwrap().peel_to_commit().unwrap();
+
+        // Store initial attribution
+        let attr1 = create_minimal_attribution("session-v1");
+        store.store_attribution(head.id(), &attr1).unwrap();
+
+        let fetched1 = store.fetch_attribution(head.id()).unwrap().unwrap();
+        assert_eq!(fetched1.session.session_id, "session-v1");
+
+        // Update with new attribution (overwrite mode)
+        let attr2 = create_minimal_attribution("session-v2");
+        store.store_attribution(head.id(), &attr2).unwrap();
+
+        let fetched2 = store.fetch_attribution(head.id()).unwrap().unwrap();
+        assert_eq!(fetched2.session.session_id, "session-v2");
+    }
+
+    #[test]
+    fn test_notes_ref_constant() {
+        assert_eq!(NOTES_REF, "refs/notes/whogitit");
+    }
+
+    // Helper function to create minimal attribution for tests
+    fn create_minimal_attribution(session_id: &str) -> AIAttribution {
+        AIAttribution {
+            version: 2,
+            session: SessionMetadata {
+                session_id: session_id.to_string(),
+                model: ModelInfo::claude("test-model"),
+                started_at: "2026-01-30T10:00:00Z".to_string(),
+                prompt_count: 0,
+                used_plan_mode: false,
+                subagent_count: 0,
+            },
+            prompts: vec![],
+            files: vec![],
+        }
+    }
 }
