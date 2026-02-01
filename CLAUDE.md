@@ -53,12 +53,32 @@ cargo run -- setup              # One-time global setup (Claude Code integration
 cargo run -- doctor             # Verify configuration
 cargo run -- init               # Initialize repository hooks
 
-# Core commands
+# Core attribution commands
 cargo run -- blame src/main.rs
+cargo run -- blame src/main.rs --ai-only
 cargo run -- show HEAD
+cargo run -- show HEAD --format json
 cargo run -- prompt src/main.rs:42
-cargo run -- summary --base main
-cargo run -- status
+cargo run -- summary --base main --format markdown
+
+# Status and utility commands
+cargo run -- status             # Show pending changes
+cargo run -- clear              # Discard pending changes
+
+# Data export and management
+cargo run -- export --format json
+cargo run -- export --since 2024-01-01 --until 2024-12-31
+cargo run -- retention preview
+cargo run -- retention apply --execute
+cargo run -- audit --limit 100
+
+# Developer integration (GitHub, git)
+cargo run -- annotations --base main --head HEAD
+cargo run -- pager              # Read diff from stdin
+
+# Privacy testing
+cargo run -- redact-test --text "api_key=secret"
+cargo run -- redact-test --list-patterns
 ```
 
 ## Architecture Overview
@@ -109,8 +129,11 @@ Git Notes (refs/notes/whogitit)
   - `audit.rs`: AuditLog, AuditEvent - compliance event logging
 
 - **cli/**: Command implementations
-  - `blame.rs`, `show.rs`, `prompt.rs`, `summary.rs` - core commands
+  - `blame.rs`, `show.rs`, `prompt.rs`, `summary.rs` - core attribution commands
+  - `annotations.rs`: GitHub Checks API annotation generation
+  - `pager.rs`: Git diff pager with AI attribution markers
   - `export.rs`: Bulk attribution export (JSON/CSV)
+  - `setup.rs`: Global setup, doctor, and init commands
   - `retention.rs`: Data retention policy management
   - `audit.rs`: Audit log viewing
   - `redact.rs`: Redaction pattern testing

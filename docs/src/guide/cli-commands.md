@@ -4,6 +4,8 @@ whogitit provides a comprehensive CLI for viewing and managing AI attribution da
 
 ## Command Overview
 
+### Core Attribution Commands
+
 | Command | Description |
 |---------|-------------|
 | [`blame`](./commands/blame.md) | Show AI attribution for each line of a file |
@@ -11,13 +13,36 @@ whogitit provides a comprehensive CLI for viewing and managing AI attribution da
 | [`prompt`](./commands/prompt.md) | View the prompt that generated specific lines |
 | [`summary`](./commands/summary.md) | Generate summary for a commit range (PRs) |
 | [`status`](./commands/status.md) | Check pending attribution changes |
+
+### Developer Integration Commands
+
+| Command | Description |
+|---------|-------------|
+| [`annotations`](./commands/annotations.md) | Generate GitHub Checks API annotations |
+| [`pager`](./commands/pager.md) | Annotate git diff output with AI markers |
+
+### Data Management Commands
+
+| Command | Description |
+|---------|-------------|
 | [`export`](./commands/export.md) | Export attribution data as JSON/CSV |
 | [`retention`](./commands/retention.md) | Manage data retention policies |
 | [`audit`](./commands/audit.md) | View the audit log |
-| `setup` | Configure Claude Code integration (one-time) |
-| `doctor` | Verify whogitit configuration |
-| `init` | Initialize whogitit in a repository |
-| `clear` | Discard pending changes without committing |
+| [`clear`](./commands/clear.md) | Discard pending changes without committing |
+
+### Setup Commands
+
+| Command | Description |
+|---------|-------------|
+| [`setup`](./commands/setup.md) | Configure Claude Code integration (one-time) |
+| [`doctor`](./commands/doctor.md) | Verify whogitit configuration |
+| [`init`](./commands/init.md) | Initialize whogitit in a repository |
+
+### Privacy Commands
+
+| Command | Description |
+|---------|-------------|
+| [`redact-test`](./commands/redact-test.md) | Test redaction patterns against text/files |
 
 ## Quick Reference
 
@@ -35,6 +60,23 @@ whogitit show HEAD
 
 # Find prompt that generated a line
 whogitit prompt src/main.rs:42
+
+# Summarize a PR
+whogitit summary --base main --format markdown
+```
+
+### Developer Integration
+
+```bash
+# Generate GitHub Checks annotations for CI
+whogitit annotations --base main --head HEAD
+
+# Use as git pager for AI-annotated diffs
+git config --global core.pager "whogitit pager"
+git diff | whogitit pager
+
+# Create git aliases
+git config --global alias.ai-diff '!git diff | whogitit pager --no-pager'
 ```
 
 ### Managing Data
@@ -67,9 +109,19 @@ whogitit init
 
 # Initialize even if global setup incomplete
 whogitit init --force
+```
 
+### Privacy Testing
+
+```bash
 # Test redaction patterns
-whogitit redact-test "api_key=secret123"
+whogitit redact-test --text "api_key=secret123"
+
+# List available patterns
+whogitit redact-test --list-patterns
+
+# Show what would be redacted
+whogitit redact-test --file .env --matches-only
 ```
 
 ## Global Options
@@ -104,8 +156,23 @@ Many commands support multiple output formats:
 
 Explore each command in detail:
 
+### Core Commands
 - [blame](./commands/blame.md) - Line-level attribution
 - [show](./commands/show.md) - Commit summaries
 - [prompt](./commands/prompt.md) - Prompt lookup
 - [summary](./commands/summary.md) - PR summaries
+
+### Developer Integration
+- [annotations](./commands/annotations.md) - GitHub Checks API
+- [pager](./commands/pager.md) - Git diff annotations
+
+### Data & Privacy
 - [export](./commands/export.md) - Data export
+- [retention](./commands/retention.md) - Data retention
+- [audit](./commands/audit.md) - Audit log
+- [redact-test](./commands/redact-test.md) - Privacy testing
+
+### Setup
+- [setup](./commands/setup.md) - Global configuration
+- [doctor](./commands/doctor.md) - Configuration check
+- [init](./commands/init.md) - Repository setup

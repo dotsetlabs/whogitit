@@ -11,16 +11,21 @@
 # User Guide
 
 - [CLI Commands](./guide/cli-commands.md)
-  - [setup](./guide/commands/setup.md)
-  - [doctor](./guide/commands/doctor.md)
   - [blame](./guide/commands/blame.md)
   - [show](./guide/commands/show.md)
   - [prompt](./guide/commands/prompt.md)
   - [summary](./guide/commands/summary.md)
   - [status](./guide/commands/status.md)
+  - [annotations](./guide/commands/annotations.md)
+  - [pager](./guide/commands/pager.md)
   - [export](./guide/commands/export.md)
   - [retention](./guide/commands/retention.md)
   - [audit](./guide/commands/audit.md)
+  - [clear](./guide/commands/clear.md)
+  - [setup](./guide/commands/setup.md)
+  - [doctor](./guide/commands/doctor.md)
+  - [init](./guide/commands/init.md)
+  - [redact-test](./guide/commands/redact-test.md)
 - [Configuration](./guide/configuration.md)
 - [Privacy & Redaction](./guide/privacy.md)
 

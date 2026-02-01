@@ -225,9 +225,54 @@ whogitit audit --json             # JSON output
 Test redaction patterns against text or files:
 
 ```bash
-whogitit redact-test "text with api_key=secret123"
+whogitit redact-test --text "text with api_key=secret123"
 whogitit redact-test --file config.txt
+whogitit redact-test --list-patterns  # Show available patterns
+whogitit redact-test --text "..." --matches-only  # Show matches without redacting
+whogitit redact-test --text "..." --audit  # Show audit trail
 ```
+
+### `whogitit annotations`
+
+Generate annotations for GitHub Checks API (used by CI):
+
+```bash
+whogitit annotations --base main --head HEAD
+whogitit annotations --format json
+whogitit annotations --consolidate file    # One annotation per file
+whogitit annotations --consolidate lines   # Granular line annotations
+whogitit annotations --max-annotations 50  # GitHub API limit
+```
+
+Options:
+- `--base <commit>` - Base commit (exclusive)
+- `--head <commit>` - Head commit (default: HEAD)
+- `--format github-checks|json` - Output format
+- `--consolidate auto|file|lines` - Consolidation mode (default: auto)
+- `--consolidate-threshold <0.0-1.0>` - AI coverage threshold for auto mode (default: 0.7)
+- `--min-lines <n>` - Minimum AI lines for annotation (default: 1)
+- `--max-annotations <n>` - Maximum annotations (default: 50)
+- `--ai-only` - Only annotate pure AI lines
+
+### `whogitit pager`
+
+Annotate git diff output with AI attribution (use as git pager):
+
+```bash
+# Configure as git pager
+git config --global core.pager "whogitit pager"
+
+# Or use with aliases
+git config --global alias.ai-diff '!git diff | whogitit pager --no-pager'
+git diff | whogitit pager
+
+# Options
+whogitit pager --verbose     # Show model, timestamps
+whogitit pager --no-color    # Disable colors
+whogitit pager --no-pager    # Output directly to stdout
+```
+
+See [Git Integration](docs/src/usage/git-integration.md) for more details.
 
 ## Configuration
 
