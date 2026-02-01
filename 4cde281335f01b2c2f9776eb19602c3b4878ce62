@@ -1,0 +1,748 @@
+{
+  "version": 2,
+  "session": {
+    "session_id": "e300e6a2-32eb-46d2-a1e4-9de1c2647aab",
+    "model": {
+      "id": "claude-opus-4-5-20251101",
+      "provider": "anthropic"
+    },
+    "started_at": "2026-02-01T14:06:43.698869+00:00",
+    "prompt_count": 1
+  },
+  "prompts": [
+    {
+      "index": 0,
+      "text": "\"Check the CI jobs - there's already a failing build step\"",
+      "timestamp": "2026-02-01T14:06:43.698901+00:00",
+      "affected_files": [
+        "Cargo.toml"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "Cargo.toml",
+      "lines": [
+        {
+          "line_number": 1,
+          "content": "[package]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 2,
+          "content": "name = \"whogitit\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 3,
+          "content": "version = \"0.1.0\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 4,
+          "content": "edition = \"2021\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 5,
+          "content": "description = \"Track AI-generated code at line-level granularity\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 6,
+          "content": "license = \"MIT\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 7,
+          "content": "repository = \"https://github.com/dotsetlabs/whogitit\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 8,
+          "content": "homepage = \"https://github.com/dotsetlabs/whogitit\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 9,
+          "content": "readme = \"README.md\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 10,
+          "content": "keywords = [\"git\", \"ai\", \"attribution\", \"cli\", \"blame\"]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 11,
+          "content": "categories = [\"command-line-utilities\", \"development-tools\"]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 12,
+          "content": "rust-version = \"1.70\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 13,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 14,
+          "content": "[dependencies]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 15,
+          "content": "git2 = \"0.18\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 16,
+          "content": "openssl = { version = \"0.10\", features = [\"vendored\"] }",
+          "source": {
+            "type": "AI",
+            "edit_id": "2e4a6680-35cc-4d7b-8f7a-0d2e549d4a42"
+          },
+          "edit_id": "2e4a6680-35cc-4d7b-8f7a-0d2e549d4a42",
+          "prompt_index": 0,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 17,
+          "content": "clap = { version = \"4\", features = [\"derive\"] }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 18,
+          "content": "serde = { version = \"1\", features = [\"derive\"] }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 19,
+          "content": "serde_json = \"1\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 20,
+          "content": "similar = \"2\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 21,
+          "content": "anyhow = \"1\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 22,
+          "content": "chrono = { version = \"0.4\", features = [\"serde\"] }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 23,
+          "content": "sha2 = \"0.10\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 24,
+          "content": "colored = \"2\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 25,
+          "content": "regex = \"1\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 26,
+          "content": "uuid = { version = \"1\", features = [\"v4\"] }",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 27,
+          "content": "toml = \"0.8\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 28,
+          "content": "dirs = \"5\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 29,
+          "content": "atty = \"0.2\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 30,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 31,
+          "content": "[target.'cfg(unix)'.dependencies]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 32,
+          "content": "libc = \"0.2\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 33,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 34,
+          "content": "[dev-dependencies]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 35,
+          "content": "tempfile = \"3\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 36,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 37,
+          "content": "[profile.release]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 38,
+          "content": "lto = \"thin\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 39,
+          "content": "codegen-units = 1",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 40,
+          "content": "strip = true",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 41,
+          "content": "opt-level = 3",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 42,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 43,
+          "content": "# Config for 'cargo dist'",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 44,
+          "content": "[workspace.metadata.dist]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 45,
+          "content": "# The preferred cargo-dist version to use in CI (Conditions to При)",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 46,
+          "content": "cargo-dist-version = \"0.27.0\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 47,
+          "content": "# CI backends to support",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 48,
+          "content": "ci = \"github\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 49,
+          "content": "# The installers to generate for each app",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 50,
+          "content": "installers = [\"shell\", \"powershell\", \"homebrew\"]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 51,
+          "content": "# Target platforms to build for",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 52,
+          "content": "targets = [",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 53,
+          "content": "    \"aarch64-apple-darwin\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 54,
+          "content": "    \"x86_64-apple-darwin\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 55,
+          "content": "    \"aarch64-unknown-linux-gnu\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 56,
+          "content": "    \"x86_64-unknown-linux-gnu\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 57,
+          "content": "    \"x86_64-pc-windows-msvc\",",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 58,
+          "content": "]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 59,
+          "content": "# Path that installers should place binaries in",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 60,
+          "content": "install-path = \"CARGO_HOME\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 61,
+          "content": "# Whether to install an updater program",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 62,
+          "content": "install-updater = false",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 63,
+          "content": "# Publish jobs to run in CI",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 64,
+          "content": "pr-run-mode = \"plan\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 65,
+          "content": "# Whether to auto-include files like README, LICENSE, CHANGELOG",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 66,
+          "content": "auto-includes = true",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 67,
+          "content": "",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 68,
+          "content": "# Homebrew tap configuration",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 69,
+          "content": "[workspace.metadata.dist.homebrew]",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 70,
+          "content": "tap = \"dotsetlabs/homebrew-tap\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        },
+        {
+          "line_number": 71,
+          "content": "formula = \"whogitit\"",
+          "source": {
+            "type": "Original"
+          },
+          "edit_id": null,
+          "prompt_index": null,
+          "confidence": 1.0
+        }
+      ],
+      "summary": {
+        "total_lines": 71,
+        "ai_lines": 1,
+        "ai_modified_lines": 0,
+        "human_lines": 0,
+        "original_lines": 70,
+        "unknown_lines": 0
+      }
+    }
+  ]
+}
