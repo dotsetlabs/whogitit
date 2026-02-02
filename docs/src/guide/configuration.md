@@ -53,6 +53,13 @@ retain_refs = ["refs/heads/main", "refs/heads/release"]
 
 # Keep at least this many commits regardless of age
 min_commits = 100
+
+[analysis]
+# Maximum pending buffer age in hours (default: 24)
+max_pending_age_hours = 24
+
+# Similarity threshold for AIModified detection (default: 0.6)
+similarity_threshold = 0.6
 ```
 
 ## Privacy Section
@@ -74,6 +81,26 @@ use_builtin_patterns = true  # default
 ```
 
 Whether to use the built-in redaction patterns. See [Privacy & Redaction](./privacy.md) for the full list.
+
+## Analysis Section
+
+### max_pending_age_hours
+
+```toml
+[analysis]
+max_pending_age_hours = 24  # default
+```
+
+Controls when the pending buffer is considered stale (used by `whogitit status` and warnings).
+
+### similarity_threshold
+
+```toml
+[analysis]
+similarity_threshold = 0.6  # default
+```
+
+Similarity threshold for detecting AI‑modified lines. Lower values are more aggressive.
 
 ### disabled_patterns
 
@@ -108,7 +135,7 @@ Disable specific built-in patterns by name. Available patterns:
 audit_log = true
 ```
 
-Enable logging of significant events (deletions, exports, etc.) for compliance. Events are logged to `.whogitit/audit.log`.
+Enable logging of significant events (deletions, exports, etc.) for compliance. Events are logged to `.whogitit/audit.jsonl`.
 
 ### custom_patterns
 

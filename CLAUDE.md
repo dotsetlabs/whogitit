@@ -61,6 +61,8 @@ cargo run -- audit --limit 100
 
 # Developer integration (GitHub, git)
 cargo run -- annotations --base main --head HEAD
+cargo run -- annotations --base main --min-ai-lines 5 --sort-by coverage
+cargo run -- annotations --base main --diff-only --group-ai-types
 cargo run -- pager              # Read diff from stdin
 
 # Privacy testing

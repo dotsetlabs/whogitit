@@ -7,30 +7,25 @@
 # For Bash: snapshots all dirty files before command, detects changes after
 
 set -o pipefail
+umask 077
 
-# Enable debug logging
-DEBUG_LOG="/tmp/whogitit-hook-debug.log"
-ERROR_LOG="/tmp/whogitit-hook-errors.log"
+# Enable debug logging when WHOGITIT_HOOK_DEBUG is set
+DEBUG_ENABLED="${WHOGITIT_HOOK_DEBUG:-}"
+DEBUG_LOG=""
+ERROR_LOG=""
 
 log_debug() {
-    echo "$(date '+%Y-%m-%d %H:%M:%S') [$HOOK_PHASE] $1" >> "$DEBUG_LOG"
+    if [[ -n "$DEBUG_ENABLED" && -n "$DEBUG_LOG" ]]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') [$HOOK_PHASE] $1" >> "$DEBUG_LOG"
+    fi
 }
 
 log_error() {
-    echo "$(date '+%Y-%m-%d %H:%M:%S') [$HOOK_PHASE] ERROR: $1" >> "$ERROR_LOG"
+    if [[ -n "$DEBUG_ENABLED" && -n "$ERROR_LOG" ]]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') [$HOOK_PHASE] ERROR: $1" >> "$ERROR_LOG"
+    fi
     log_debug "ERROR: $1"
 }
-
-# State directory for tracking pre-edit content
-STATE_DIR="${TMPDIR:-/tmp}/whogitit-state"
-BASH_STATE_DIR="$STATE_DIR/bash"
-mkdir -p "$STATE_DIR" "$BASH_STATE_DIR" 2>/dev/null || {
-    log_error "Failed to create state directory: $STATE_DIR"
-    exit 0
-}
-
-# Clean up stale state files (older than 1 hour)
-find "$STATE_DIR" -type f -mmin +60 -delete 2>/dev/null
 
 # Read the hook input from stdin
 INPUT=$(cat)
@@ -41,8 +36,6 @@ fi
 
 # Determine hook phase (pre or post)
 HOOK_PHASE="${WHOGITIT_HOOK_PHASE:-post}"
-
-log_debug "Hook started"
 
 # Extract tool name with fallback
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // .tool // ""' 2>/dev/null)
@@ -71,6 +64,23 @@ if [[ -z "$REPO_ROOT" ]]; then
     log_debug "Not in a git repository, skipping"
     exit 0
 fi
+
+# State directory for tracking pre-edit content (repo-local for safety)
+STATE_DIR="$REPO_ROOT/.whogitit/state"
+BASH_STATE_DIR="$STATE_DIR/bash"
+mkdir -p "$STATE_DIR" "$BASH_STATE_DIR" 2>/dev/null || {
+    echo "whogitit: Failed to create state directory: $STATE_DIR" >&2
+    exit 0
+}
+chmod 700 "$STATE_DIR" "$BASH_STATE_DIR" 2>/dev/null || true
+
+DEBUG_LOG="$STATE_DIR/hook-debug.log"
+ERROR_LOG="$STATE_DIR/hook-errors.log"
+
+# Clean up stale state files (older than 1 hour)
+find "$STATE_DIR" -type f -mmin +60 -delete 2>/dev/null
+
+log_debug "Hook started"
 
 # ============================================================================
 # UTILITY FUNCTIONS
@@ -169,8 +179,9 @@ send_to_whogitit() {
     local file_path="$2"
     local prompt="$3"
     local old_content="$4"
-    local new_content="$5"
-    local context_json="$6"
+    local old_content_present="$5"
+    local new_content="$6"
+    local context_json="$7"
 
     local plan_mode is_subagent agent_depth
     plan_mode=$(echo "$context_json" | jq -r '.plan_mode // false')
@@ -178,13 +189,14 @@ send_to_whogitit() {
     agent_depth=$(echo "$context_json" | jq -r '.agent_depth // 0')
 
     local capture_result
-    if [[ -z "$old_content" ]]; then
+    if [[ "$old_content_present" != "1" ]]; then
         log_debug "Sending $file_path as NEW file"
         capture_result=$(jq -n \
             --arg tool "$tool" \
             --arg file_path "$file_path" \
             --arg prompt "$prompt" \
             --arg new_content "$new_content" \
+            --argjson old_content_present false \
             --argjson plan_mode "$plan_mode" \
             --argjson is_subagent "$is_subagent" \
             --argjson agent_depth "$agent_depth" \
@@ -193,6 +205,7 @@ send_to_whogitit() {
                 file_path: $file_path,
                 prompt: $prompt,
                 old_content: null,
+                old_content_present: $old_content_present,
                 new_content: $new_content,
                 context: {
                     plan_mode: $plan_mode,
@@ -208,6 +221,7 @@ send_to_whogitit() {
             --arg prompt "$prompt" \
             --arg old_content "$old_content" \
             --arg new_content "$new_content" \
+            --argjson old_content_present true \
             --argjson plan_mode "$plan_mode" \
             --argjson is_subagent "$is_subagent" \
             --argjson agent_depth "$agent_depth" \
@@ -216,6 +230,7 @@ send_to_whogitit() {
                 file_path: $file_path,
                 prompt: $prompt,
                 old_content: $old_content,
+                old_content_present: $old_content_present,
                 new_content: $new_content,
                 context: {
                     plan_mode: $plan_mode,
@@ -266,8 +281,10 @@ handle_edit_write_post() {
 
     # Get old content from state file
     local old_content=""
+    local old_content_present="0"
     if [[ -f "$state_file" ]]; then
         old_content=$(cat "$state_file" 2>/dev/null)
+        old_content_present="1"
         rm -f "$state_file" 2>/dev/null
     fi
 
@@ -306,7 +323,7 @@ handle_edit_write_post() {
     context_json=$(extract_context_from_transcript "$transcript_path")
 
     # Send to whogitit
-    send_to_whogitit "$tool_name" "$file_path" "$prompt" "$old_content" "$new_content" "$context_json"
+    send_to_whogitit "$tool_name" "$file_path" "$prompt" "$old_content" "$old_content_present" "$new_content" "$context_json"
 }
 
 # ============================================================================
@@ -452,8 +469,10 @@ handle_bash_post() {
 
             # Get old content
             local old_content=""
+            local old_content_present="0"
             if [[ -f "$state_file" ]]; then
                 old_content=$(cat "$state_file" 2>/dev/null)
+                old_content_present="1"
             fi
 
             # Check if file still exists
@@ -470,7 +489,7 @@ handle_bash_post() {
             # Check if changed
             if [[ "$old_content" != "$new_content" ]]; then
                 log_debug "File modified by Bash: $rel_path"
-                send_to_whogitit "Bash" "$abs_path" "$prompt" "$old_content" "$new_content" "$context_json"
+                send_to_whogitit "Bash" "$abs_path" "$prompt" "$old_content" "$old_content_present" "$new_content" "$context_json"
                 changed_count=$((changed_count + 1))
             fi
         done < "$manifest_file"
@@ -506,7 +525,7 @@ handle_bash_post() {
 
         if [[ -n "$new_content" ]]; then
             log_debug "File created by Bash: $rel_path"
-            send_to_whogitit "Bash" "$abs_path" "$prompt" "" "$new_content" "$context_json"
+            send_to_whogitit "Bash" "$abs_path" "$prompt" "" "0" "$new_content" "$context_json"
             created_count=$((created_count + 1))
         fi
     done < <(get_dirty_files)

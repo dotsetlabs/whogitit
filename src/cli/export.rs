@@ -6,6 +6,8 @@ use serde::Serialize;
 use std::io::Write;
 
 use crate::core::attribution::AIAttribution;
+use crate::privacy::WhogititConfig;
+use crate::storage::audit::AuditLog;
 use crate::storage::notes::NotesStore;
 
 /// Arguments for export command
@@ -115,6 +117,9 @@ pub fn run(args: ExportArgs) -> Result<()> {
         "Not in a git repository. \
          Run 'git init' to create one, or 'cd' to a directory containing a .git folder.",
     )?;
+    let repo_root = repo
+        .workdir()
+        .ok_or_else(|| anyhow::anyhow!("No working directory"))?;
     let notes_store = NotesStore::new(&repo)?;
 
     // Parse date filters
@@ -191,6 +196,12 @@ pub fn run(args: ExportArgs) -> Result<()> {
             "Unsupported format: '{}'. Supported formats: json, csv",
             other
         ),
+    }
+
+    let config = WhogititConfig::load(repo_root).unwrap_or_default();
+    if config.privacy.audit_log {
+        let audit_log = AuditLog::new(repo_root);
+        audit_log.log_export(&args.format, output_data.summary.total_commits as u32)?;
     }
 
     Ok(())

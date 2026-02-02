@@ -177,7 +177,10 @@ fn run_status() -> Result<()> {
         }
 
         if status.is_stale {
-            println!("\n⚠️  Warning: This pending buffer is stale (> 24 hours old).");
+            println!(
+                "\n⚠️  Warning: This pending buffer is stale (> {} hours old).",
+                status.max_pending_age_hours
+            );
             println!("   Run 'whogitit clear' if these changes are no longer relevant.");
         } else {
             println!("\nRun 'git commit' to finalize attribution.");
@@ -248,6 +251,7 @@ fn run_init(args: InitArgs) -> Result<()> {
 
     // Configure git to auto-fetch notes
     configure_git_fetch(&repo)?;
+    add_git_exclude(&repo)?;
 
     println!("\nRepository initialized! AI attribution will be tracked for commits in this repo.");
     println!("Notes will be automatically pushed with 'git push' and fetched with 'git fetch'.");
@@ -427,20 +431,70 @@ fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
     let mut config = repo.config().context("Failed to open git config")?;
 
     let fetch_refspec = "+refs/notes/whogitit:refs/notes/whogitit";
-    let fetch_configured = config
-        .get_string("remote.origin.fetch")
-        .map(|v| v.contains("whogitit"))
-        .unwrap_or(false);
+    let mut existing_fetch = Vec::new();
+    if let Ok(entries) = config.entries(Some("remote.origin.fetch")) {
+        entries.for_each(|entry| {
+            if let Some(value) = entry.value() {
+                existing_fetch.push(value.to_string());
+            }
+        })?;
+    }
+    let fetch_configured = existing_fetch.iter().any(|v| v.contains("whogitit"));
 
     if !fetch_configured {
-        config
-            .set_multivar("remote.origin.fetch", "^$", fetch_refspec)
-            .or_else(|_| config.set_str("remote.origin.fetch", fetch_refspec))
-            .context("Failed to configure fetch refspec")?;
+        let result = config.set_multivar("remote.origin.fetch", "^$", fetch_refspec);
+        if result.is_err() {
+            if existing_fetch.is_empty() {
+                config
+                    .set_str("remote.origin.fetch", fetch_refspec)
+                    .context("Failed to configure fetch refspec")?;
+            } else {
+                eprintln!(
+                    "whogitit: Warning - unable to add fetch refspec without overwriting existing settings."
+                );
+                eprintln!("whogitit: Please add this manually:\n  {}", fetch_refspec);
+                return Ok(());
+            }
+        }
         println!("✓ Configured git to fetch whogitit notes automatically.");
     } else {
         println!("✓ Git already configured to fetch whogitit notes.");
     }
+
+    Ok(())
+}
+
+/// Add whogitit artifacts to git exclude list to avoid accidental commits
+fn add_git_exclude(repo: &git2::Repository) -> Result<()> {
+    let git_dir = repo.path();
+    let info_dir = git_dir.join("info");
+    fs::create_dir_all(&info_dir).context("Failed to create .git/info directory")?;
+
+    let exclude_path = info_dir.join("exclude");
+    let existing = fs::read_to_string(&exclude_path).unwrap_or_default();
+
+    if existing.contains("# >>> whogitit ignore >>>") {
+        println!("✓ Git exclude already configured for whogitit artifacts.");
+        return Ok(());
+    }
+
+    let block = [
+        "",
+        "# >>> whogitit ignore >>>",
+        "# whogitit local artifacts",
+        ".whogitit-pending.json",
+        ".whogitit-pending.lock",
+        ".whogitit-pending.tmp",
+        ".whogitit-pending.*",
+        ".whogitit/",
+        "# <<< whogitit ignore <<<",
+        "",
+    ]
+    .join("\n");
+
+    let new_content = format!("{}{}", existing.trim_end(), block);
+    fs::write(&exclude_path, new_content).context("Failed to update git exclude")?;
+    println!("✓ Added whogitit artifacts to .git/info/exclude.");
 
     Ok(())
 }

@@ -328,7 +328,9 @@ jobs:
             const totalAI = parseInt(process.env.TOTAL_AI) || 0;
             const totalAIMod = parseInt(process.env.TOTAL_AI_MODIFIED) || 0;
             const fileCount = parseInt(process.env.FILE_COUNT) || 0;
-            const model = annotationsData.summary?.model || 'unknown';
+            // Handle both old (model) and new (models array) formats
+            const models = annotationsData.summary?.models || (annotationsData.summary?.model ? [annotationsData.summary.model] : []);
+            const model = models.length > 0 ? models.join(', ') : 'unknown';
 
             // Create check run
             const checkRun = await github.rest.checks.create({

@@ -39,6 +39,10 @@ This command should be run once per repository after the global `setup` command 
    - Adds fetch refspec for `refs/notes/whogitit`
    - Notes are automatically fetched on `git fetch`/`git pull`
 
+5. **Updates git exclude**
+   - Adds whogitit local artifacts to `.git/info/exclude`
+   - Prevents accidental commits of `.whogitit-pending.json` and `.whogitit/`
+
 ## Examples
 
 ### Standard initialization

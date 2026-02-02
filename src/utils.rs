@@ -14,11 +14,14 @@ pub const SHORT_COMMIT_LEN: usize = 7;
 
 /// Truncate a string to max length, adding "..." if truncated
 pub fn truncate(s: &str, max: usize) -> String {
-    if s.len() <= max {
-        s.to_string()
-    } else {
-        format!("{}...", &s[..max.saturating_sub(3)])
+    let len = s.chars().count();
+    if len <= max {
+        return s.to_string();
     }
+
+    let keep = max.saturating_sub(3);
+    let truncated: String = s.chars().take(keep).collect();
+    format!("{}...", truncated)
 }
 
 /// Truncate with trimming (for prompts)
@@ -29,17 +32,20 @@ pub fn truncate_prompt(text: &str, max_len: usize) -> String {
 
 /// Pad a string to exactly the given length (truncate or add spaces)
 pub fn pad_right(s: &str, len: usize) -> String {
-    if s.len() >= len {
-        s[..len].to_string()
-    } else {
-        format!("{}{}", s, " ".repeat(len - s.len()))
+    let count = s.chars().count();
+    if count >= len {
+        return s.chars().take(len).collect();
     }
+    format!("{}{}", s, " ".repeat(len - count))
 }
 
 /// Truncate or pad to exact length, using ellipsis for truncation
 pub fn truncate_or_pad(s: &str, len: usize) -> String {
-    if s.len() > len {
-        format!("{}…", &s[..len - 1])
+    let count = s.chars().count();
+    if count > len {
+        let keep = len.saturating_sub(1);
+        let truncated: String = s.chars().take(keep).collect();
+        format!("{}…", truncated)
     } else {
         format!("{:<width$}", s, width = len)
     }
@@ -94,6 +100,12 @@ mod tests {
     }
 
     #[test]
+    fn test_truncate_unicode() {
+        assert_eq!(truncate("你好世界", 3), "...");
+        assert_eq!(truncate("🙂🙂🙂🙂", 3), "...");
+    }
+
+    #[test]
     fn test_truncate_prompt() {
         assert_eq!(truncate_prompt("  hello  ", 10), "hello");
         assert_eq!(truncate_prompt("  long text here  ", 8), "long ...");
@@ -107,9 +119,21 @@ mod tests {
     }
 
     #[test]
+    fn test_pad_right_unicode() {
+        assert_eq!(pad_right("你好", 4), "你好  ");
+        assert_eq!(pad_right("🙂🙂🙂", 2), "🙂🙂");
+    }
+
+    #[test]
     fn test_truncate_or_pad() {
         assert_eq!(truncate_or_pad("hi", 5), "hi   ");
         assert_eq!(truncate_or_pad("hello world", 5), "hell…");
+    }
+
+    #[test]
+    fn test_truncate_or_pad_unicode() {
+        assert_eq!(truncate_or_pad("你好世界", 3), "你好…");
+        assert_eq!(truncate_or_pad("🙂🙂🙂🙂", 3), "🙂🙂…");
     }
 
     #[test]

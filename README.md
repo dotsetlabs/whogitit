@@ -261,7 +261,10 @@ whogitit annotations --base main --head HEAD
 whogitit annotations --format json
 whogitit annotations --consolidate file    # One annotation per file
 whogitit annotations --consolidate lines   # Granular line annotations
-whogitit annotations --max-annotations 50  # GitHub API limit
+whogitit annotations --min-ai-lines 10     # Filter insignificant files
+whogitit annotations --diff-only           # Only annotate lines in PR diff
+whogitit annotations --group-ai-types      # Group AI and AI-modified together
+whogitit annotations --sort-by coverage    # Sort by AI coverage (default)
 ```
 
 Options:
@@ -270,9 +273,15 @@ Options:
 - `--format github-checks|json` - Output format
 - `--consolidate auto|file|lines` - Consolidation mode (default: auto)
 - `--consolidate-threshold <0.0-1.0>` - AI coverage threshold for auto mode (default: 0.7)
-- `--min-lines <n>` - Minimum AI lines for annotation (default: 1)
+- `--consolidate-prompt-limit <n>` - Max prompts for auto-consolidation (default: 3)
+- `--min-lines <n>` - Minimum AI lines for line-level annotation (default: 1)
+- `--min-ai-lines <n>` - Minimum AI lines for a file to be annotated (default: 3)
+- `--min-ai-percent <n>` - Minimum AI percentage for a file (default: 5.0)
 - `--max-annotations <n>` - Maximum annotations (default: 50)
 - `--ai-only` - Only annotate pure AI lines
+- `--diff-only` - Only annotate lines within the PR diff
+- `--group-ai-types` - Group AI and AIModified together
+- `--sort-by coverage|lines|alpha` - Sort files by (default: coverage)
 
 ### `whogitit copy-notes`
 

@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use anyhow::{Context, Result};
 use git2::{BlameOptions, Repository};
@@ -61,9 +61,10 @@ impl<'a> AIBlamer<'a> {
 
         // Collect unique commits from blame
         let mut unique_commits: Vec<String> = Vec::new();
+        let mut unique_set: HashSet<String> = HashSet::new();
         for hunk in blame.iter() {
             let commit_id = hunk.final_commit_id().to_string();
-            if !unique_commits.contains(&commit_id) {
+            if unique_set.insert(commit_id.clone()) {
                 unique_commits.push(commit_id);
             }
         }

@@ -100,8 +100,8 @@ whogitit setup
 
 4. **Check debug logs:**
    ```bash
-   cat /tmp/whogitit-hook-debug.log
-   cat /tmp/whogitit-hook-errors.log
+   cat .whogitit/state/hook-debug.log
+   cat .whogitit/state/hook-errors.log
    ```
 
 5. **Verify whogitit binary path:**
@@ -376,10 +376,10 @@ Enable verbose logging:
 
 ```bash
 # For capture hook
-export WHOGITIT_DEBUG=1
+export WHOGITIT_HOOK_DEBUG=1
 
 # Then use Claude Code, check:
-cat /tmp/whogitit-hook-debug.log
+cat .whogitit/state/hook-debug.log
 ```
 
 ### Reporting Issues
@@ -399,8 +399,8 @@ When reporting issues, include:
 
 3. **Relevant logs:**
    ```bash
-   cat /tmp/whogitit-hook-debug.log
-   cat /tmp/whogitit-hook-errors.log
+   cat .whogitit/state/hook-debug.log
+   cat .whogitit/state/hook-errors.log
    ```
 
 4. **Steps to reproduce**

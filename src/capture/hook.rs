@@ -2,13 +2,14 @@ use std::env;
 use std::path::Path;
 
 use anyhow::{Context, Result};
-use git2::Repository;
+use git2::{Delta, DiffFindOptions, DiffOptions, Repository};
 use serde::{Deserialize, Serialize};
 
 use crate::capture::pending::{PendingBuffer, PendingStore};
 use crate::capture::threeway::ThreeWayAnalyzer;
 use crate::core::attribution::{AIAttribution, PromptInfo, SessionMetadata};
 use crate::privacy::{Redactor, WhogititConfig};
+use crate::storage::audit::AuditLog;
 use crate::storage::notes::NotesStore;
 
 /// Environment variable for session ID
@@ -46,6 +47,9 @@ pub struct HookInput {
     pub prompt: String,
     /// Old file content (None for new files)
     pub old_content: Option<String>,
+    /// Whether old_content was provided (distinguish empty from missing)
+    #[serde(default)]
+    pub old_content_present: bool,
     /// New file content
     pub new_content: String,
     /// Context from transcript (plan mode, subagent, etc.)
@@ -61,6 +65,10 @@ pub struct CaptureHook {
     redactor: Redactor,
     /// Whether audit logging is enabled
     audit_enabled: bool,
+    /// Similarity threshold for AI-modified detection
+    similarity_threshold: f64,
+    /// Maximum pending buffer age in hours
+    max_pending_age_hours: i64,
 }
 
 impl CaptureHook {
@@ -72,11 +80,15 @@ impl CaptureHook {
         let config = WhogititConfig::load(&repo_root).unwrap_or_default();
         let redactor = config.privacy.build_redactor();
         let audit_enabled = config.privacy.audit_log;
+        let similarity_threshold = config.analysis.similarity_threshold;
+        let max_pending_age_hours = config.analysis.max_pending_age_hours as i64;
 
         Ok(Self {
             repo_root,
             redactor,
             audit_enabled,
+            similarity_threshold,
+            max_pending_age_hours,
         })
     }
 
@@ -95,7 +107,7 @@ impl CaptureHook {
         let store = PendingStore::new(&self.repo_root);
 
         // Load or create pending buffer
-        let mut buffer = match store.load()? {
+        let mut buffer = match store.load_with_max_age(self.max_pending_age_hours)? {
             Some(b) => {
                 // Check if we should start a new session
                 // (different session ID in env means new session)
@@ -109,7 +121,9 @@ impl CaptureHook {
                             b.total_edits()
                         );
                     }
-                    PendingBuffer::new(&current_session, &Self::get_model_id())
+                    let mut buffer = PendingBuffer::new(&current_session, &Self::get_model_id());
+                    buffer.audit_logging_enabled = self.audit_enabled;
+                    buffer
                 } else {
                     b
                 }
@@ -129,18 +143,27 @@ impl CaptureHook {
             anyhow::bail!("Empty file path");
         }
 
-        // Check for path traversal attempts
-        if relative_path.contains("..") {
+        let rel_path = std::path::Path::new(&relative_path);
+
+        // Reject absolute paths (including Windows prefixes)
+        if rel_path.is_absolute()
+            || rel_path
+                .components()
+                .any(|c| matches!(c, std::path::Component::Prefix(_)))
+        {
             anyhow::bail!(
-                "Path traversal detected in file path: '{}'. Paths containing '..' are not allowed.",
+                "Absolute path not allowed: '{}'. Paths must be relative to repository root.",
                 relative_path
             );
         }
 
-        // Check for absolute paths that escaped normalization
-        if relative_path.starts_with('/') {
+        // Check for path traversal attempts
+        if rel_path
+            .components()
+            .any(|c| matches!(c, std::path::Component::ParentDir))
+        {
             anyhow::bail!(
-                "Absolute path not allowed: '{}'. Paths must be relative to repository root.",
+                "Path traversal detected in file path: '{}'. Paths containing '..' are not allowed.",
                 relative_path
             );
         }
@@ -150,12 +173,13 @@ impl CaptureHook {
         }
 
         // Determine old content: use provided value, or fall back to git HEAD
-        let old_content = match input.old_content {
-            Some(content) => Some(content),
-            None => {
-                // Try to get content from git HEAD for existing files
-                self.get_content_from_git_head(&relative_path)
-            }
+        let old_content = if input.old_content_present {
+            Some(input.old_content.unwrap_or_default())
+        } else if let Some(content) = input.old_content.clone() {
+            Some(content)
+        } else {
+            // Try to get content from git HEAD for existing files
+            self.get_content_from_git_head(&relative_path)
         };
 
         // Build edit context from hook input
@@ -180,6 +204,25 @@ impl CaptureHook {
             Some(&self.redactor),
             edit_context,
         );
+
+        // Log redaction audit events (if enabled)
+        if self.audit_enabled {
+            if let Some(prompt) = buffer.session.prompts.last() {
+                if !prompt.redaction_events.is_empty() {
+                    let audit_log = AuditLog::new(&self.repo_root);
+                    let mut counts: std::collections::HashMap<String, u32> =
+                        std::collections::HashMap::new();
+                    for event in &prompt.redaction_events {
+                        *counts.entry(event.pattern_name.clone()).or_insert(0) += 1;
+                    }
+                    for (pattern, count) in counts {
+                        if let Err(e) = audit_log.log_redaction(&pattern, count) {
+                            eprintln!("whogitit: Warning - failed to log redaction: {}", e);
+                        }
+                    }
+                }
+            }
+        }
 
         // Save buffer with atomic write
         store.save(&buffer)?;
@@ -273,13 +316,24 @@ impl CaptureHook {
             .peel_to_commit()
             .context("Failed to get HEAD commit")?;
 
+        // Build rename map (old -> new) to preserve attribution across moves
+        let rename_map = build_rename_map(&repo, &head)?;
+
         // Analyze each file with three-way diff against committed content
         let mut file_results = Vec::new();
         let tree = head.tree()?;
 
         for (path, history) in &buffer.file_histories {
+            let mut committed_path = path.as_str();
+
+            if tree.get_path(std::path::Path::new(path)).is_err() {
+                if let Some(new_path) = rename_map.get(path) {
+                    committed_path = new_path.as_str();
+                }
+            }
+
             // Get the committed content for this file
-            let committed_content = match tree.get_path(std::path::Path::new(path)) {
+            let committed_content = match tree.get_path(std::path::Path::new(committed_path)) {
                 Ok(entry) => {
                     let blob = repo.find_blob(entry.id())?;
                     String::from_utf8_lossy(blob.content()).to_string()
@@ -291,7 +345,14 @@ impl CaptureHook {
             };
 
             // Perform three-way analysis
-            let result = ThreeWayAnalyzer::analyze_with_diff(history, &committed_content);
+            let mut result = ThreeWayAnalyzer::analyze_with_diff_with_threshold(
+                history,
+                &committed_content,
+                self.similarity_threshold,
+            );
+            if committed_path != path.as_str() {
+                result.path = committed_path.to_string();
+            }
             file_results.push(result);
         }
 
@@ -392,7 +453,7 @@ impl CaptureHook {
                 let edit_count = buffer.total_edits();
                 let prompt_count = buffer.session.prompt_count;
                 let has_pending = buffer.has_changes();
-                let is_stale = buffer.is_stale();
+                let is_stale = buffer.is_stale_hours(self.max_pending_age_hours);
                 let age = buffer.age_string();
                 Ok(PendingStatus {
                     has_pending,
@@ -403,6 +464,7 @@ impl CaptureHook {
                     prompt_count,
                     is_stale,
                     age,
+                    max_pending_age_hours: self.max_pending_age_hours,
                 })
             }
             None => Ok(PendingStatus {
@@ -414,6 +476,7 @@ impl CaptureHook {
                 prompt_count: 0,
                 is_stale: false,
                 age: String::new(),
+                max_pending_age_hours: self.max_pending_age_hours,
             }),
         }
     }
@@ -425,6 +488,46 @@ impl CaptureHook {
     }
 }
 
+fn build_rename_map(
+    repo: &Repository,
+    head: &git2::Commit,
+) -> Result<std::collections::HashMap<String, String>> {
+    let mut map = std::collections::HashMap::new();
+
+    let parent = match head.parent(0) {
+        Ok(p) => p,
+        Err(_) => return Ok(map),
+    };
+
+    let old_tree = parent.tree()?;
+    let new_tree = head.tree()?;
+
+    let mut opts = DiffOptions::new();
+    let mut diff = repo.diff_tree_to_tree(Some(&old_tree), Some(&new_tree), Some(&mut opts))?;
+
+    let mut find_opts = DiffFindOptions::new();
+    find_opts.renames_from_rewrites(true);
+    diff.find_similar(Some(&mut find_opts))?;
+
+    for delta in diff.deltas() {
+        if delta.status() == Delta::Renamed {
+            let old_path = delta
+                .old_file()
+                .path()
+                .map(|p| p.to_string_lossy().to_string());
+            let new_path = delta
+                .new_file()
+                .path()
+                .map(|p| p.to_string_lossy().to_string());
+            if let (Some(old_path), Some(new_path)) = (old_path, new_path) {
+                map.insert(old_path, new_path);
+            }
+        }
+    }
+
+    Ok(map)
+}
+
 /// Status of pending changes
 #[derive(Debug)]
 pub struct PendingStatus {
@@ -434,10 +537,12 @@ pub struct PendingStatus {
     pub line_count: u32,
     pub edit_count: usize,
     pub prompt_count: u32,
-    /// Whether the pending buffer is stale (older than 24 hours)
+    /// Whether the pending buffer is stale (older than configured hours)
     pub is_stale: bool,
     /// Human-readable age of the pending buffer
     pub age: String,
+    /// Configured maximum pending buffer age in hours
+    pub max_pending_age_hours: i64,
 }
 
 /// Hook entry point for Claude Code integration
@@ -524,6 +629,7 @@ mod tests {
             file_path: "test.rs".to_string(),
             prompt: "Create a test file".to_string(),
             old_content: None,
+            old_content_present: false,
             new_content: "fn test() {}\n".to_string(),
             context: None,
         };
@@ -548,6 +654,7 @@ mod tests {
             file_path: "test.rs".to_string(),
             prompt: "Create file".to_string(),
             old_content: None,
+            old_content_present: false,
             new_content: "line1\n".to_string(),
             context: None,
         })
@@ -559,6 +666,7 @@ mod tests {
             file_path: "test.rs".to_string(),
             prompt: "Add line".to_string(),
             old_content: Some("line1\n".to_string()),
+            old_content_present: true,
             new_content: "line1\nline2\n".to_string(),
             context: None,
         })
@@ -591,6 +699,7 @@ mod tests {
             file_path: "test.rs".to_string(),
             prompt: "test".to_string(),
             old_content: None,
+            old_content_present: false,
             new_content: "content\n".to_string(),
             context: None,
         })
@@ -601,6 +710,68 @@ mod tests {
         // Clear
         hook.clear_pending().unwrap();
         assert!(!hook.status().unwrap().has_pending);
+    }
+
+    #[test]
+    fn test_post_commit_rename_preserves_attribution_path() {
+        let (dir, repo) = create_test_repo();
+        let repo_root = dir.path();
+
+        // Create and commit initial file
+        let old_path = repo_root.join("old.rs");
+        std::fs::write(&old_path, "line1\n").unwrap();
+
+        {
+            let mut index = repo.index().unwrap();
+            index.add_path(std::path::Path::new("old.rs")).unwrap();
+            index.write().unwrap();
+            let tree_id = index.write_tree().unwrap();
+            let tree = repo.find_tree(tree_id).unwrap();
+            let sig = Signature::now("Test", "test@test.com").unwrap();
+            let head = repo.head().unwrap().peel_to_commit().unwrap();
+            repo.commit(Some("HEAD"), &sig, &sig, "Add old.rs", &tree, &[&head])
+                .unwrap();
+        }
+
+        let hook = CaptureHook::new(repo_root).unwrap();
+        hook.on_file_change(HookInput {
+            tool: "Edit".to_string(),
+            file_path: "old.rs".to_string(),
+            prompt: "Add line".to_string(),
+            old_content: Some("line1\n".to_string()),
+            old_content_present: true,
+            new_content: "line1\nline2\n".to_string(),
+            context: None,
+        })
+        .unwrap();
+
+        // Rename file and commit
+        let new_path = repo_root.join("new.rs");
+        std::fs::rename(&old_path, &new_path).unwrap();
+
+        {
+            let mut index = repo.index().unwrap();
+            index.remove_path(std::path::Path::new("old.rs")).unwrap();
+            index.add_path(std::path::Path::new("new.rs")).unwrap();
+            index.write().unwrap();
+            let tree_id = index.write_tree().unwrap();
+            let tree = repo.find_tree(tree_id).unwrap();
+            let sig = Signature::now("Test", "test@test.com").unwrap();
+            let head = repo.head().unwrap().peel_to_commit().unwrap();
+            repo.commit(
+                Some("HEAD"),
+                &sig,
+                &sig,
+                "Rename old.rs to new.rs",
+                &tree,
+                &[&head],
+            )
+            .unwrap();
+        }
+
+        let attribution = hook.on_post_commit().unwrap().unwrap();
+        assert_eq!(attribution.files.len(), 1);
+        assert_eq!(attribution.files[0].path, "new.rs");
     }
 
     #[test]

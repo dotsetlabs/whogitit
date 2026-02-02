@@ -6,6 +6,7 @@ use colored::Colorize;
 use std::collections::HashSet;
 
 use crate::privacy::WhogititConfig;
+use crate::storage::audit::AuditLog;
 use crate::storage::notes::NotesStore;
 
 /// Arguments for retention command
@@ -230,6 +231,11 @@ fn run_apply(execute: bool, reason: Option<String>) -> Result<()> {
         to_delete.len()
     );
     println!("Reason: {}", reason_str);
+
+    if config.privacy.audit_log {
+        let audit_log = AuditLog::new(repo_root);
+        audit_log.log_retention(to_delete.len() as u32, &reason_str)?;
+    }
 
     Ok(())
 }

@@ -454,6 +454,11 @@ impl PendingStore {
 
     /// Load pending buffer from disk, with stale detection
     pub fn load(&self) -> Result<Option<PendingBuffer>> {
+        self.load_with_max_age(DEFAULT_MAX_PENDING_AGE_HOURS)
+    }
+
+    /// Load pending buffer with a custom stale threshold
+    pub fn load_with_max_age(&self, max_pending_age_hours: i64) -> Result<Option<PendingBuffer>> {
         if !self.file_path.exists() {
             return Ok(None);
         }
@@ -480,7 +485,7 @@ impl PendingStore {
                 }
 
                 // Warn if buffer is stale
-                if buffer.is_stale() {
+                if buffer.is_stale_hours(max_pending_age_hours) {
                     eprintln!(
                         "whogitit: Warning - pending buffer is stale (started {})",
                         buffer.age_string()

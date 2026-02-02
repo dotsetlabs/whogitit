@@ -131,17 +131,17 @@ The capture script (`hooks/whogitit-capture.sh`) handles:
 |----------|-------------|
 | `WHOGITIT_HOOK_PHASE` | `pre` or `post` |
 | `WHOGITIT_BIN` | Path to whogitit binary |
-| `WHOGITIT_DEBUG` | Enable debug logging |
+| `WHOGITIT_HOOK_DEBUG` | Enable debug logging |
 
 ### Debug Logging
 
 ```bash
 # Enable debug mode
-export WHOGITIT_DEBUG=1
+export WHOGITIT_HOOK_DEBUG=1
 
 # Logs go to
-/tmp/whogitit-hook-debug.log
-/tmp/whogitit-hook-errors.log
+.whogitit/state/hook-debug.log
+.whogitit/state/hook-errors.log
 ```
 
 ## Git Hooks
@@ -348,8 +348,8 @@ which whogitit
 ls -la ~/.claude/hooks/whogitit-capture.sh
 
 # Check debug logs
-cat /tmp/whogitit-hook-debug.log
-cat /tmp/whogitit-hook-errors.log
+cat .whogitit/state/hook-debug.log
+cat .whogitit/state/hook-errors.log
 ```
 
 ### Notes Not Pushing

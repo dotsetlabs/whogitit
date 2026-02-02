@@ -252,7 +252,7 @@ audit_log = true
 And periodically archive:
 
 ```bash
-cp .whogitit/audit.log "audit-backup-$(date +%Y%m%d).log"
+cp .whogitit/audit.jsonl "audit-backup-$(date +%Y%m%d).jsonl"
 ```
 
 ## Training and Onboarding

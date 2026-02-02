@@ -47,7 +47,8 @@ No pending AI attribution.
 
 ### Stale Pending Buffer
 
-If the pending buffer is older than 24 hours, a warning is displayed:
+If the pending buffer is older than the configured threshold
+(`analysis.max_pending_age_hours`, default 24), a warning is displayed:
 
 ```
 Pending AI attribution:

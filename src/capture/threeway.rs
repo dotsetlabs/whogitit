@@ -58,6 +58,7 @@ impl ThreeWayAnalyzer {
                 &original_lines,
                 &ai_line_sources,
                 history,
+                DEFAULT_SIMILARITY_THRESHOLD,
             );
             attributions.push(attribution);
         }
@@ -78,6 +79,15 @@ impl ThreeWayAnalyzer {
     pub fn analyze_with_diff(
         history: &FileEditHistory,
         final_content: &str,
+    ) -> FileAttributionResult {
+        Self::analyze_with_diff_with_threshold(history, final_content, DEFAULT_SIMILARITY_THRESHOLD)
+    }
+
+    /// Analyze with position-aware diff for better accuracy, using a custom similarity threshold
+    pub fn analyze_with_diff_with_threshold(
+        history: &FileEditHistory,
+        final_content: &str,
+        similarity_threshold: f64,
     ) -> FileAttributionResult {
         let final_lines: Vec<&str> = final_content.lines().collect();
         let mut attributions = Vec::with_capacity(final_lines.len());
@@ -193,7 +203,7 @@ impl ThreeWayAnalyzer {
 
             // Check if this is similar to an AI line (modified)
             if let Some((edit_id, prompt_idx, similarity)) =
-                find_similar_ai_line(line, &ai_line_map, DEFAULT_SIMILARITY_THRESHOLD)
+                find_similar_ai_line(line, &ai_line_map, similarity_threshold)
             {
                 final_line_sources.insert(
                     idx,
@@ -331,6 +341,7 @@ fn attribute_line(
     original_lines: &HashSet<String>,
     ai_line_sources: &HashMap<String, (String, u32)>,
     _history: &FileEditHistory,
+    similarity_threshold: f64,
 ) -> LineAttribution {
     let normalized = normalize_for_key(line);
     let in_original = original_lines.contains(&normalized);
@@ -378,7 +389,7 @@ fn attribute_line(
 
     // Check if line is similar to an AI line (human modified AI output)
     if let Some((edit_id, prompt_idx, similarity)) =
-        find_similar_ai_line(line, ai_line_sources, 0.6)
+        find_similar_ai_line(line, ai_line_sources, similarity_threshold)
     {
         return LineAttribution {
             line_number,
