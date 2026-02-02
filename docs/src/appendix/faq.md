@@ -154,6 +154,10 @@ git fetch origin refs/notes/whogitit:refs/notes/whogitit
 
 ## Troubleshooting
 
+### Why isn't whogitit tracking my repository?
+
+whogitit only tracks attribution in repositories that have been explicitly initialized. Run `whogitit init` in your repository to enable tracking.
+
 ### Why is there no attribution after my commit?
 
 Common causes:

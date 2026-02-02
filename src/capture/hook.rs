@@ -449,6 +449,11 @@ pub fn run_capture_hook() -> Result<()> {
     // Find repo root
     let repo_root = find_repo_root()?;
 
+    // Only capture in repos that have been initialized with `whogitit init`
+    if !is_repo_initialized(&repo_root) {
+        return Ok(());
+    }
+
     // Process the change
     let hook = CaptureHook::new(&repo_root)?;
     hook.on_file_change(input)?;
@@ -464,6 +469,17 @@ fn find_repo_root() -> Result<std::path::PathBuf> {
     repo.workdir()
         .map(|p| p.to_path_buf())
         .context("Repository has no working directory")
+}
+
+/// Check if the repository has been initialized with `whogitit init`
+/// by looking for the whogitit marker in the post-commit hook
+fn is_repo_initialized(repo_root: &std::path::Path) -> bool {
+    let post_commit = repo_root.join(".git/hooks/post-commit");
+    if let Ok(content) = std::fs::read_to_string(&post_commit) {
+        content.contains("whogitit")
+    } else {
+        false
+    }
 }
 
 /// Git post-commit hook entry point
@@ -585,5 +601,27 @@ mod tests {
         // Clear
         hook.clear_pending().unwrap();
         assert!(!hook.status().unwrap().has_pending);
+    }
+
+    #[test]
+    fn test_is_repo_initialized() {
+        let dir = TempDir::new().unwrap();
+        let hooks_dir = dir.path().join(".git/hooks");
+        std::fs::create_dir_all(&hooks_dir).unwrap();
+
+        // Not initialized - no hook file
+        assert!(!is_repo_initialized(dir.path()));
+
+        // Not initialized - hook exists but no whogitit marker
+        std::fs::write(hooks_dir.join("post-commit"), "#!/bin/bash\necho hello").unwrap();
+        assert!(!is_repo_initialized(dir.path()));
+
+        // Initialized - hook contains whogitit
+        std::fs::write(
+            hooks_dir.join("post-commit"),
+            "#!/bin/bash\nwhogitit commit",
+        )
+        .unwrap();
+        assert!(is_repo_initialized(dir.path()));
     }
 }

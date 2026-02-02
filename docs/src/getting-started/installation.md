@@ -72,6 +72,8 @@ This automatically:
 - Configures Claude Code's `~/.claude/settings.json` with required hooks
 - Creates a backup of your existing settings
 
+> **Note**: After running `whogitit setup`, you must also run `whogitit init` in each repository where you want to track AI attribution. The global hooks only activate for initialized repositories.
+
 ### 2. Initialize your repository
 
 ```bash
