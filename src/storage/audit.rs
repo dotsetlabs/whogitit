@@ -252,7 +252,6 @@ impl AuditLog {
         let mut value = serde_json::to_value(event)?;
         if let Some(map) = value.as_object_mut() {
             map.remove("event_hash");
-            map.remove("prev_hash");
         }
         Ok(serde_json::to_string(&value)?)
     }
@@ -298,7 +297,7 @@ impl AuditLog {
     /// Returns Ok(true) if the chain is valid, Ok(false) if tampered,
     /// or an error if the log cannot be read.
     pub fn verify_chain(&self) -> Result<bool> {
-        let events = self.read_all()?;
+        let events = self.read_all_strict()?;
 
         if events.is_empty() {
             return Ok(true);
@@ -321,13 +320,9 @@ impl AuditLog {
             let expected_prev = events[i - 1].details.event_hash.as_ref();
             let actual_prev = events[i].details.prev_hash.as_ref();
 
-            // If either the previous event has a hash or the current expects one,
-            // they should match
-            if expected_prev != actual_prev {
-                // Allow for legacy events without hashes
-                if expected_prev.is_some() && actual_prev.is_some() {
-                    return Ok(false);
-                }
+            // If the chain has hashes, prev_hash must match exactly
+            if expected_prev != actual_prev && (expected_prev.is_some() || actual_prev.is_some()) {
+                return Ok(false);
             }
 
             // If the event has a hash, ensure it matches recomputation
@@ -349,6 +344,28 @@ impl AuditLog {
         hasher.update(content_to_hash.as_bytes());
         let hash = format!("{:x}", hasher.finalize());
         Ok(hash[..16].to_string())
+    }
+
+    fn read_all_strict(&self) -> Result<Vec<AuditEvent>> {
+        if !self.path.exists() {
+            return Ok(Vec::new());
+        }
+
+        let file = File::open(&self.path).context("Failed to open audit log")?;
+        let reader = BufReader::new(file);
+
+        let mut events = Vec::new();
+        for (idx, line) in reader.lines().enumerate() {
+            let line = line?;
+            if line.trim().is_empty() {
+                continue;
+            }
+            let event = serde_json::from_str::<AuditEvent>(&line)
+                .with_context(|| format!("Failed to parse audit log entry at line {}", idx + 1))?;
+            events.push(event);
+        }
+
+        Ok(events)
     }
 }
 
@@ -418,6 +435,47 @@ mod tests {
         assert_eq!(events[1].details.prev_hash, events[0].details.event_hash);
         assert_eq!(events[2].details.prev_hash, events[1].details.event_hash);
         assert!(log.verify_chain().unwrap());
+    }
+
+    #[test]
+    fn test_audit_chain_detects_tamper() {
+        let dir = TempDir::new().unwrap();
+        let log = AuditLog::new(dir.path());
+
+        log.log_delete("abc123", "GDPR request").unwrap();
+        log.log_export("json", 42).unwrap();
+
+        let path = log.path();
+        let content = std::fs::read_to_string(path).unwrap();
+        let mut lines: Vec<String> = content.lines().map(|l| l.to_string()).collect();
+        assert!(lines.len() >= 2);
+
+        let mut value: serde_json::Value = serde_json::from_str(&lines[1]).unwrap();
+        if let Some(obj) = value.as_object_mut() {
+            obj.insert(
+                "prev_hash".to_string(),
+                serde_json::Value::String("deadbeefdeadbeef".to_string()),
+            );
+        }
+        lines[1] = serde_json::to_string(&value).unwrap();
+        std::fs::write(path, format!("{}\n", lines.join("\n"))).unwrap();
+
+        assert!(!log.verify_chain().unwrap());
+    }
+
+    #[test]
+    fn test_audit_chain_fails_on_invalid_json() {
+        let dir = TempDir::new().unwrap();
+        let log = AuditLog::new(dir.path());
+
+        log.log_delete("abc123", "GDPR request").unwrap();
+
+        let path = log.path();
+        let mut content = std::fs::read_to_string(path).unwrap();
+        content.push_str("\nnot json\n");
+        std::fs::write(path, content).unwrap();
+
+        assert!(log.verify_chain().is_err());
     }
 
     #[test]

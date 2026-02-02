@@ -252,6 +252,10 @@ Output of `whogitit annotations --format github-checks`:
 Each line in `.whogitit/audit.jsonl` is a JSON object, including `prev_hash` and
 `event_hash` fields for tamper‑evident chaining:
 
+`event_hash` is computed over the event content including `prev_hash`, so any
+reordering or tampering breaks the chain. Malformed lines cause verification
+to fail.
+
 ```json
 {"timestamp":"2026-01-30T14:23:15Z","event":"Delete","details":{"commit":"abc123d","user":"greg","reason":"Retention policy"}}
 {"timestamp":"2026-01-28T10:15:00Z","event":"Export","details":{"commit_count":45,"format":"json","user":"greg"}}

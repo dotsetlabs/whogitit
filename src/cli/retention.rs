@@ -49,7 +49,7 @@ fn run_preview() -> Result<()> {
         .workdir()
         .ok_or_else(|| anyhow::anyhow!("No working directory"))?;
 
-    let config = WhogititConfig::load(repo_root).unwrap_or_default();
+    let config = WhogititConfig::load(repo_root).context("Failed to load configuration")?;
     let retention = config.retention.unwrap_or_default();
 
     let sets = compute_retention_sets(&repo, &retention)?;
@@ -119,7 +119,7 @@ fn run_apply(execute: bool, reason: Option<String>) -> Result<()> {
         .workdir()
         .ok_or_else(|| anyhow::anyhow!("No working directory"))?;
 
-    let config = WhogititConfig::load(repo_root).unwrap_or_default();
+    let config = WhogititConfig::load(repo_root).context("Failed to load configuration")?;
     let retention = config.retention.unwrap_or_default();
 
     let sets = compute_retention_sets(&repo, &retention)?;
@@ -167,7 +167,7 @@ fn run_config() -> Result<()> {
         .workdir()
         .ok_or_else(|| anyhow::anyhow!("No working directory"))?;
 
-    let config = WhogititConfig::load(repo_root).unwrap_or_default();
+    let config = WhogititConfig::load(repo_root).context("Failed to load configuration")?;
     let retention = config.retention.unwrap_or_default();
 
     println!("{}", "Current Retention Configuration".bold());

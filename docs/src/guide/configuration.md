@@ -12,6 +12,9 @@ whogitit looks for configuration in this order:
 
 Repository-local configuration takes precedence over global configuration.
 
+If a configuration file is present but invalid, CLI commands will return an error so you can fix it.
+Hook-based capture will log a warning and fall back to defaults to avoid breaking your workflow.
+
 ## Complete Configuration Reference
 
 ```toml
@@ -194,6 +197,7 @@ min_commits = 100  # default
 ```
 
 Minimum number of commits to keep regardless of age. Prevents accidental deletion of all attribution data.
+When enforcing this minimum, whogitit keeps the newest commits by commit time.
 
 ## Example Configurations
 

@@ -140,7 +140,7 @@ min_commits = 100
 | `max_age_days` | number | none | Delete data older than N days |
 | `auto_purge` | boolean | false | Purge automatically on commit (post-commit hook) |
 | `retain_refs` | array | `["refs/heads/main"]` | Refs to always preserve |
-| `min_commits` | number | 100 | Minimum commits to keep |
+| `min_commits` | number | 100 | Minimum commits to keep (newest by commit time) |
 
 ## Retention Logic
 
@@ -148,7 +148,7 @@ The retention policy applies these rules in order:
 
 1. **Age filter**: Identify commits older than `max_age_days`
 2. **Ref protection**: Exclude commits reachable from `retain_refs`
-3. **Minimum guarantee**: Keep at least `min_commits` (most recent)
+3. **Minimum guarantee**: Keep at least `min_commits` (newest by commit time)
 
 ### Example Scenario
 

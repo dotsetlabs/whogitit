@@ -80,7 +80,16 @@ impl CaptureHook {
         let repo_root = repo_path.to_path_buf();
 
         // Load config and build redactor
-        let config = WhogititConfig::load(&repo_root).unwrap_or_default();
+        let config = match WhogititConfig::load(&repo_root) {
+            Ok(config) => config,
+            Err(err) => {
+                eprintln!(
+                    "whogitit: Warning - failed to load config, using defaults: {}",
+                    err
+                );
+                WhogititConfig::default()
+            }
+        };
         let redactor = config.privacy.build_redactor();
         let audit_enabled = config.privacy.audit_log;
         let similarity_threshold = config.analysis.similarity_threshold;
