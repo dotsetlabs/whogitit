@@ -54,7 +54,7 @@ whogitit --version
 You should see output like:
 
 ```
-whogitit 0.1.0
+whogitit 0.2.0
 ```
 
 ## Quick Setup (Recommended)
