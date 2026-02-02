@@ -1,6 +1,6 @@
 //! Redact-test command for testing redaction patterns
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use colored::Colorize;
 
 use crate::privacy::{PrivacyConfig, WhogititConfig};
@@ -48,7 +48,7 @@ pub fn run(args: RedactArgs) -> Result<()> {
     let config = match &repo {
         Some(r) => {
             let root = r.workdir().unwrap_or(std::path::Path::new("."));
-            WhogititConfig::load(root).unwrap_or_default()
+            WhogititConfig::load(root).context("Failed to load configuration")?
         }
         None => WhogititConfig::default(),
     };

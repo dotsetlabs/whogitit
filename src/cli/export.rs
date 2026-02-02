@@ -198,7 +198,7 @@ pub fn run(args: ExportArgs) -> Result<()> {
         ),
     }
 
-    let config = WhogititConfig::load(repo_root).unwrap_or_default();
+    let config = WhogititConfig::load(repo_root).context("Failed to load configuration")?;
     if config.privacy.audit_log {
         let audit_log = AuditLog::new(repo_root);
         audit_log.log_export(&args.format, output_data.summary.total_commits as u32)?;

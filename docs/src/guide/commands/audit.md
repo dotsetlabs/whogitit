@@ -169,6 +169,8 @@ audit_log = true
 
 The audit log is stored in `.whogitit/audit.jsonl` in your repository. Each line is a JSON object representing one event.
 Each event includes `prev_hash` and `event_hash` fields to form a tamper‑evident chain.
+The event hash includes the previous hash, so any reordering or tampering will cause verification to fail.
+If any line is malformed, chain verification fails rather than silently skipping it.
 
 ```bash
 # View raw audit log
