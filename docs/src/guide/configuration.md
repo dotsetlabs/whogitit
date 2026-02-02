@@ -172,7 +172,8 @@ Delete attribution data older than this many days. Set to `null` or omit for no 
 auto_purge = false  # default
 ```
 
-When `true`, automatically apply retention policy after each commit. Use with caution.
+When `true`, automatically apply retention policy after each commit via the post-commit hook.
+Use with caution.
 
 ### retain_refs
 

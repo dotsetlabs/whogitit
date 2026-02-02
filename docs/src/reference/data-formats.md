@@ -249,7 +249,8 @@ Output of `whogitit annotations --format github-checks`:
 
 ## Audit Log Format
 
-Each line in `.whogitit/audit.jsonl` is a JSON object:
+Each line in `.whogitit/audit.jsonl` is a JSON object, including `prev_hash` and
+`event_hash` fields for tamper‑evident chaining:
 
 ```json
 {"timestamp":"2026-01-30T14:23:15Z","event":"Delete","details":{"commit":"abc123d","user":"greg","reason":"Retention policy"}}

@@ -2,6 +2,7 @@ pub mod capture;
 pub mod cli;
 pub mod core;
 pub mod privacy;
+pub mod retention;
 pub mod storage;
 pub mod utils;
 

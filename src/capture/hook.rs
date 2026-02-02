@@ -8,7 +8,8 @@ use serde::{Deserialize, Serialize};
 use crate::capture::pending::{PendingBuffer, PendingStore};
 use crate::capture::threeway::ThreeWayAnalyzer;
 use crate::core::attribution::{AIAttribution, PromptInfo, SessionMetadata};
-use crate::privacy::{Redactor, WhogititConfig};
+use crate::privacy::{Redactor, RetentionConfig, WhogititConfig};
+use crate::retention::apply_retention_policy;
 use crate::storage::audit::AuditLog;
 use crate::storage::notes::NotesStore;
 
@@ -69,6 +70,8 @@ pub struct CaptureHook {
     similarity_threshold: f64,
     /// Maximum pending buffer age in hours
     max_pending_age_hours: i64,
+    /// Retention configuration
+    retention_config: RetentionConfig,
 }
 
 impl CaptureHook {
@@ -82,6 +85,7 @@ impl CaptureHook {
         let audit_enabled = config.privacy.audit_log;
         let similarity_threshold = config.analysis.similarity_threshold;
         let max_pending_age_hours = config.analysis.max_pending_age_hours as i64;
+        let retention_config = config.retention.unwrap_or_default();
 
         Ok(Self {
             repo_root,
@@ -89,6 +93,7 @@ impl CaptureHook {
             audit_enabled,
             similarity_threshold,
             max_pending_age_hours,
+            retention_config,
         })
     }
 
@@ -399,6 +404,18 @@ impl CaptureHook {
         let notes_store = NotesStore::new(&repo)?;
         notes_store.store_attribution(head.id(), &attribution)?;
 
+        if self.retention_config.auto_purge {
+            if let Err(e) = apply_retention_policy(
+                &repo,
+                &self.retention_config,
+                true,
+                "Auto purge (post-commit)",
+                self.audit_enabled,
+            ) {
+                eprintln!("whogitit: Warning - auto purge failed: {}", e);
+            }
+        }
+
         // Clean up pending file
         store.delete()?;
 
@@ -494,33 +511,36 @@ fn build_rename_map(
 ) -> Result<std::collections::HashMap<String, String>> {
     let mut map = std::collections::HashMap::new();
 
-    let parent = match head.parent(0) {
-        Ok(p) => p,
-        Err(_) => return Ok(map),
-    };
-
-    let old_tree = parent.tree()?;
     let new_tree = head.tree()?;
 
-    let mut opts = DiffOptions::new();
-    let mut diff = repo.diff_tree_to_tree(Some(&old_tree), Some(&new_tree), Some(&mut opts))?;
+    for parent_idx in 0..head.parent_count() {
+        let parent = match head.parent(parent_idx) {
+            Ok(p) => p,
+            Err(_) => continue,
+        };
 
-    let mut find_opts = DiffFindOptions::new();
-    find_opts.renames_from_rewrites(true);
-    diff.find_similar(Some(&mut find_opts))?;
+        let old_tree = parent.tree()?;
 
-    for delta in diff.deltas() {
-        if delta.status() == Delta::Renamed {
-            let old_path = delta
-                .old_file()
-                .path()
-                .map(|p| p.to_string_lossy().to_string());
-            let new_path = delta
-                .new_file()
-                .path()
-                .map(|p| p.to_string_lossy().to_string());
-            if let (Some(old_path), Some(new_path)) = (old_path, new_path) {
-                map.insert(old_path, new_path);
+        let mut opts = DiffOptions::new();
+        let mut diff = repo.diff_tree_to_tree(Some(&old_tree), Some(&new_tree), Some(&mut opts))?;
+
+        let mut find_opts = DiffFindOptions::new();
+        find_opts.renames_from_rewrites(true);
+        diff.find_similar(Some(&mut find_opts))?;
+
+        for delta in diff.deltas() {
+            if delta.status() == Delta::Renamed {
+                let old_path = delta
+                    .old_file()
+                    .path()
+                    .map(|p| p.to_string_lossy().to_string());
+                let new_path = delta
+                    .new_file()
+                    .path()
+                    .map(|p| p.to_string_lossy().to_string());
+                if let (Some(old_path), Some(new_path)) = (old_path, new_path) {
+                    map.entry(old_path).or_insert(new_path);
+                }
             }
         }
     }

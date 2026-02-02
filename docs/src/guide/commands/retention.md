@@ -138,7 +138,7 @@ min_commits = 100
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `max_age_days` | number | none | Delete data older than N days |
-| `auto_purge` | boolean | false | Purge automatically on commit |
+| `auto_purge` | boolean | false | Purge automatically on commit (post-commit hook) |
 | `retain_refs` | array | `["refs/heads/main"]` | Refs to always preserve |
 | `min_commits` | number | 100 | Minimum commits to keep |
 

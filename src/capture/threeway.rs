@@ -9,6 +9,9 @@ use crate::capture::snapshot::{
 /// Default similarity threshold for AIModified detection
 /// This can be overridden via config (analysis.similarity_threshold)
 pub const DEFAULT_SIMILARITY_THRESHOLD: f64 = 0.6;
+const CONTEXT_CONFIDENCE: f64 = 0.85;
+const CONTEXT_SIMILARITY_FALLBACK: f64 = 0.5;
+const MAX_CONTEXT_ITERATIONS: usize = 5;
 
 /// Normalize a line for comparison purposes.
 /// - Trims trailing whitespace (but preserves leading indentation)
@@ -517,11 +520,11 @@ fn improve_attributions_with_context(
             if prev_edit.is_some() && prev_edit == next_edit {
                 attributions[i].source = LineSource::AIModified {
                     edit_id: prev_edit.clone().unwrap(),
-                    similarity: 0.5,
+                    similarity: CONTEXT_SIMILARITY_FALLBACK,
                 };
                 attributions[i].edit_id = prev_edit;
                 attributions[i].prompt_index = attributions[i - 1].prompt_index;
-                attributions[i].confidence = 0.5;
+                attributions[i].confidence = CONTEXT_SIMILARITY_FALLBACK;
             }
         }
     }
@@ -592,9 +595,7 @@ fn improve_attributions_with_surrounding_context(attributions: &mut [LineAttribu
     // Make multiple passes since fixing one line might enable fixing adjacent lines
     let mut changed = true;
     let mut iterations = 0;
-    const MAX_ITERATIONS: usize = 5;
-
-    while changed && iterations < MAX_ITERATIONS {
+    while changed && iterations < MAX_CONTEXT_ITERATIONS {
         changed = false;
         iterations += 1;
 
@@ -634,7 +635,7 @@ fn improve_attributions_with_surrounding_context(attributions: &mut [LineAttribu
                 };
                 attributions[i].edit_id = Some(edit_id);
                 attributions[i].prompt_index = prompt_index;
-                attributions[i].confidence = 0.85; // High confidence from context
+                attributions[i].confidence = CONTEXT_CONFIDENCE; // High confidence from context
                 changed = true;
             }
         }

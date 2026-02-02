@@ -1,13 +1,11 @@
 //! Retention command for data retention policy management
 
 use anyhow::{Context, Result};
-use chrono::{DateTime, Duration, Utc};
+use chrono::DateTime;
 use colored::Colorize;
-use std::collections::HashSet;
 
 use crate::privacy::WhogititConfig;
-use crate::storage::audit::AuditLog;
-use crate::storage::notes::NotesStore;
+use crate::retention::{apply_retention_policy, compute_retention_sets};
 
 /// Arguments for retention command
 #[derive(Debug, clap::Args)]
@@ -54,53 +52,21 @@ fn run_preview() -> Result<()> {
     let config = WhogititConfig::load(repo_root).unwrap_or_default();
     let retention = config.retention.unwrap_or_default();
 
-    let notes_store = NotesStore::new(&repo)?;
-    let commits = notes_store.list_attributed_commits()?;
-
-    if commits.is_empty() {
+    let sets = compute_retention_sets(&repo, &retention)?;
+    if sets.to_delete.is_empty() && sets.to_keep.is_empty() {
         println!("No attribution data found.");
         return Ok(());
     }
-
-    // Build set of retained refs
-    let retained_commits = get_retained_commits(&repo, &retention.retain_refs)?;
-
-    // Calculate cutoff date
-    let cutoff = retention
-        .max_age_days
-        .map(|days| Utc::now() - Duration::days(days as i64));
-
-    // Analyze commits
-    let mut to_delete = Vec::new();
-    let mut to_keep = Vec::new();
-
-    for commit_oid in commits {
-        let commit = repo.find_commit(commit_oid)?;
-        let commit_time =
-            DateTime::from_timestamp(commit.time().seconds(), 0).unwrap_or(DateTime::UNIX_EPOCH);
-
-        let is_retained = retained_commits.contains(&commit_oid);
-        let is_old = cutoff.map(|c| commit_time < c).unwrap_or(false);
-
-        if is_old && !is_retained {
-            to_delete.push((commit_oid, commit));
-        } else {
-            to_keep.push((commit_oid, commit));
-        }
-    }
-
-    // Apply min_commits if specified
-    let min_keep = retention.min_commits.unwrap_or(0) as usize;
-    if to_keep.len() < min_keep && !to_delete.is_empty() {
-        // Move some from delete to keep
-        let need = min_keep - to_keep.len();
-        let save_count = need.min(to_delete.len());
-        for _ in 0..save_count {
-            if let Some(item) = to_delete.pop() {
-                to_keep.push(item);
-            }
-        }
-    }
+    let to_delete: Vec<_> = sets
+        .to_delete
+        .iter()
+        .filter_map(|oid| repo.find_commit(*oid).ok().map(|c| (*oid, c)))
+        .collect();
+    let to_keep: Vec<_> = sets
+        .to_keep
+        .iter()
+        .filter_map(|oid| repo.find_commit(*oid).ok().map(|c| (*oid, c)))
+        .collect();
 
     // Print summary
     println!("{}", "Retention Policy Preview".bold());
@@ -156,54 +122,12 @@ fn run_apply(execute: bool, reason: Option<String>) -> Result<()> {
     let config = WhogititConfig::load(repo_root).unwrap_or_default();
     let retention = config.retention.unwrap_or_default();
 
-    let notes_store = NotesStore::new(&repo)?;
-    let commits = notes_store.list_attributed_commits()?;
-
-    if commits.is_empty() {
+    let sets = compute_retention_sets(&repo, &retention)?;
+    if sets.to_delete.is_empty() && sets.to_keep.is_empty() {
         println!("No attribution data found.");
         return Ok(());
     }
-
-    // Build set of retained refs
-    let retained_commits = get_retained_commits(&repo, &retention.retain_refs)?;
-
-    // Calculate cutoff date
-    let cutoff = retention
-        .max_age_days
-        .map(|days| Utc::now() - Duration::days(days as i64));
-
-    // Analyze commits
-    let mut to_delete = Vec::new();
-    let mut to_keep = Vec::new();
-
-    for commit_oid in commits {
-        let commit = repo.find_commit(commit_oid)?;
-        let commit_time =
-            DateTime::from_timestamp(commit.time().seconds(), 0).unwrap_or(DateTime::UNIX_EPOCH);
-
-        let is_retained = retained_commits.contains(&commit_oid);
-        let is_old = cutoff.map(|c| commit_time < c).unwrap_or(false);
-
-        if is_old && !is_retained {
-            to_delete.push(commit_oid);
-        } else {
-            to_keep.push(commit_oid);
-        }
-    }
-
-    // Apply min_commits if specified
-    let min_keep = retention.min_commits.unwrap_or(0) as usize;
-    if to_keep.len() < min_keep && !to_delete.is_empty() {
-        let need = min_keep - to_keep.len();
-        let save_count = need.min(to_delete.len());
-        for _ in 0..save_count {
-            if let Some(oid) = to_delete.pop() {
-                to_keep.push(oid);
-            }
-        }
-    }
-
-    if to_delete.is_empty() {
+    if sets.to_delete.is_empty() {
         println!("No commits to delete based on current policy.");
         return Ok(());
     }
@@ -212,30 +136,27 @@ fn run_apply(execute: bool, reason: Option<String>) -> Result<()> {
         println!(
             "{} {} commits would be deleted (dry-run)",
             "Preview:".yellow(),
-            to_delete.len()
+            sets.to_delete.len()
         );
         println!("Run with --execute to actually delete.");
         return Ok(());
     }
 
-    // Actually delete
     let reason_str = reason.unwrap_or_else(|| "Retention policy".to_string());
-
-    for commit_oid in &to_delete {
-        notes_store.remove_attribution(*commit_oid)?;
-    }
+    let result = apply_retention_policy(
+        &repo,
+        &retention,
+        true,
+        &reason_str,
+        config.privacy.audit_log,
+    )?;
 
     println!(
         "{} Deleted attribution for {} commits",
         "Done:".green(),
-        to_delete.len()
+        result.deleted_count
     );
     println!("Reason: {}", reason_str);
-
-    if config.privacy.audit_log {
-        let audit_log = AuditLog::new(repo_root);
-        audit_log.log_retention(to_delete.len() as u32, &reason_str)?;
-    }
 
     Ok(())
 }
@@ -304,66 +225,11 @@ min_commits = 100
     Ok(())
 }
 
-/// Get all commits that are reachable from retained refs
-fn get_retained_commits(
-    repo: &git2::Repository,
-    retain_refs: &[String],
-) -> Result<HashSet<git2::Oid>> {
-    let mut retained = HashSet::new();
-
-    for ref_name in retain_refs {
-        if let Ok(reference) = repo.find_reference(ref_name) {
-            if let Ok(commit) = reference.peel_to_commit() {
-                // Walk the commit history
-                let mut revwalk = repo.revwalk()?;
-                revwalk.push(commit.id())?;
-
-                for oid in revwalk.flatten() {
-                    retained.insert(oid);
-                }
-            }
-        }
-    }
-
-    Ok(retained)
-}
-
-/// Apply min_commits logic - returns (to_delete, to_keep) counts after adjustment
-/// This is extracted for testing purposes
-#[allow(dead_code)]
-fn apply_min_commits(
-    to_delete_count: usize,
-    to_keep_count: usize,
-    min_commits: Option<u32>,
-) -> (usize, usize) {
-    let min_keep = min_commits.unwrap_or(0) as usize;
-    if to_keep_count >= min_keep || to_delete_count == 0 {
-        return (to_delete_count, to_keep_count);
-    }
-
-    // Need to save some from deletion
-    let need = min_keep - to_keep_count;
-    let save_count = need.min(to_delete_count);
-
-    (to_delete_count - save_count, to_keep_count + save_count)
-}
-
-/// Check if a commit is old based on cutoff
-#[allow(dead_code)]
-fn is_commit_old(commit_time: DateTime<Utc>, max_age_days: Option<u32>) -> bool {
-    match max_age_days {
-        Some(days) => {
-            let cutoff = Utc::now() - Duration::days(days as i64);
-            commit_time < cutoff
-        }
-        None => false,
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::TimeZone;
+    use crate::retention::is_commit_old;
+    use chrono::{Duration, Utc};
 
     // RetentionAction enum tests
 
@@ -390,112 +256,6 @@ mod tests {
             }
             _ => panic!("Wrong variant"),
         }
-    }
-
-    // apply_min_commits tests
-
-    #[test]
-    fn test_apply_min_commits_no_limit() {
-        // No min_commits specified - keep original counts
-        let (delete, keep) = apply_min_commits(5, 10, None);
-        assert_eq!(delete, 5);
-        assert_eq!(keep, 10);
-    }
-
-    #[test]
-    fn test_apply_min_commits_already_met() {
-        // Already have enough to keep
-        let (delete, keep) = apply_min_commits(5, 100, Some(50));
-        assert_eq!(delete, 5);
-        assert_eq!(keep, 100);
-    }
-
-    #[test]
-    fn test_apply_min_commits_save_some() {
-        // Need to save some from deletion
-        // Have 10 to delete, 30 to keep, need min 50
-        // Need to save 20, but only have 10 to delete
-        let (delete, keep) = apply_min_commits(10, 30, Some(50));
-        assert_eq!(delete, 0); // All 10 saved
-        assert_eq!(keep, 40); // 30 + 10 saved
-    }
-
-    #[test]
-    fn test_apply_min_commits_save_partial() {
-        // Need to save some from deletion
-        // Have 30 to delete, 10 to keep, need min 25
-        // Need 15, have 30 available
-        let (delete, keep) = apply_min_commits(30, 10, Some(25));
-        assert_eq!(delete, 15); // 30 - 15 saved
-        assert_eq!(keep, 25); // 10 + 15 = exactly min
-    }
-
-    #[test]
-    fn test_apply_min_commits_nothing_to_delete() {
-        // Nothing to delete - should do nothing
-        let (delete, keep) = apply_min_commits(0, 5, Some(100));
-        assert_eq!(delete, 0);
-        assert_eq!(keep, 5);
-    }
-
-    #[test]
-    fn test_apply_min_commits_zero_min() {
-        // min_commits = 0 should be treated as no minimum
-        let (delete, keep) = apply_min_commits(10, 5, Some(0));
-        assert_eq!(delete, 10);
-        assert_eq!(keep, 5);
-    }
-
-    // is_commit_old tests
-
-    #[test]
-    fn test_is_commit_old_no_max_age() {
-        let commit_time = Utc.with_ymd_and_hms(2020, 1, 1, 0, 0, 0).unwrap();
-        assert!(!is_commit_old(commit_time, None));
-    }
-
-    #[test]
-    fn test_is_commit_old_recent_commit() {
-        // Commit from 1 day ago with 30 day max age
-        let commit_time = Utc::now() - Duration::days(1);
-        assert!(!is_commit_old(commit_time, Some(30)));
-    }
-
-    #[test]
-    fn test_is_commit_old_old_commit() {
-        // Commit from 100 days ago with 30 day max age
-        let commit_time = Utc::now() - Duration::days(100);
-        assert!(is_commit_old(commit_time, Some(30)));
-    }
-
-    #[test]
-    fn test_is_commit_old_exactly_at_cutoff() {
-        // Commit from exactly 30 days ago with 30 day max age
-        // Due to sub-second timing, this could go either way
-        // Just verify it doesn't panic
-        let commit_time = Utc::now() - Duration::days(30);
-        let _ = is_commit_old(commit_time, Some(30));
-    }
-
-    #[test]
-    fn test_is_commit_old_future_commit() {
-        // Edge case: commit in the future
-        let commit_time = Utc::now() + Duration::days(10);
-        assert!(!is_commit_old(commit_time, Some(30)));
-    }
-
-    #[test]
-    fn test_is_commit_old_zero_max_age() {
-        // Zero max age - everything is old except future commits
-        let commit_time = Utc::now() - Duration::seconds(1);
-        assert!(is_commit_old(commit_time, Some(0)));
-    }
-
-    #[test]
-    fn test_is_commit_old_very_old_commit() {
-        // Very old commit
-        let commit_time = Utc.with_ymd_and_hms(2000, 1, 1, 0, 0, 0).unwrap();
-        assert!(is_commit_old(commit_time, Some(365)));
     }
 
     // Integration test for delete/keep classification logic

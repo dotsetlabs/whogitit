@@ -111,33 +111,8 @@ impl AuditLog {
 
     /// Append an event to the audit log
     pub fn log(&self, event: AuditEvent) -> Result<()> {
-        self.ensure_dir()?;
-
-        let is_new_file = !self.path.exists();
-
-        let mut file = OpenOptions::new()
-            .create(true)
-            .append(true)
-            .open(&self.path)
-            .context("Failed to open audit log")?;
-
-        // Set restrictive permissions (0600) on new audit log - contains sensitive data
-        #[cfg(unix)]
-        if is_new_file {
-            let mut perms = fs::metadata(&self.path)?.permissions();
-            perms.set_mode(0o600);
-            fs::set_permissions(&self.path, perms)
-                .context("Failed to set permissions on audit log")?;
-        }
-
-        let json = serde_json::to_string(&event)?;
-        writeln!(file, "{}", json).context("Failed to write to audit log")?;
-
-        // Ensure data is persisted to disk for audit integrity
-        file.sync_all()
-            .context("Failed to sync audit log to disk")?;
-
-        Ok(())
+        let event = self.with_chain(event)?;
+        self.write_event(&event)
     }
 
     /// Log a delete event
@@ -245,7 +220,12 @@ impl AuditLog {
     ///
     /// Each event includes a hash of the previous event, creating a chain
     /// that can be verified to detect tampering.
-    pub fn log_with_chain(&self, mut event: AuditEvent) -> Result<()> {
+    pub fn log_with_chain(&self, event: AuditEvent) -> Result<()> {
+        let event = self.with_chain(event)?;
+        self.write_event(&event)
+    }
+
+    fn with_chain(&self, mut event: AuditEvent) -> Result<AuditEvent> {
         use sha2::{Digest, Sha256};
 
         // Get the hash of the last event (if any)
@@ -259,16 +239,52 @@ impl AuditLog {
         event.details.prev_hash = prev_hash;
 
         // Calculate hash of this event's content (excluding event_hash itself)
-        let content_to_hash = format!(
-            "{}:{}:{:?}",
-            event.timestamp, event.event, event.details.commit
-        );
+        let content_to_hash = self.hashable_event_content(&event)?;
         let mut hasher = Sha256::new();
         hasher.update(content_to_hash.as_bytes());
         let hash = format!("{:x}", hasher.finalize());
         event.details.event_hash = Some(hash[..16].to_string()); // Truncate for readability
 
-        self.log(event)
+        Ok(event)
+    }
+
+    fn hashable_event_content(&self, event: &AuditEvent) -> Result<String> {
+        let mut value = serde_json::to_value(event)?;
+        if let Some(map) = value.as_object_mut() {
+            map.remove("event_hash");
+            map.remove("prev_hash");
+        }
+        Ok(serde_json::to_string(&value)?)
+    }
+
+    fn write_event(&self, event: &AuditEvent) -> Result<()> {
+        self.ensure_dir()?;
+
+        let is_new_file = !self.path.exists();
+
+        let mut file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&self.path)
+            .context("Failed to open audit log")?;
+
+        // Set restrictive permissions (0600) on new audit log - contains sensitive data
+        #[cfg(unix)]
+        if is_new_file {
+            let mut perms = fs::metadata(&self.path)?.permissions();
+            perms.set_mode(0o600);
+            fs::set_permissions(&self.path, perms)
+                .context("Failed to set permissions on audit log")?;
+        }
+
+        let json = serde_json::to_string(event)?;
+        writeln!(file, "{}", json).context("Failed to write to audit log")?;
+
+        // Ensure data is persisted to disk for audit integrity
+        file.sync_all()
+            .context("Failed to sync audit log to disk")?;
+
+        Ok(())
     }
 
     /// Get the hash of the last event in the log
@@ -293,6 +309,13 @@ impl AuditLog {
             return Ok(false);
         }
 
+        if let Some(stored_hash) = events[0].details.event_hash.as_ref() {
+            let computed = self.compute_event_hash(&events[0])?;
+            if stored_hash != &computed {
+                return Ok(false);
+            }
+        }
+
         // Each subsequent event should reference the previous event's hash
         for i in 1..events.len() {
             let expected_prev = events[i - 1].details.event_hash.as_ref();
@@ -306,9 +329,26 @@ impl AuditLog {
                     return Ok(false);
                 }
             }
+
+            // If the event has a hash, ensure it matches recomputation
+            if let Some(stored_hash) = events[i].details.event_hash.as_ref() {
+                let computed = self.compute_event_hash(&events[i])?;
+                if stored_hash != &computed {
+                    return Ok(false);
+                }
+            }
         }
 
         Ok(true)
+    }
+
+    fn compute_event_hash(&self, event: &AuditEvent) -> Result<String> {
+        use sha2::{Digest, Sha256};
+        let content_to_hash = self.hashable_event_content(event)?;
+        let mut hasher = Sha256::new();
+        hasher.update(content_to_hash.as_bytes());
+        let hash = format!("{:x}", hasher.finalize());
+        Ok(hash[..16].to_string())
     }
 }
 
@@ -372,6 +412,12 @@ mod tests {
         assert_eq!(events[0].event, AuditEventType::Delete);
         assert_eq!(events[1].event, AuditEventType::Export);
         assert_eq!(events[2].event, AuditEventType::RetentionApply);
+
+        assert!(events[0].details.prev_hash.is_none());
+        assert!(events[0].details.event_hash.is_some());
+        assert_eq!(events[1].details.prev_hash, events[0].details.event_hash);
+        assert_eq!(events[2].details.prev_hash, events[1].details.event_hash);
+        assert!(log.verify_chain().unwrap());
     }
 
     #[test]

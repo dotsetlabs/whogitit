@@ -327,16 +327,22 @@ fn write_csv(data: &ExportData, output: &Option<String>) -> Result<()> {
 
     // Rows
     for commit in &data.commits {
-        let message = commit.message.replace(',', ";").replace('\n', " ");
+        let message = csv_escape(&commit.message);
+        let author = csv_escape(&commit.author);
+        let commit_id = csv_escape(&commit.commit_id);
+        let commit_short = csv_escape(&commit.commit_short);
+        let committed_at = csv_escape(&commit.committed_at);
+        let session_id = csv_escape(&commit.session_id);
+        let model = csv_escape(&commit.model);
         csv_content.push_str(&format!(
             "{},{},{},{},{},{},{},{},{},{},{},{},{}\n",
-            commit.commit_id,
-            commit.commit_short,
+            commit_id,
+            commit_short,
             message,
-            commit.author.replace(',', ";"),
-            commit.committed_at,
-            commit.session_id,
-            commit.model,
+            author,
+            committed_at,
+            session_id,
+            model,
             commit.ai_lines,
             commit.ai_modified_lines,
             commit.human_lines,
@@ -361,6 +367,13 @@ fn write_csv(data: &ExportData, output: &Option<String>) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn csv_escape(value: &str) -> String {
+    let mut escaped = value.replace('"', "\"\"");
+    escaped = escaped.replace('\r', " ");
+    escaped = escaped.replace('\n', " ");
+    format!("\"{}\"", escaped)
 }
 
 #[cfg(test)]
@@ -552,20 +565,16 @@ mod tests {
 
     #[test]
     fn test_csv_message_escaping() {
-        // The message escaping happens in write_csv inline
-        // We can test the replacement logic directly
-        let message = "Fix bug, add feature\nSecond line";
-        let escaped = message.replace(',', ";").replace('\n', " ");
-        assert_eq!(escaped, "Fix bug; add feature Second line");
-        assert!(!escaped.contains(','));
-        assert!(!escaped.contains('\n'));
+        let message = "Fix bug, add \"feature\"\nSecond line";
+        let escaped = csv_escape(message);
+        assert_eq!(escaped, "\"Fix bug, add \"\"feature\"\" Second line\"");
     }
 
     #[test]
     fn test_csv_author_escaping() {
         let author = "John Doe, Jr.";
-        let escaped = author.replace(',', ";");
-        assert_eq!(escaped, "John Doe; Jr.");
+        let escaped = csv_escape(author);
+        assert_eq!(escaped, "\"John Doe, Jr.\"");
     }
 
     // ExportData structure tests

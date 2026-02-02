@@ -166,6 +166,7 @@ This hook:
 2. Processes the pending buffer
 3. Creates git note with attribution
 4. Clears pending buffer
+5. Applies retention policy automatically if `retention.auto_purge = true`
 
 ### pre-push
 
