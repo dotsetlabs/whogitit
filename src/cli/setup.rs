@@ -109,11 +109,22 @@ fn merge_hooks_into_settings(mut settings: Value) -> Value {
     let hook_config = hook_configuration();
 
     // Ensure hooks object exists
-    if settings.get("hooks").is_none() {
+    let hooks_is_object = settings
+        .get("hooks")
+        .map(|hooks| hooks.is_object())
+        .unwrap_or(false);
+    if !hooks_is_object {
+        if settings.get("hooks").is_some() {
+            eprintln!(
+                "whogitit: Warning - settings.json hooks is not an object, replacing with defaults"
+            );
+        }
         settings["hooks"] = json!({});
     }
 
-    let hooks = settings["hooks"].as_object_mut().unwrap();
+    let hooks = settings["hooks"]
+        .as_object_mut()
+        .expect("hooks should be an object after normalization");
 
     // Merge PreToolUse
     if let Some(pre_hooks) = hook_config.get("PreToolUse") {
@@ -266,7 +277,7 @@ fn configure_settings() -> Result<bool> {
     // Load existing settings or create new
     let settings: Value = if settings_path.exists() {
         let content = fs::read_to_string(&settings_path)?;
-        serde_json::from_str(&content).unwrap_or_else(|_| json!({}))
+        serde_json::from_str(&content).context("Failed to parse ~/.claude/settings.json")?
     } else {
         json!({})
     };
@@ -761,6 +772,19 @@ mod tests {
 
         assert!(has_existing, "Should preserve existing hook");
         assert!(has_whogitit, "Should add whogitit hook");
+    }
+
+    #[test]
+    fn test_merge_hooks_replaces_invalid_hooks() {
+        let settings = json!({
+            "hooks": "not-an-object"
+        });
+
+        let merged = merge_hooks_into_settings(settings);
+
+        assert!(merged["hooks"].is_object());
+        assert!(merged["hooks"].get("PreToolUse").is_some());
+        assert!(merged["hooks"].get("PostToolUse").is_some());
     }
 
     #[test]

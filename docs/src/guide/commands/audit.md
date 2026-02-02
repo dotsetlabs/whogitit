@@ -217,6 +217,7 @@ whogitit audit --event-type redaction
 - The audit log itself is not automatically purged
 - Consider including `.whogitit/audit.jsonl` in backups
 - Events are appended in real-time
+- If the audit log contains malformed JSON, audit commands will return an error until it is fixed
 
 ## See Also
 

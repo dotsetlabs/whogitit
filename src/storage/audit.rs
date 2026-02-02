@@ -180,14 +180,14 @@ impl AuditLog {
         let reader = BufReader::new(file);
 
         let mut events = Vec::new();
-        for line in reader.lines() {
+        for (idx, line) in reader.lines().enumerate() {
             let line = line?;
             if line.trim().is_empty() {
                 continue;
             }
-            if let Ok(event) = serde_json::from_str::<AuditEvent>(&line) {
-                events.push(event);
-            }
+            let event = serde_json::from_str::<AuditEvent>(&line)
+                .with_context(|| format!("Failed to parse audit log entry at line {}", idx + 1))?;
+            events.push(event);
         }
 
         Ok(events)
@@ -297,7 +297,7 @@ impl AuditLog {
     /// Returns Ok(true) if the chain is valid, Ok(false) if tampered,
     /// or an error if the log cannot be read.
     pub fn verify_chain(&self) -> Result<bool> {
-        let events = self.read_all_strict()?;
+        let events = self.read_all()?;
 
         if events.is_empty() {
             return Ok(true);
@@ -344,28 +344,6 @@ impl AuditLog {
         hasher.update(content_to_hash.as_bytes());
         let hash = format!("{:x}", hasher.finalize());
         Ok(hash[..16].to_string())
-    }
-
-    fn read_all_strict(&self) -> Result<Vec<AuditEvent>> {
-        if !self.path.exists() {
-            return Ok(Vec::new());
-        }
-
-        let file = File::open(&self.path).context("Failed to open audit log")?;
-        let reader = BufReader::new(file);
-
-        let mut events = Vec::new();
-        for (idx, line) in reader.lines().enumerate() {
-            let line = line?;
-            if line.trim().is_empty() {
-                continue;
-            }
-            let event = serde_json::from_str::<AuditEvent>(&line)
-                .with_context(|| format!("Failed to parse audit log entry at line {}", idx + 1))?;
-            events.push(event);
-        }
-
-        Ok(events)
     }
 }
 
