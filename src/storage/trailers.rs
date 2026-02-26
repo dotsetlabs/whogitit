@@ -176,11 +176,11 @@ fn has_existing_trailers(message: &str) -> bool {
 mod tests {
     use super::*;
     use crate::capture::snapshot::{AttributionSummary, FileAttributionResult};
-    use crate::core::attribution::{ModelInfo, SessionMetadata};
+    use crate::core::attribution::{ModelInfo, SessionMetadata, SCHEMA_VERSION};
 
     fn test_attribution() -> AIAttribution {
         AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: "abc123-def456-ghi789".to_string(),
                 model: ModelInfo::claude("claude-opus-4-5-20251101"),

@@ -18,10 +18,13 @@ if SUMMARY=$("$WHOGITIT" summary --base "$BASE_SHA" --head "$HEAD_SHA" --format 
   # Parse JSON output
   COMMITS_ANALYZED=$(echo "$SUMMARY" | jq -r '.commits_analyzed // 0')
   COMMITS_WITH_AI=$(echo "$SUMMARY" | jq -r '.commits_with_ai // 0')
-  TOTAL_AI=$(echo "$SUMMARY" | jq -r '.lines.ai // 0')
-  TOTAL_AI_MODIFIED=$(echo "$SUMMARY" | jq -r '.lines.ai_modified // 0')
-  TOTAL_HUMAN=$(echo "$SUMMARY" | jq -r '.lines.human // 0')
-  TOTAL_ORIGINAL=$(echo "$SUMMARY" | jq -r '.lines.original // 0')
+  # summary --format json reports additions in .additions.* (keep .lines.* fallback for legacy compatibility)
+  TOTAL_AI=$(echo "$SUMMARY" | jq -r '.additions.ai // .lines.ai // 0')
+  TOTAL_AI_MODIFIED=$(echo "$SUMMARY" | jq -r '.additions.ai_modified // .lines.ai_modified // 0')
+  TOTAL_HUMAN=$(echo "$SUMMARY" | jq -r '.additions.human // .lines.human // 0')
+  # original/unchanged lines are not guaranteed in summary output; initialize and
+  # accumulate from per-commit show data below for accuracy.
+  TOTAL_ORIGINAL=0
   AI_PERCENT=$(echo "$SUMMARY" | jq -r '.ai_percentage // 0')
 
   if [ "$COMMITS_WITH_AI" -eq 0 ] || [ -z "$COMMITS_WITH_AI" ]; then
@@ -52,9 +55,16 @@ if SUMMARY=$("$WHOGITIT" summary --base "$BASE_SHA" --head "$HEAD_SHA" --format 
         AI=$(echo "$ATTR" | jq -r '[.files[].summary.ai_lines] | add // 0')
         AI_MOD=$(echo "$ATTR" | jq -r '[.files[].summary.ai_modified_lines] | add // 0')
         HUMAN=$(echo "$ATTR" | jq -r '[.files[].summary.human_lines] | add // 0')
+        ORIGINAL=$(echo "$ATTR" | jq -r '[.files[].summary.original_lines] | add // 0')
         FILES=$(echo "$ATTR" | jq -r '.files | length')
 
+        AI=${AI:-0}
+        AI_MOD=${AI_MOD:-0}
+        HUMAN=${HUMAN:-0}
+        ORIGINAL=${ORIGINAL:-0}
+
         if [ "${AI:-0}" != "0" ] || [ "${AI_MOD:-0}" != "0" ]; then
+          TOTAL_ORIGINAL=$((TOTAL_ORIGINAL + ORIGINAL))
           MSG=$(git log -1 --format=%s "$COMMIT" 2>/dev/null | head -c 50)
           COMMIT_DETAILS="${COMMIT_DETAILS}| \`${SHORT}\` | ${MSG} | ${AI:-0} | ${AI_MOD:-0} | ${HUMAN:-0} | ${FILES:-0} |
 "

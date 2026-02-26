@@ -16,6 +16,8 @@ extern crate libc;
 const AUDIT_DIR: &str = ".whogitit";
 /// Audit log file name
 const AUDIT_FILE: &str = "audit.jsonl";
+/// Number of hex chars retained from SHA-256 for event hash chaining (128 bits).
+const EVENT_HASH_HEX_LEN: usize = 32;
 
 /// An audit log event
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -87,6 +89,9 @@ pub struct AuditDetails {
     /// User who performed the action
     #[serde(skip_serializing_if = "Option::is_none")]
     pub user: Option<String>,
+    /// Configuration field that changed (for config_change events)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub field: Option<String>,
 }
 
 /// Append-only audit log store
@@ -170,6 +175,20 @@ impl AuditLog {
         })
     }
 
+    /// Log a configuration change event
+    pub fn log_config_change(&self, field: &str, reason: &str) -> Result<()> {
+        self.log(AuditEvent {
+            timestamp: chrono::Utc::now().to_rfc3339(),
+            event: AuditEventType::ConfigChange,
+            details: AuditDetails {
+                field: Some(field.to_string()),
+                reason: Some(reason.to_string()),
+                user: get_current_user(),
+                ..Default::default()
+            },
+        })
+    }
+
     /// Read all events from the audit log
     pub fn read_all(&self) -> Result<Vec<AuditEvent>> {
         if !self.path.exists() {
@@ -216,15 +235,6 @@ impl AuditLog {
         &self.path
     }
 
-    /// Log an event with hash chaining for tamper detection
-    ///
-    /// Each event includes a hash of the previous event, creating a chain
-    /// that can be verified to detect tampering.
-    pub fn log_with_chain(&self, event: AuditEvent) -> Result<()> {
-        let event = self.with_chain(event)?;
-        self.write_event(&event)
-    }
-
     fn with_chain(&self, mut event: AuditEvent) -> Result<AuditEvent> {
         use sha2::{Digest, Sha256};
 
@@ -243,7 +253,7 @@ impl AuditLog {
         let mut hasher = Sha256::new();
         hasher.update(content_to_hash.as_bytes());
         let hash = format!("{:x}", hasher.finalize());
-        event.details.event_hash = Some(hash[..16].to_string()); // Truncate for readability
+        event.details.event_hash = Some(truncate_event_hash(&hash));
 
         Ok(event)
     }
@@ -343,8 +353,12 @@ impl AuditLog {
         let mut hasher = Sha256::new();
         hasher.update(content_to_hash.as_bytes());
         let hash = format!("{:x}", hasher.finalize());
-        Ok(hash[..16].to_string())
+        Ok(truncate_event_hash(&hash))
     }
+}
+
+fn truncate_event_hash(full_hash_hex: &str) -> String {
+    full_hash_hex[..EVENT_HASH_HEX_LEN.min(full_hash_hex.len())].to_string()
 }
 
 /// Get the current user name for audit trail
@@ -361,15 +375,8 @@ fn get_current_user() -> Option<String> {
         // Get the actual username from the system based on UID
         let uid = unsafe { libc::getuid() };
 
-        // Try to get the password entry for this UID
-        let pwd = unsafe { libc::getpwuid(uid) };
-        if !pwd.is_null() {
-            let system_user = unsafe {
-                std::ffi::CStr::from_ptr((*pwd).pw_name)
-                    .to_string_lossy()
-                    .to_string()
-            };
-
+        // Use getpwuid_r (re-entrant) instead of getpwuid to avoid static-buffer races.
+        if let Some(system_user) = get_system_user_for_uid(uid) {
             // Check if env var matches system user
             if let Some(ref env_name) = env_user {
                 if env_name != &system_user {
@@ -386,6 +393,46 @@ fn get_current_user() -> Option<String> {
 
     // Fallback to environment variable
     env_user
+}
+
+#[cfg(unix)]
+fn get_system_user_for_uid(uid: libc::uid_t) -> Option<String> {
+    let mut buf_size = unsafe { libc::sysconf(libc::_SC_GETPW_R_SIZE_MAX) };
+    if buf_size <= 0 {
+        buf_size = 1024;
+    }
+
+    for _ in 0..4 {
+        let mut pwd: libc::passwd = unsafe { std::mem::zeroed() };
+        let mut result: *mut libc::passwd = std::ptr::null_mut();
+        let mut buffer = vec![0u8; buf_size as usize];
+
+        let ret = unsafe {
+            libc::getpwuid_r(
+                uid,
+                &mut pwd,
+                buffer.as_mut_ptr().cast(),
+                buffer.len(),
+                &mut result,
+            )
+        };
+
+        if ret == 0 && !result.is_null() && !pwd.pw_name.is_null() {
+            return Some(
+                unsafe { std::ffi::CStr::from_ptr(pwd.pw_name) }
+                    .to_string_lossy()
+                    .into_owned(),
+            );
+        }
+
+        if ret != libc::ERANGE {
+            return None;
+        }
+
+        buf_size *= 2;
+    }
+
+    None
 }
 
 #[cfg(test)]
@@ -410,6 +457,10 @@ mod tests {
 
         assert!(events[0].details.prev_hash.is_none());
         assert!(events[0].details.event_hash.is_some());
+        assert_eq!(
+            events[0].details.event_hash.as_ref().unwrap().len(),
+            EVENT_HASH_HEX_LEN
+        );
         assert_eq!(events[1].details.prev_hash, events[0].details.event_hash);
         assert_eq!(events[2].details.prev_hash, events[1].details.event_hash);
         assert!(log.verify_chain().unwrap());
@@ -481,5 +532,49 @@ mod tests {
         let parsed: AuditEvent = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.event, AuditEventType::Delete);
         assert_eq!(parsed.details.commit, Some("abc123".to_string()));
+    }
+
+    #[test]
+    fn test_log_config_change() {
+        let dir = TempDir::new().unwrap();
+        let log = AuditLog::new(dir.path());
+
+        log.log_config_change("git.remote.origin.fetch", "Configured notes fetch")
+            .unwrap();
+
+        let events = log.read_all().unwrap();
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].event, AuditEventType::ConfigChange);
+        assert_eq!(
+            events[0].details.field.as_deref(),
+            Some("git.remote.origin.fetch")
+        );
+        assert_eq!(
+            events[0].details.reason.as_deref(),
+            Some("Configured notes fetch")
+        );
+    }
+
+    #[test]
+    fn test_hashable_event_content_excludes_event_hash() {
+        let dir = TempDir::new().unwrap();
+        let log = AuditLog::new(dir.path());
+
+        let mut event = AuditEvent {
+            timestamp: "2026-01-31T12:00:00Z".to_string(),
+            event: AuditEventType::Delete,
+            details: AuditDetails {
+                commit: Some("abc123".to_string()),
+                reason: Some("test".to_string()),
+                event_hash: Some("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa".to_string()),
+                ..Default::default()
+            },
+        };
+
+        let hashable_a = log.hashable_event_content(&event).unwrap();
+        event.details.event_hash = Some("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb".to_string());
+        let hashable_b = log.hashable_event_content(&event).unwrap();
+
+        assert_eq!(hashable_a, hashable_b);
     }
 }

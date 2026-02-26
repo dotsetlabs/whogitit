@@ -6,11 +6,13 @@ whogitit is configured via a TOML file (`.whogitit.toml`) in your repository roo
 
 whogitit looks for configuration in this order:
 
+0. **Environment override**: `WHOGITIT_CONFIG=/path/to/config.toml` (if set)
 1. **Repository-local**: `.whogitit.toml` in the repository root
 2. **Global**: `~/.config/whogitit/config.toml`
 3. **Defaults**: Built-in default values
 
 Repository-local configuration takes precedence over global configuration.
+When `WHOGITIT_CONFIG` is set, it takes precedence over all other config locations.
 
 If a configuration file is present but invalid, CLI commands will return an error so you can fix it.
 Hook-based capture will log a warning and fall back to defaults to avoid breaking your workflow.
@@ -284,7 +286,7 @@ Some settings can be overridden via environment variables:
 
 | Variable | Description |
 |----------|-------------|
-| `WHOGITIT_CONFIG` | Path to configuration file |
+| `WHOGITIT_CONFIG` | Absolute or relative path to a TOML config file (overrides repo/global discovery) |
 | `WHOGITIT_BIN` | Path to whogitit binary (used by hooks) |
 
 ## See Also

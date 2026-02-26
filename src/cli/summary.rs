@@ -3,6 +3,7 @@ use clap::{Args, ValueEnum};
 use colored::Colorize;
 use git2::Repository;
 
+use crate::cli::output::MACHINE_OUTPUT_SCHEMA_VERSION;
 use crate::storage::notes::NotesStore;
 
 /// Check if repository is a shallow clone
@@ -329,6 +330,8 @@ fn print_json(summary: &AggregateSummary) {
         .collect();
 
     let output = serde_json::json!({
+        "schema_version": MACHINE_OUTPUT_SCHEMA_VERSION,
+        "schema": "whogitit.summary.v1",
         "commits_analyzed": summary.commits_analyzed,
         "commits_with_ai": summary.commits_with_ai,
         "additions": {

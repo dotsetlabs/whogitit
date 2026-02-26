@@ -36,7 +36,7 @@ You should see all checks passing.
 
 Use Claude Code to make changes to your project. For example:
 
-```
+```text
 > Add a function that validates email addresses
 ```
 
@@ -55,7 +55,7 @@ whogitit status
 
 Output:
 
-```
+```text
 Pending AI attribution:
   Session: 7f3a-4b2c-9d1e-8a7b
   Files: 2
@@ -89,7 +89,7 @@ whogitit blame src/validation.rs
 
 Output:
 
-```
+```text
  LINE   │ COMMIT  │ AUTHOR     │ SRC │ CODE
 ─────────────────────────────────────────────────────────────────────────────────────
     1   │ a1b2c3d │ Greg King  │  ●  │ use regex::Regex;
@@ -112,7 +112,7 @@ whogitit show HEAD
 
 Output:
 
-```
+```text
 Commit: a1b2c3d
 Session: 7f3a-4b2c-9d1e-8a7b
 Model: claude-opus-4-5-20251101
@@ -137,7 +137,7 @@ whogitit prompt src/validation.rs:3
 
 Output:
 
-```
+```text
 ╔════════════════════════════════════════════════════════════════════╗
 ║  PROMPT #0 in session 7f3a-4b2c-9d1e...                            ║
 ║  Model: claude-opus-4-5-20251101 | 2026-01-30T14:23:17Z            ║

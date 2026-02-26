@@ -30,7 +30,7 @@ whogitit retention config
 
 Output:
 
-```
+```text
 Current Retention Configuration
 ==================================================
 Config file: /path/to/repo/.whogitit.toml
@@ -56,27 +56,37 @@ Preview what would be deleted based on current policy:
 
 ```bash
 whogitit retention preview
+
+# Show more commits in the preview list
+whogitit retention preview --show 100
 ```
 
 Output:
 
-```
+```text
 Retention Policy Preview
 ==================================================
 Max age: 365 days
 Retained refs: refs/heads/main
 Min commits to keep: 100
+Preview list size: 25
 
 ● 95 commits to keep
 ● 12 commits to delete
 
-Commits that would be deleted:
+Commits that would be deleted (showing up to 25):
   abc1234 Fix typo in readme (2024-08-15) - would be deleted
   def5678 Update dependencies (2024-07-22) - would be deleted
-  ...
+  ... and 10 more not shown (increase with --show)
 
 Run 'whogitit retention apply --execute' to delete these.
 ```
+
+### Preview Options
+
+| Option | Description |
+|--------|-------------|
+| `--show <N>` | Number of commits to list in preview output (default: `25`, use `0` to hide list) |
 
 ## Subcommand: apply
 
@@ -102,14 +112,14 @@ whogitit retention apply --execute --reason "Quarterly cleanup"
 
 ### Dry-Run Output
 
-```
+```text
 Preview: 12 commits would be deleted (dry-run)
 Run with --execute to actually delete.
 ```
 
 ### Execute Output
 
-```
+```text
 Done: Deleted attribution for 12 commits
 Reason: Quarterly cleanup
 ```

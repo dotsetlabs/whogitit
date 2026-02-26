@@ -9,6 +9,9 @@ use std::path::{Path, PathBuf};
 use super::redaction::{patterns, Redactor};
 use regex;
 
+/// Optional environment override for config path.
+const ENV_CONFIG_PATH: &str = "WHOGITIT_CONFIG";
+
 /// Privacy configuration
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
@@ -128,17 +131,24 @@ impl Default for RetentionConfig {
 impl WhogititConfig {
     /// Load configuration from repo root, falling back to global config
     pub fn load(repo_root: &Path) -> Result<Self> {
-        // Try repo-local config first
-        let repo_config = repo_root.join(".whogitit.toml");
-        if repo_config.exists() {
-            return Self::load_from_file(&repo_config);
+        let env_override = Self::env_override_path();
+        Self::load_with_override(repo_root, env_override.as_deref())
+    }
+
+    fn load_with_override(repo_root: &Path, override_path: Option<&Path>) -> Result<Self> {
+        // WHOGITIT_CONFIG takes precedence over repo/global discovery.
+        if let Some(override_path) = override_path {
+            return Self::load_from_file(override_path).with_context(|| {
+                format!(
+                    "Failed to load config from {}={}",
+                    ENV_CONFIG_PATH,
+                    override_path.display()
+                )
+            });
         }
 
-        // Try global config
-        if let Some(global_config) = Self::global_config_path() {
-            if global_config.exists() {
-                return Self::load_from_file(&global_config);
-            }
+        if let Some(config_path) = Self::discover_config_path(repo_root) {
+            return Self::load_from_file(&config_path);
         }
 
         // Return defaults
@@ -167,6 +177,27 @@ impl WhogititConfig {
     /// Check if a config file exists for this repo
     pub fn exists_for_repo(repo_root: &Path) -> bool {
         Self::repo_config_path(repo_root).exists()
+    }
+
+    fn env_override_path() -> Option<PathBuf> {
+        std::env::var_os(ENV_CONFIG_PATH).and_then(|value| {
+            if value.is_empty() {
+                None
+            } else {
+                Some(PathBuf::from(value))
+            }
+        })
+    }
+
+    fn discover_config_path(repo_root: &Path) -> Option<PathBuf> {
+        // Try repo-local config first
+        let repo_config = Self::repo_config_path(repo_root);
+        if repo_config.exists() {
+            return Some(repo_config);
+        }
+
+        // Try global config
+        Self::global_config_path().filter(|path| path.exists())
     }
 }
 
@@ -376,6 +407,47 @@ audit_log = true
         // Should return defaults
         assert!(config.privacy.enabled);
         assert!(!config.privacy.audit_log);
+    }
+
+    #[test]
+    fn test_load_prefers_env_override_config() {
+        let dir = TempDir::new().unwrap();
+        let repo_config_path = dir.path().join(".whogitit.toml");
+        let override_config_path = dir.path().join("override.toml");
+
+        std::fs::write(
+            &repo_config_path,
+            r#"
+[privacy]
+audit_log = false
+"#,
+        )
+        .unwrap();
+
+        std::fs::write(
+            &override_config_path,
+            r#"
+[privacy]
+audit_log = true
+"#,
+        )
+        .unwrap();
+
+        let config =
+            WhogititConfig::load_with_override(dir.path(), Some(&override_config_path)).unwrap();
+
+        assert!(config.privacy.audit_log);
+    }
+
+    #[test]
+    fn test_load_env_override_missing_file_returns_error() {
+        let dir = TempDir::new().unwrap();
+        let missing_path = dir.path().join("does-not-exist.toml");
+        let err = WhogititConfig::load_with_override(dir.path(), Some(&missing_path)).unwrap_err();
+
+        let message = err.to_string();
+        assert!(message.contains(ENV_CONFIG_PATH));
+        assert!(message.contains("does-not-exist.toml"));
     }
 
     #[test]

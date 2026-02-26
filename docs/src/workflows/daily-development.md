@@ -8,7 +8,7 @@ This guide covers how to use whogitit as part of your everyday development workf
 
 Open your project and start working with Claude Code:
 
-```
+```text
 > Add a function to validate email addresses
 ```
 
@@ -21,7 +21,7 @@ Claude edits your files. Behind the scenes, whogitit's hooks capture:
 
 Review Claude's changes. Make any modifications you want:
 
-```rust
+```rust,ignore
 // Claude wrote:
 fn validate_email(email: &str) -> bool {
     email.contains('@')
@@ -40,7 +40,7 @@ These modifications will be tracked as `AIModified` lines.
 
 Write additional code yourself:
 
-```rust
+```rust,ignore
 // You add:
 #[cfg(test)]
 mod tests {
@@ -63,7 +63,7 @@ whogitit status
 
 Output:
 
-```
+```text
 Pending AI attribution:
   Session: 7f3a-4b2c-9d1e-8a7b
   Files: 1
@@ -92,7 +92,7 @@ The post-commit hook automatically:
 whogitit blame src/validation.rs
 ```
 
-```
+```text
  LINE   │ COMMIT  │ AUTHOR     │ SRC │ CODE
 ───────────────────────────────────────────────────────────────────
     1   │ a1b2c3d │ Greg King  │  ◐  │ fn validate_email(email: &str) -> bool {
@@ -111,7 +111,7 @@ whogitit blame src/validation.rs
 
 Claude Code often edits multiple files. All changes within a session are tracked together:
 
-```
+```text
 > Add user authentication with login and registration endpoints
 ```
 
@@ -126,7 +126,7 @@ All are captured with the same session ID and prompt.
 
 If you give Claude multiple prompts before committing:
 
-```
+```text
 > Add the User struct
 > Now add password hashing
 > Add email verification
@@ -138,7 +138,7 @@ Each prompt is recorded separately. You can trace which prompt generated which c
 whogitit show HEAD
 ```
 
-```
+```text
 Prompts used:
   #0: "Add the User struct..."
   #1: "Now add password hashing..."

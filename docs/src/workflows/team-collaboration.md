@@ -108,7 +108,7 @@ Prompts used:
 Human modifications:
 - Improved regex pattern
 - Added international domain support
-```
+```text
 ```
 
 ### Code Review Standards
@@ -190,7 +190,7 @@ If a contributor doesn't have whogitit set up:
 # This is visible in PR summaries as "commits without attribution"
 
 # After merging, you can optionally add a note:
-git notes --ref=whogitit add -m '{"schema_version":2,"session":{"session_id":"unknown"},"prompts":[],"files":[]}' <commit>
+git notes --ref=whogitit add -m '{"version":3,"session":{"session_id":"unknown","model":{"id":"unknown","provider":"unknown"},"started_at":"1970-01-01T00:00:00Z","prompt_count":0},"prompts":[],"files":[]}' <commit>
 ```
 
 ### Rebasing and Attribution

@@ -17,8 +17,8 @@ The `export` command extracts attribution data from git notes and outputs it in 
 | Option | Description |
 |--------|-------------|
 | `--format <FORMAT>` | Output format: `json` (default), `csv` |
-| `--since <DATE>` | Only include commits after this date (YYYY-MM-DD) |
-| `--until <DATE>` | Only include commits before this date (YYYY-MM-DD) |
+| `--since <DATE>` | Only include commits on or after this date (YYYY-MM-DD) |
+| `--until <DATE>` | Only include commits on or before this date (YYYY-MM-DD) |
 | `-o, --output <FILE>` | Output file (default: stdout) |
 | `--full-prompts` | Include full prompt text (default: truncated to 100 chars) |
 | `--prompt-max-len <N>` | Max prompt length when not using --full-prompts (default: 100) |
@@ -81,7 +81,7 @@ whogitit export -o attribution-data.json
 
 Output:
 
-```
+```text
 Exported 10 commits to attribution-data.json
 ```
 
@@ -133,7 +133,7 @@ whogitit export --prompt-max-len 200 -o export.json
 
 ### JSON Schema
 
-```
+```text
 {
   export_version: number,      // Schema version (currently 1)
   exported_at: string,         // ISO 8601 timestamp
@@ -203,6 +203,7 @@ whogitit export --since "$LAST_RELEASE_DATE" -o release-attribution.json
 
 - Only commits with attribution in git notes are included
 - Commits are sorted by date (newest first)
+- Date filters are inclusive at day boundaries (`--since` starts at `00:00:00`, `--until` ends at `23:59:59`)
 - Prompts are redacted according to privacy settings
 - Large exports may take time; consider date filtering
 

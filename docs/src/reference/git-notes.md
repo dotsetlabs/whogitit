@@ -72,7 +72,7 @@ This:
 
 ```bash
 # Add a note manually
-git notes --ref=whogitit add -m '{"schema_version":2,...}' abc123
+git notes --ref=whogitit add -m '{"version":3,...}' abc123
 
 # Edit existing note
 git notes --ref=whogitit edit abc123
@@ -152,7 +152,7 @@ After this, notes are automatically preserved during:
 - `git commit --amend`
 
 You'll see a message like:
-```
+```text
 whogitit: Preserved attribution for 3 commit(s)
 ```
 
@@ -203,7 +203,7 @@ Squash creates a new commit, losing individual notes. Options:
 
 ### Notes Tree Structure
 
-```
+```text
 refs/notes/whogitit/
 ├── ab/
 │   ├── c123...  → note for commit abc123...
@@ -218,9 +218,15 @@ Notes are stored as blobs in the git object database.
 ### Note Size
 
 Each note is a JSON blob. Typical sizes:
-- Small commit (1 file, 20 lines): ~500 bytes
-- Medium commit (5 files, 100 lines): ~2-5 KB
-- Large commit (20 files, 500 lines): ~10-20 KB
+- Small commit (1 file, 20 lines): ~1-10 KiB
+- Medium commit (5 files, 100 lines): ~20-150 KiB
+- Large commit (20 files, 500 lines): ~200+ KiB
+
+To keep repositories healthy at scale:
+- whogitit warns when a note payload exceeds **512 KiB**
+- whogitit rejects payloads above **4 MiB** with a clear error
+
+If you hit the hard limit, split the work into smaller commits or reduce prompt payload size.
 
 ### Storage Efficiency
 

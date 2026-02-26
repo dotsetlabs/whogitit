@@ -19,7 +19,7 @@ whogitit summary --base main
 
 Output:
 
-```
+```text
 AI Attribution Summary
 ======================
 
@@ -148,7 +148,7 @@ Good prompts lead to better AI output. Consider:
 
 When commenting, reference the attribution:
 
-```
+```text
 This AI-generated code (lines 15-30) doesn't handle the case where
 `user_id` is None. The prompt asked for "user authentication" but
 didn't specify guest user handling.
@@ -158,7 +158,7 @@ didn't specify guest user handling.
 
 If the issue stems from the prompt:
 
-```
+```text
 The AI generated this based on "Add authentication". For future
 features, consider more specific prompts like "Add JWT authentication
 with 24-hour token expiry and refresh token support".
@@ -168,7 +168,7 @@ with 24-hour token expiry and refresh token support".
 
 If AIModified code is unclear:
 
-```
+```text
 Line 42 was modified from AI output. Could you explain what the
 original AI generated and why you changed it?
 ```

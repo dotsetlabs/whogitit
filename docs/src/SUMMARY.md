@@ -46,5 +46,6 @@
 
 # Appendix
 
+- [Migrating to 1.0](./appendix/migrating-to-1.0.md)
 - [Troubleshooting](./appendix/troubleshooting.md)
 - [FAQ](./appendix/faq.md)

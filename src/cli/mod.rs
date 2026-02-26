@@ -21,6 +21,8 @@ use clap::{Parser, Subcommand};
 use std::os::unix::fs::PermissionsExt;
 
 use crate::capture::hook;
+use crate::privacy::WhogititConfig;
+use crate::storage::audit::AuditLog;
 
 /// AI-aware git blame tool for tracking AI-generated code
 #[derive(Debug, Parser)]
@@ -64,9 +66,11 @@ pub enum Commands {
     Audit(audit::AuditArgs),
 
     /// Capture a file change (called by Claude Code hook)
+    #[command(hide = true)]
     Capture(CaptureArgs),
 
     /// Finalize attribution after a commit (post-commit hook)
+    #[command(hide = true)]
     PostCommit,
 
     /// Show pending changes status
@@ -250,8 +254,30 @@ fn run_init(args: InitArgs) -> Result<()> {
     install_post_rewrite_hook(&hooks_dir)?;
 
     // Configure git to auto-fetch notes
-    configure_git_fetch(&repo)?;
-    add_git_exclude(&repo)?;
+    let fetch_updated = configure_git_fetch(&repo)?;
+    let exclude_updated = add_git_exclude(&repo)?;
+
+    if let Ok(config) = WhogititConfig::load(repo_root) {
+        if config.privacy.audit_log {
+            let audit_log = AuditLog::new(repo_root);
+            if fetch_updated {
+                if let Err(e) = audit_log.log_config_change(
+                    "git.remote.origin.fetch",
+                    "Configured automatic fetch for whogitit notes",
+                ) {
+                    eprintln!("whogitit: Warning - failed to write audit event: {}", e);
+                }
+            }
+            if exclude_updated {
+                if let Err(e) = audit_log.log_config_change(
+                    "git.info.exclude",
+                    "Added whogitit local artifacts to .git/info/exclude",
+                ) {
+                    eprintln!("whogitit: Warning - failed to write audit event: {}", e);
+                }
+            }
+        }
+    }
 
     println!("\nRepository initialized! AI attribution will be tracked for commits in this repo.");
     println!("Notes will be automatically pushed with 'git push' and fetched with 'git fetch'.");
@@ -427,7 +453,7 @@ fn make_executable(_path: &std::path::Path) -> Result<()> {
 }
 
 /// Configure git to automatically fetch whogitit notes
-fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
+fn configure_git_fetch(repo: &git2::Repository) -> Result<bool> {
     let mut config = repo.config().context("Failed to open git config")?;
 
     let fetch_refspec = "+refs/notes/whogitit:refs/notes/whogitit";
@@ -453,19 +479,20 @@ fn configure_git_fetch(repo: &git2::Repository) -> Result<()> {
                     "whogitit: Warning - unable to add fetch refspec without overwriting existing settings."
                 );
                 eprintln!("whogitit: Please add this manually:\n  {}", fetch_refspec);
-                return Ok(());
+                return Ok(false);
             }
         }
         println!("✓ Configured git to fetch whogitit notes automatically.");
+        return Ok(true);
     } else {
         println!("✓ Git already configured to fetch whogitit notes.");
     }
 
-    Ok(())
+    Ok(false)
 }
 
 /// Add whogitit artifacts to git exclude list to avoid accidental commits
-fn add_git_exclude(repo: &git2::Repository) -> Result<()> {
+fn add_git_exclude(repo: &git2::Repository) -> Result<bool> {
     let git_dir = repo.path();
     let info_dir = git_dir.join("info");
     fs::create_dir_all(&info_dir).context("Failed to create .git/info directory")?;
@@ -475,7 +502,7 @@ fn add_git_exclude(repo: &git2::Repository) -> Result<()> {
 
     if existing.contains("# >>> whogitit ignore >>>") {
         println!("✓ Git exclude already configured for whogitit artifacts.");
-        return Ok(());
+        return Ok(false);
     }
 
     let block = [
@@ -496,7 +523,7 @@ fn add_git_exclude(repo: &git2::Repository) -> Result<()> {
     fs::write(&exclude_path, new_content).context("Failed to update git exclude")?;
     println!("✓ Added whogitit artifacts to .git/info/exclude.");
 
-    Ok(())
+    Ok(true)
 }
 
 #[cfg(test)]

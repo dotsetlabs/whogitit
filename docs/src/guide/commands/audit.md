@@ -41,7 +41,7 @@ whogitit audit
 
 Output:
 
-```
+```text
 Audit Log
 ============================================================
 2026-01-30 14:23:15 delete commit:abc123d user:greg - Retention policy
@@ -60,7 +60,7 @@ whogitit audit --event-type delete
 
 Output:
 
-```
+```text
 Audit Log
 ============================================================
 2026-01-30 14:23:15 delete commit:abc123d user:greg - Retention policy
@@ -159,7 +159,7 @@ audit_log = true
 
 If not enabled, the command will prompt you:
 
-```
+```text
 No audit log found.
 Enable audit logging in .whogitit.toml: [privacy]
 audit_log = true

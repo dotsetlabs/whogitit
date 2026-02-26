@@ -169,7 +169,20 @@ whogitit annotations --sort-by lines
 
 ### JSON Format
 
-Same structure but without GitHub-specific formatting constraints.
+Machine-readable JSON includes schema metadata:
+
+```json
+{
+  "schema_version": 1,
+  "schema": "whogitit.annotations.v1",
+  "annotations": [],
+  "summary": {
+    "files_analyzed": 5,
+    "models": ["claude-opus-4-5-20251101"],
+    "session_range": "2024-01-15 to 2024-01-20"
+  }
+}
+```
 
 ## Shallow Clone Handling
 

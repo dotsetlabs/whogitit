@@ -9,7 +9,7 @@ Common issues and their solutions.
 ### `whogitit` command not found
 
 **Symptoms:**
-```
+```text
 bash: whogitit: command not found
 ```
 
@@ -37,7 +37,7 @@ bash: whogitit: command not found
 ### Build fails
 
 **Symptoms:**
-```
+```text
 error[E0433]: failed to resolve: could not find `xyz` in `abc`
 ```
 
@@ -182,7 +182,7 @@ whogitit setup
 ### pre-push hook failing
 
 **Symptoms:**
-```
+```text
 error: failed to push some refs to 'origin'
 ```
 
@@ -258,7 +258,7 @@ Git notes are attached to specific commit SHAs. Rebase creates new SHAs.
 ### Corrupt note data
 
 **Symptoms:**
-```
+```text
 Error: invalid JSON in note
 ```
 
@@ -281,7 +281,7 @@ Error: invalid JSON in note
 ### JSON parse errors
 
 **Symptoms:**
-```
+```text
 Error: expected value at line 1 column 1
 ```
 
@@ -347,6 +347,25 @@ Error: expected value at line 1 column 1
 1. **Commit more frequently:** Pending buffer grows with each edit.
 
 2. **Clear and restart:**
+   ```bash
+   whogitit clear
+   ```
+
+### `Attribution payload is too large for a git note`
+
+**Symptoms:**
+```text
+Error: Attribution payload is too large for a git note
+```
+
+**Cause:**
+- A single commit generated an unusually large attribution payload (note hard limit is 4 MiB)
+
+**Solutions:**
+
+1. **Split the work into smaller commits:** commit focused file groups instead of one large sweep.
+2. **Trim oversized prompts:** very long prompts increase payload size.
+3. **Clear stale pending state if needed:**
    ```bash
    whogitit clear
    ```

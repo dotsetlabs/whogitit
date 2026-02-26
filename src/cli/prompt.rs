@@ -3,6 +3,7 @@ use clap::Args;
 use colored::Colorize;
 use git2::Repository;
 
+use crate::cli::output::{LineSourceOutput, OutputFormat, MACHINE_OUTPUT_SCHEMA_VERSION};
 use crate::core::blame::AIBlamer;
 use crate::utils::{pad_right, truncate, word_wrap};
 
@@ -12,7 +13,15 @@ pub struct PromptArgs {
     /// File and line reference (e.g., "src/main.rs:42" or "src/main.rs")
     pub reference: String,
 
-    /// Output as JSON
+    /// Revision to inspect (default: HEAD)
+    #[arg(short, long)]
+    pub revision: Option<String>,
+
+    /// Output format
+    #[arg(long, value_enum)]
+    pub format: Option<OutputFormat>,
+
+    /// Output as JSON (deprecated: use --format json)
     #[arg(long)]
     pub json: bool,
 }
@@ -47,6 +56,11 @@ impl FileLineRef {
 pub fn run(args: PromptArgs) -> Result<()> {
     // Parse reference
     let file_ref = FileLineRef::parse(&args.reference)?;
+    let output_format = if args.json {
+        OutputFormat::Json
+    } else {
+        args.format.unwrap_or(OutputFormat::Pretty)
+    };
 
     // Open repository
     let repo = Repository::discover(".").context("Not in a git repository")?;
@@ -55,7 +69,7 @@ pub fn run(args: PromptArgs) -> Result<()> {
     let mut blamer = AIBlamer::new(&repo)?;
 
     // Run blame to find AI attribution
-    let result = blamer.blame(&file_ref.file, None)?;
+    let result = blamer.blame(&file_ref.file, args.revision.as_deref())?;
 
     // Find the relevant line
     let target_line = match file_ref.line {
@@ -95,14 +109,33 @@ pub fn run(args: PromptArgs) -> Result<()> {
         .prompt_index
         .and_then(|idx| attribution.get_prompt(idx));
 
-    if args.json {
+    if output_format == OutputFormat::Json {
         let output = serde_json::json!({
-            "file": file_ref.file,
-            "line": line.line_number,
-            "commit": line.commit_id,
-            "source": format!("{:?}", line.source),
-            "prompt_index": line.prompt_index,
-            "prompt_text": prompt_info.map(|p| &p.text),
+            "schema_version": MACHINE_OUTPUT_SCHEMA_VERSION,
+            "schema": "whogitit.prompt.v1",
+            "query": {
+                "reference": args.reference,
+                "file": file_ref.file,
+                "line_number": line.line_number,
+                "revision": result.revision,
+            },
+            "line": {
+                "line_number": line.line_number,
+                "content": line.content,
+                "source": LineSourceOutput::from(&line.source),
+                "prompt_index": line.prompt_index,
+            },
+            "commit": {
+                "id": line.commit_id,
+                "short": line.commit_short,
+                "author": line.author,
+            },
+            "prompt": prompt_info.map(|p| serde_json::json!({
+                "index": p.index,
+                "text": p.text,
+                "timestamp": p.timestamp,
+                "affected_files": p.affected_files,
+            })),
             "session": {
                 "id": attribution.session.session_id,
                 "model": attribution.session.model.id,
@@ -285,9 +318,13 @@ mod tests {
     fn test_prompt_args_structure() {
         let args = PromptArgs {
             reference: "src/main.rs:42".to_string(),
+            revision: None,
+            format: None,
             json: false,
         };
         assert_eq!(args.reference, "src/main.rs:42");
+        assert!(args.revision.is_none());
+        assert!(args.format.is_none());
         assert!(!args.json);
     }
 
@@ -295,8 +332,12 @@ mod tests {
     fn test_prompt_args_json_output() {
         let args = PromptArgs {
             reference: "file.rs".to_string(),
+            revision: Some("HEAD~1".to_string()),
+            format: Some(OutputFormat::Json),
             json: true,
         };
+        assert_eq!(args.revision.as_deref(), Some("HEAD~1"));
+        assert!(matches!(args.format, Some(OutputFormat::Json)));
         assert!(args.json);
     }
 }

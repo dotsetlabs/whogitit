@@ -74,14 +74,14 @@ jobs:
           COMMITS_WITH_AI=0
           COMMIT_COUNT=0
 
-          # Collect per-commit data
-          COMMIT_DETAILS=""
-          # Collect per-file data
-          declare -A FILE_AI
-          declare -A FILE_AI_MOD
-          declare -A FILE_HUMAN
-          declare -A FILE_IS_NEW
-          FILE_LIST=""
+            # Collect per-commit data
+            COMMIT_DETAILS=""
+            # Collect per-file data
+            declare -A FILE_AI
+            declare -A FILE_AI_MOD
+            declare -A FILE_HUMAN
+            declare -A FILE_IS_NEW
+            declare -A FILE_SEEN
           # Track unique prompts (deduplicated across commits)
           declare -A SEEN_PROMPTS
           PROMPT_LIST=""
@@ -93,15 +93,15 @@ jobs:
 
             # Try to get attribution for this commit
             if ATTR=$("$WHOGITIT" show "$COMMIT" --format json 2>/dev/null); then
-              # Skip if no attribution (null output)
-              if [ "$ATTR" = "null" ]; then
+              # Skip if commit has no attribution note
+              if ! echo "$ATTR" | jq -e '.has_attribution == true' > /dev/null 2>&1; then
                 continue
               fi
               # Parse JSON output
-              AI=$(echo "$ATTR" | jq -r '[.files[].summary.ai_lines] | add // 0')
-              AI_MOD=$(echo "$ATTR" | jq -r '[.files[].summary.ai_modified_lines] | add // 0')
-              HUMAN=$(echo "$ATTR" | jq -r '[.files[].summary.human_lines] | add // 0')
-              ORIGINAL=$(echo "$ATTR" | jq -r '[.files[].summary.original_lines] | add // 0')
+              AI=$(echo "$ATTR" | jq -r '[.files[]?.summary.ai_lines] | add // 0')
+              AI_MOD=$(echo "$ATTR" | jq -r '[.files[]?.summary.ai_modified_lines] | add // 0')
+              HUMAN=$(echo "$ATTR" | jq -r '[.files[]?.summary.human_lines] | add // 0')
+              ORIGINAL=$(echo "$ATTR" | jq -r '[.files[]?.summary.original_lines] | add // 0')
               MODEL=$(echo "$ATTR" | jq -r '.session.model.id // "unknown"')
               FILES=$(echo "$ATTR" | jq -r '.files | length')
 
@@ -111,30 +111,26 @@ jobs:
                 TOTAL_AI_MODIFIED=$((TOTAL_AI_MODIFIED + AI_MOD))
                 TOTAL_HUMAN=$((TOTAL_HUMAN + HUMAN))
 
-                # Collect per-file statistics
-                FILE_DATA=$(echo "$ATTR" | jq -r '.files[] | "\(.path)|\(.summary.ai_lines)|\(.summary.ai_modified_lines)|\(.summary.human_lines)|\(.summary.original_lines)"' 2>/dev/null || true)
-                for FILE_LINE in $FILE_DATA; do
-                  F_PATH=$(echo "$FILE_LINE" | cut -d'|' -f1)
-                  F_AI=$(echo "$FILE_LINE" | cut -d'|' -f2)
-                  F_AI_MOD=$(echo "$FILE_LINE" | cut -d'|' -f3)
-                  F_HUMAN=$(echo "$FILE_LINE" | cut -d'|' -f4)
-                  F_ORIG=$(echo "$FILE_LINE" | cut -d'|' -f5)
+                  # Collect per-file statistics
+                  FILE_DATA=$(echo "$ATTR" | jq -r '.files[]? | [.path, .summary.ai_lines, .summary.ai_modified_lines, .summary.human_lines, .summary.original_lines] | @tsv' 2>/dev/null || true)
+                  while IFS=$'\t' read -r F_PATH F_AI F_AI_MOD F_HUMAN F_ORIG; do
+                    if [ -z "$F_PATH" ]; then
+                      continue
+                    fi
 
-                  # Accumulate per-file stats
-                  FILE_AI["$F_PATH"]=$((${FILE_AI["$F_PATH"]:-0} + F_AI))
-                  FILE_AI_MOD["$F_PATH"]=$((${FILE_AI_MOD["$F_PATH"]:-0} + F_AI_MOD))
-                  FILE_HUMAN["$F_PATH"]=$((${FILE_HUMAN["$F_PATH"]:-0} + F_HUMAN))
+                    # Accumulate per-file stats
+                    FILE_AI["$F_PATH"]=$((${FILE_AI["$F_PATH"]:-0} + F_AI))
+                    FILE_AI_MOD["$F_PATH"]=$((${FILE_AI_MOD["$F_PATH"]:-0} + F_AI_MOD))
+                    FILE_HUMAN["$F_PATH"]=$((${FILE_HUMAN["$F_PATH"]:-0} + F_HUMAN))
 
                   # Mark as new file if no original lines
-                  if [ "$F_ORIG" = "0" ] && [ $((F_AI + F_AI_MOD + F_HUMAN)) -gt 0 ]; then
-                    FILE_IS_NEW["$F_PATH"]=1
-                  fi
+                    if [ "$F_ORIG" = "0" ] && [ $((F_AI + F_AI_MOD + F_HUMAN)) -gt 0 ]; then
+                      FILE_IS_NEW["$F_PATH"]=1
+                    fi
 
-                  # Track unique files
-                  if [[ ! "$FILE_LIST" =~ "$F_PATH" ]]; then
-                    FILE_LIST="${FILE_LIST}${F_PATH}|||"
-                  fi
-                done
+                    # Track unique files
+                    FILE_SEEN["$F_PATH"]=1
+                  done <<< "$FILE_DATA"
 
                 # Get commit message (first line)
                 MSG=$(git log -1 --format=%s "$COMMIT" | head -c 50)
@@ -151,23 +147,26 @@ jobs:
                   # Decode and extract prompt text (full text, up to 2000 chars)
                   PROMPT_TEXT=$(echo "$PROMPT_B64" | base64 -d | jq -r '.text // ""' 2>/dev/null | head -c 2000)
 
-                  # Get affected files and make them relative/clean
-                  RAW_FILES=$(echo "$PROMPT_B64" | base64 -d | jq -r '.affected_files[]?' 2>/dev/null || echo "")
-                  PROMPT_FILES=""
-                  for FILE in $RAW_FILES; do
-                    # Make path relative to repo if it's inside the repo
-                    if [[ "$FILE" == "$PWD"/* ]]; then
-                      FILE="${FILE#$PWD/}"
-                    elif [[ "$FILE" == /* ]]; then
-                      # Absolute path outside repo - skip or just show basename
-                      FILE=$(basename "$FILE")
-                    fi
-                    if [ -n "$PROMPT_FILES" ]; then
-                      PROMPT_FILES="$PROMPT_FILES, $FILE"
-                    else
-                      PROMPT_FILES="$FILE"
-                    fi
-                  done
+                    # Get affected files and make them relative/clean
+                    RAW_FILES=$(echo "$PROMPT_B64" | base64 -d | jq -r '.affected_files[]?' 2>/dev/null || echo "")
+                    PROMPT_FILES=""
+                    while IFS= read -r FILE; do
+                      if [ -z "$FILE" ]; then
+                        continue
+                      fi
+                      # Make path relative to repo if it's inside the repo
+                      if [[ "$FILE" == "$PWD"/* ]]; then
+                        FILE="${FILE#$PWD/}"
+                      elif [[ "$FILE" == /* ]]; then
+                        # Absolute path outside repo - skip or just show basename
+                        FILE=$(basename "$FILE")
+                      fi
+                      if [ -n "$PROMPT_FILES" ]; then
+                        PROMPT_FILES="$PROMPT_FILES, $FILE"
+                      else
+                        PROMPT_FILES="$FILE"
+                      fi
+                    done <<< "$RAW_FILES"
 
                   # If no files from prompt, use commit files
                   if [ -z "$PROMPT_FILES" ]; then
@@ -226,32 +225,37 @@ jobs:
             AI_PERCENT="0"
           fi
 
-          # Count files
-          FILE_COUNT=$(echo "$FILE_LIST" | tr '|||' '\n' | grep -v '^$' | wc -l | tr -d ' ')
+            # Count files
+            FILE_COUNT=${#FILE_SEEN[@]}
 
-          # Build per-file details
-          FILE_DETAILS=""
-          for F_PATH in $(echo "$FILE_LIST" | tr '|||' '\n' | grep -v '^$'); do
-            F_AI=${FILE_AI["$F_PATH"]:-0}
-            F_AI_MOD=${FILE_AI_MOD["$F_PATH"]:-0}
-            F_HUMAN=${FILE_HUMAN["$F_PATH"]:-0}
-            F_ADDITIONS=$((F_AI + F_AI_MOD + F_HUMAN))
-            F_AI_TOTAL=$((F_AI + F_AI_MOD))
+            # Build per-file details
+            FILE_DETAILS=""
+            if [ "${#FILE_SEEN[@]}" -gt 0 ]; then
+              while IFS= read -r F_PATH; do
+                if [ -z "$F_PATH" ]; then
+                  continue
+                fi
+                F_AI=${FILE_AI["$F_PATH"]:-0}
+                F_AI_MOD=${FILE_AI_MOD["$F_PATH"]:-0}
+                F_HUMAN=${FILE_HUMAN["$F_PATH"]:-0}
+                F_ADDITIONS=$((F_AI + F_AI_MOD + F_HUMAN))
+                F_AI_TOTAL=$((F_AI + F_AI_MOD))
 
-            if [ "$F_ADDITIONS" -gt 0 ]; then
-              F_AI_PCT=$(echo "scale=0; $F_AI_TOTAL * 100 / $F_ADDITIONS" | bc)
-            else
-              F_AI_PCT=0
+                if [ "$F_ADDITIONS" -gt 0 ]; then
+                  F_AI_PCT=$(echo "scale=0; $F_AI_TOTAL * 100 / $F_ADDITIONS" | bc)
+                else
+                  F_AI_PCT=0
+                fi
+
+                F_STATUS="Modified"
+                if [ "${FILE_IS_NEW["$F_PATH"]:-0}" = "1" ]; then
+                  F_STATUS="New"
+                fi
+
+                FILE_DETAILS="${FILE_DETAILS}| \`${F_PATH}\` | +${F_ADDITIONS} | ${F_AI_TOTAL} | ${F_HUMAN} | ${F_AI_PCT}% | ${F_STATUS} |
+            "
+              done < <(printf '%s\n' "${!FILE_SEEN[@]}" | sort)
             fi
-
-            F_STATUS="Modified"
-            if [ "${FILE_IS_NEW["$F_PATH"]:-0}" = "1" ]; then
-              F_STATUS="New"
-            fi
-
-            FILE_DETAILS="${FILE_DETAILS}| \`${F_PATH}\` | +${F_ADDITIONS} | ${F_AI_TOTAL} | ${F_HUMAN} | ${F_AI_PCT}% | ${F_STATUS} |
-          "
-          done
 
           # Build summary
           echo "has_data=true" >> "$GITHUB_OUTPUT"
@@ -275,8 +279,8 @@ jobs:
           echo "prompt_count=$PROMPT_COUNT" >> "$GITHUB_OUTPUT"
           SCRIPT
 
-          chmod +x /tmp/analyze.sh
-          /tmp/analyze.sh "$BASE_SHA" "$HEAD_SHA"
+            chmod +x /tmp/analyze.sh
+            bash /tmp/analyze.sh "$BASE_SHA" "$HEAD_SHA"
 
       - name: Generate annotations
         if: steps.analyze.outputs.has_data == 'true'

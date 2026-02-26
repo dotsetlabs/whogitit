@@ -1,10 +1,14 @@
 use anyhow::{Context, Result};
 use git2::{Oid, Repository, Signature};
 
-use crate::core::attribution::AIAttribution;
+use crate::core::attribution::{AIAttribution, SCHEMA_VERSION};
 
 /// Notes reference used for AI attribution storage
 pub const NOTES_REF: &str = "refs/notes/whogitit";
+/// Warn when a single attribution note grows beyond this size.
+const NOTE_SIZE_WARN_BYTES: usize = 512 * 1024;
+/// Reject note payloads above this size to avoid pathological note objects.
+const NOTE_SIZE_HARD_LIMIT_BYTES: usize = 4 * 1024 * 1024;
 
 /// Git notes storage for AI attribution data
 pub struct NotesStore<'a> {
@@ -18,8 +22,12 @@ impl<'a> NotesStore<'a> {
 
     /// Store attribution data as a git note on a commit
     pub fn store_attribution(&self, commit_oid: Oid, attribution: &AIAttribution) -> Result<Oid> {
-        let json = serde_json::to_string_pretty(attribution)
+        // Store compact JSON to keep note payloads smaller in large sessions.
+        let json = serde_json::to_string(attribution)
             .context("Failed to serialize attribution to JSON")?;
+        if let Some(warning) = evaluate_note_payload_size(json.len())? {
+            eprintln!("whogitit: Warning - {warning}");
+        }
 
         let sig = self.get_signature()?;
 
@@ -38,6 +46,7 @@ impl<'a> NotesStore<'a> {
                 if let Some(message) = note.message() {
                     let attribution: AIAttribution = serde_json::from_str(message)
                         .context("Failed to parse attribution JSON")?;
+                    warn_on_schema_version_mismatch(commit_oid, attribution.version);
                     Ok(Some(attribution))
                 } else {
                     Ok(None)
@@ -108,6 +117,60 @@ impl<'a> NotesStore<'a> {
     }
 }
 
+fn evaluate_note_payload_size(payload_bytes: usize) -> Result<Option<String>> {
+    if payload_bytes > NOTE_SIZE_HARD_LIMIT_BYTES {
+        anyhow::bail!(
+            "Attribution payload is too large for a git note: {} (limit: {}). \
+Reduce pending scope (smaller commits) or shorten prompts before committing.",
+            format_bytes(payload_bytes),
+            format_bytes(NOTE_SIZE_HARD_LIMIT_BYTES)
+        );
+    }
+
+    if payload_bytes > NOTE_SIZE_WARN_BYTES {
+        return Ok(Some(format!(
+            "large attribution payload detected: {} (warning threshold: {}). \
+Blame/show may be slower for this commit.",
+            format_bytes(payload_bytes),
+            format_bytes(NOTE_SIZE_WARN_BYTES)
+        )));
+    }
+
+    Ok(None)
+}
+
+fn format_bytes(bytes: usize) -> String {
+    const KIB: f64 = 1024.0;
+    const MIB: f64 = KIB * 1024.0;
+    let bytes_f64 = bytes as f64;
+
+    if bytes_f64 >= MIB {
+        format!("{:.2} MiB", bytes_f64 / MIB)
+    } else if bytes_f64 >= KIB {
+        format!("{:.1} KiB", bytes_f64 / KIB)
+    } else {
+        format!("{bytes} B")
+    }
+}
+
+fn warn_on_schema_version_mismatch(commit_oid: Oid, note_version: u8) {
+    if note_version == SCHEMA_VERSION {
+        return;
+    }
+
+    if note_version < SCHEMA_VERSION {
+        eprintln!(
+            "whogitit: Warning - commit {} uses attribution schema v{} (current is v{}); continuing in compatibility mode.",
+            commit_oid, note_version, SCHEMA_VERSION
+        );
+    } else {
+        eprintln!(
+            "whogitit: Warning - commit {} uses newer attribution schema v{} (this build supports v{}); some fields may be ignored.",
+            commit_oid, note_version, SCHEMA_VERSION
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -143,7 +206,7 @@ mod tests {
         let head = repo.head().unwrap().peel_to_commit().unwrap();
 
         let attribution = AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: "test-session".to_string(),
                 model: ModelInfo::claude("claude-opus-4-5-20251101"),
@@ -186,7 +249,7 @@ mod tests {
         assert!(store.has_attribution(head.id()));
 
         let fetched = store.fetch_attribution(head.id()).unwrap().unwrap();
-        assert_eq!(fetched.version, 2);
+        assert_eq!(fetched.version, SCHEMA_VERSION);
         assert_eq!(fetched.session.session_id, "test-session");
         assert_eq!(fetched.files.len(), 1);
         assert_eq!(fetched.prompts.len(), 1);
@@ -319,6 +382,26 @@ mod tests {
     }
 
     #[test]
+    fn test_evaluate_note_payload_size_within_threshold() {
+        let warning = evaluate_note_payload_size(1024).unwrap();
+        assert!(warning.is_none());
+    }
+
+    #[test]
+    fn test_evaluate_note_payload_size_warns_before_limit() {
+        let warning = evaluate_note_payload_size(NOTE_SIZE_WARN_BYTES + 1).unwrap();
+        assert!(warning
+            .unwrap()
+            .contains("large attribution payload detected"));
+    }
+
+    #[test]
+    fn test_evaluate_note_payload_size_rejects_oversized_payload() {
+        let err = evaluate_note_payload_size(NOTE_SIZE_HARD_LIMIT_BYTES + 1).unwrap_err();
+        assert!(err.to_string().contains("too large for a git note"));
+    }
+
+    #[test]
     fn test_copy_attribution() {
         let (dir, repo) = create_test_repo();
         let store = NotesStore::new(&repo).unwrap();
@@ -383,7 +466,7 @@ mod tests {
     // Helper function to create minimal attribution for tests
     fn create_minimal_attribution(session_id: &str) -> AIAttribution {
         AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: session_id.to_string(),
                 model: ModelInfo::claude("test-model"),

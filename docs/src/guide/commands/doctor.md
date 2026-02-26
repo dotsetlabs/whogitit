@@ -21,14 +21,14 @@ The `doctor` command performs a comprehensive check of your whogitit configurati
 | Hook permissions | Confirms the hook script is executable |
 | Claude Code settings | Checks that `~/.claude/settings.json` has whogitit hooks configured |
 | Required tools | Verifies `jq` is installed (required by capture hook) |
-| Repository hooks | If in a git repo, checks that post-commit and pre-push hooks are installed |
+| Repository hooks | If in a git repo, checks that post-commit, pre-push, and post-rewrite hooks are installed |
 | Attribution notes | If notes exist, checks for orphaned notes (attached to deleted commits) |
 
 ## Example Output
 
 ### All Checks Passing
 
-```
+```text
 Checking whogitit configuration...
 
 [OK] whogitit binary: Installed and running
@@ -44,7 +44,7 @@ All checks passed! whogitit is properly configured.
 
 ### With Issues
 
-```
+```text
 Checking whogitit configuration...
 
 [OK] whogitit binary: Installed and running
@@ -55,7 +55,7 @@ Checking whogitit configuration...
 [FAIL] Claude Code settings: whogitit hooks not configured
    Fix: Run 'whogitit setup' to configure
 [OK] Required tools (jq): Available
-[FAIL] Repository hooks: Not initialized in current repo
+[FAIL] Repository hooks: Missing or invalid hooks: post-rewrite
    Fix: Run 'whogitit init' in this repository
 
 Some checks failed. Run 'whogitit setup' to fix configuration issues.

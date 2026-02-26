@@ -109,7 +109,7 @@ extract_prompt_from_transcript() {
 
     if [[ -n "$transcript_path" && -f "$transcript_path" ]]; then
         local prompt
-        prompt=$(jq -s '
+        prompt=$(jq -rs '
             [.[] | select(.type == "user" and .toolUseResult == null and .isCompactSummary != true)] |
             last |
             if .message.content then
@@ -346,24 +346,13 @@ get_bash_invocation_id() {
 get_dirty_files() {
     cd "$REPO_ROOT" || return
 
-    # Get modified and staged files (excluding deleted)
-    # Also get untracked files that aren't ignored
-    git status --porcelain 2>/dev/null | while read -r status file; do
-        # Skip deleted files (first char is D or second char is D)
-        if [[ "${status:0:1}" == "D" || "${status:1:1}" == "D" ]]; then
-            continue
-        fi
-        # Skip empty lines
-        if [[ -z "$file" ]]; then
-            continue
-        fi
-        # Handle renamed files (show new name)
-        if [[ "$file" == *" -> "* ]]; then
-            file="${file##* -> }"
-        fi
-        # Output the file path (relative to repo root)
-        echo "$file"
-    done
+    # Build a deduplicated list of modified/staged/untracked paths.
+    # Using name-only plumbing avoids word-splitting issues with spaces.
+    {
+        git diff --name-only --diff-filter=ACMR 2>/dev/null
+        git diff --cached --name-only --diff-filter=ACMR 2>/dev/null
+        git ls-files --others --exclude-standard 2>/dev/null
+    } | awk 'NF && !seen[$0]++'
 }
 
 # Snapshot all dirty files before Bash command

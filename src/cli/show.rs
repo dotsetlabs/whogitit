@@ -3,7 +3,7 @@ use clap::Args;
 use colored::Colorize;
 use git2::Repository;
 
-use crate::cli::output::OutputFormat;
+use crate::cli::output::{LineSourceOutput, OutputFormat, MACHINE_OUTPUT_SCHEMA_VERSION};
 use crate::storage::notes::NotesStore;
 use crate::utils::{truncate, SHORT_COMMIT_LEN};
 
@@ -54,15 +54,67 @@ pub fn run(args: ShowArgs) -> Result<()> {
     match attribution {
         Some(attr) => {
             if args.format == OutputFormat::Json {
-                println!("{}", serde_json::to_string_pretty(&attr)?);
+                let files_json: Vec<_> = attr
+                    .files
+                    .iter()
+                    .map(|file| {
+                        let lines_json: Vec<_> = file
+                            .lines
+                            .iter()
+                            .map(|line| {
+                                serde_json::json!({
+                                    "line_number": line.line_number,
+                                    "content": line.content,
+                                    "source": LineSourceOutput::from(&line.source),
+                                    "edit_id": line.edit_id,
+                                    "prompt_index": line.prompt_index,
+                                    "confidence": line.confidence,
+                                })
+                            })
+                            .collect();
+
+                        serde_json::json!({
+                            "path": file.path,
+                            "lines": lines_json,
+                            "summary": file.summary,
+                        })
+                    })
+                    .collect();
+
+                let output = serde_json::json!({
+                    "schema_version": MACHINE_OUTPUT_SCHEMA_VERSION,
+                    "schema": "whogitit.show.v1",
+                    "has_attribution": true,
+                    "commit": commit_id,
+                    "commit_short": commit_short,
+                    "attribution_version": attr.version,
+                    "session": attr.session,
+                    "prompts": attr.prompts,
+                    "files": files_json,
+                    "summary": {
+                        "total_ai_lines": attr.total_ai_lines(),
+                        "total_ai_modified_lines": attr.total_ai_modified_lines(),
+                        "total_human_lines": attr.total_human_lines(),
+                        "total_original_lines": attr.total_original_lines(),
+                    }
+                });
+                println!("{}", serde_json::to_string_pretty(&output)?);
             } else {
                 print_summary(commit_short, &attr);
             }
         }
         None => {
             if args.format == OutputFormat::Json {
-                // Output null JSON for programmatic consumption
-                println!("null");
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&serde_json::json!({
+                        "schema_version": MACHINE_OUTPUT_SCHEMA_VERSION,
+                        "schema": "whogitit.show.v1",
+                        "has_attribution": false,
+                        "commit": commit_id,
+                        "commit_short": commit_short,
+                    }))?
+                );
             } else {
                 println!("No AI attribution found for commit {}", commit_short);
                 println!("This commit was not made with AI assistance tracked by whogitit.");

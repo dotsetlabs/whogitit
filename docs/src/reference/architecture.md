@@ -4,7 +4,7 @@ This document describes the internal architecture of whogitit.
 
 ## System Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           Claude Code Session                            │
 │                                                                          │
@@ -59,7 +59,7 @@ This document describes the internal architecture of whogitit.
 
 ## Module Structure
 
-```
+```text
 src/
 ├── capture/           # Hook handlers and pending buffer
 │   ├── hook.rs        # CaptureHook - PreToolUse/PostToolUse handling
@@ -103,7 +103,7 @@ src/
 
 Handles Claude Code hook events:
 
-```rust
+```rust,ignore
 pub struct CaptureHook {
     repo_root: PathBuf,
     pending_store: PendingStore,
@@ -122,12 +122,12 @@ impl CaptureHook {
 
 Accumulates changes during a session:
 
-```rust
+```rust,ignore
 pub struct PendingBuffer {
-    pub schema_version: u8,
+    pub version: u8,
     pub session: SessionMetadata,
-    pub files: HashMap<String, FileEditHistory>,
-    pub prompts: Vec<PromptInfo>,
+    pub file_histories: HashMap<String, FileEditHistory>,
+    pub prompt_counter: u32,
 }
 ```
 
@@ -137,7 +137,7 @@ Stored as JSON in `.whogitit-pending.json`.
 
 Core attribution algorithm:
 
-```rust
+```rust,ignore
 pub struct ThreeWayAnalyzer;
 
 impl ThreeWayAnalyzer {
@@ -160,17 +160,18 @@ Produces per-line attribution.
 
 Final attribution data structure:
 
-```rust
+```rust,ignore
 pub struct AIAttribution {
-    pub schema_version: u8,
+    pub version: u8,
     pub session: SessionMetadata,
     pub prompts: Vec<PromptInfo>,
-    pub files: Vec<FileAttribution>,
+    pub files: Vec<FileAttributionResult>,
 }
 
-pub struct FileAttribution {
+pub struct FileAttributionResult {
     pub path: String,
     pub lines: Vec<LineAttribution>,
+    pub summary: AttributionSummary,
 }
 
 pub struct LineAttribution {
@@ -184,7 +185,7 @@ pub struct LineAttribution {
 
 Git notes persistence:
 
-```rust
+```rust,ignore
 pub struct NotesStore<'repo> {
     repo: &'repo Repository,
 }
@@ -201,7 +202,7 @@ impl NotesStore {
 
 Privacy protection:
 
-```rust
+```rust,ignore
 pub struct Redactor {
     patterns: Vec<CompiledPattern>,
 }
@@ -216,7 +217,7 @@ impl Redactor {
 
 ### 1. Capture Phase
 
-```
+```text
 Claude Code Edit
        │
        ▼
@@ -242,7 +243,7 @@ Claude Code Edit
 
 ### 2. Commit Phase
 
-```
+```text
 git commit
        │
        ▼
@@ -271,7 +272,7 @@ git commit
 
 ### 3. Query Phase
 
-```
+```text
 whogitit blame file.rs
        │
        ▼
@@ -291,7 +292,7 @@ whogitit blame file.rs
 
 The three-way diff is the core of accurate attribution:
 
-```
+```text
 Original (O)     AI Edit (A)      Final (F)       Attribution
 ============     ===========      =========       ===========
 line 1           line 1           line 1          Original (in O, unchanged)

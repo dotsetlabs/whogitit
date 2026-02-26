@@ -198,7 +198,7 @@ mod tests {
     #[test]
     fn test_ai_attribution_totals() {
         let attribution = AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: "test-123".to_string(),
                 model: ModelInfo::claude("claude-opus-4-5-20251101"),
@@ -277,7 +277,7 @@ mod tests {
     #[test]
     fn test_serialization_roundtrip() {
         let attribution = AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: "test-123".to_string(),
                 model: ModelInfo::claude("claude-opus-4-5-20251101"),
@@ -318,7 +318,7 @@ mod tests {
         let json = serde_json::to_string(&attribution).unwrap();
         let parsed: AIAttribution = serde_json::from_str(&json).unwrap();
 
-        assert_eq!(parsed.version, 2);
+        assert_eq!(parsed.version, SCHEMA_VERSION);
         assert_eq!(parsed.session.session_id, "test-123");
         assert_eq!(parsed.files.len(), 1);
         assert_eq!(parsed.prompts.len(), 1);
@@ -424,7 +424,7 @@ mod tests {
     #[test]
     fn test_get_prompt() {
         let attribution = AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: "test-123".to_string(),
                 model: ModelInfo::claude("claude-opus-4-5-20251101"),
@@ -470,7 +470,7 @@ mod tests {
     #[test]
     fn test_attribution_multiple_files() {
         let attribution = AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: "multi-file".to_string(),
                 model: ModelInfo::claude("claude-opus-4-5-20251101"),

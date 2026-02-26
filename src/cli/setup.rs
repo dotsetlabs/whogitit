@@ -79,29 +79,37 @@ fn hook_configuration() -> Value {
 
 /// Check if whogitit hooks are already configured in a settings value
 fn has_whogitit_hooks(settings: &Value) -> bool {
-    if let Some(hooks) = settings.get("hooks") {
-        // Check PreToolUse for whogitit
-        if let Some(pre_hooks) = hooks.get("PreToolUse") {
-            if let Some(arr) = pre_hooks.as_array() {
-                for entry in arr {
-                    if let Some(inner_hooks) = entry.get("hooks") {
-                        if let Some(inner_arr) = inner_hooks.as_array() {
-                            for hook in inner_arr {
-                                if let Some(cmd) = hook.get("command") {
-                                    if let Some(cmd_str) = cmd.as_str() {
-                                        if cmd_str.contains("whogitit") {
-                                            return true;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    false
+    has_whogitit_phase_hook(settings, "PreToolUse", "pre")
+        && has_whogitit_phase_hook(settings, "PostToolUse", "post")
+}
+
+fn has_whogitit_phase_hook(settings: &Value, phase_key: &str, phase_value: &str) -> bool {
+    let expected_phase = format!("WHOGITIT_HOOK_PHASE={phase_value}");
+
+    settings
+        .get("hooks")
+        .and_then(|hooks| hooks.get(phase_key))
+        .and_then(Value::as_array)
+        .map(|entries| {
+            entries.iter().any(|entry| {
+                entry
+                    .get("hooks")
+                    .and_then(Value::as_array)
+                    .map(|inner_arr| {
+                        inner_arr.iter().any(|hook| {
+                            hook.get("command")
+                                .and_then(Value::as_str)
+                                .map(|cmd| {
+                                    cmd.contains("whogitit-capture.sh")
+                                        && cmd.contains(&expected_phase)
+                                })
+                                .unwrap_or(false)
+                        })
+                    })
+                    .unwrap_or(false)
+            })
+        })
+        .unwrap_or(false)
 }
 
 /// Merge whogitit hooks into existing settings
@@ -643,6 +651,7 @@ fn check_git_repo() -> Option<DoctorCheck> {
     let hooks_dir = repo_root.join(".git/hooks");
     let post_commit = hooks_dir.join("post-commit");
     let pre_push = hooks_dir.join("pre-push");
+    let post_rewrite = hooks_dir.join("post-rewrite");
 
     let post_commit_ok = post_commit.exists()
         && fs::read_to_string(&post_commit)
@@ -654,7 +663,12 @@ fn check_git_repo() -> Option<DoctorCheck> {
             .map(|c| c.contains("whogitit"))
             .unwrap_or(false);
 
-    if post_commit_ok && pre_push_ok {
+    let post_rewrite_ok = post_rewrite.exists()
+        && fs::read_to_string(&post_rewrite)
+            .map(|c| c.contains("whogitit"))
+            .unwrap_or(false);
+
+    if post_commit_ok && pre_push_ok && post_rewrite_ok {
         Some(DoctorCheck {
             name: "Repository hooks",
             passed: true,
@@ -662,10 +676,20 @@ fn check_git_repo() -> Option<DoctorCheck> {
             fix_hint: None,
         })
     } else {
+        let mut missing = Vec::new();
+        if !post_commit_ok {
+            missing.push("post-commit");
+        }
+        if !pre_push_ok {
+            missing.push("pre-push");
+        }
+        if !post_rewrite_ok {
+            missing.push("post-rewrite");
+        }
         Some(DoctorCheck {
             name: "Repository hooks",
             passed: false,
-            message: "Not initialized in current repo".to_string(),
+            message: format!("Missing or invalid hooks: {}", missing.join(", ")),
             fix_hint: Some("Run 'whogitit init' in this repository".to_string()),
         })
     }
@@ -715,10 +739,41 @@ mod tests {
                             }
                         ]
                     }
+                ],
+                "PostToolUse": [
+                    {
+                        "matcher": "Edit|Write|Bash",
+                        "hooks": [
+                            {
+                                "type": "command",
+                                "command": "WHOGITIT_HOOK_PHASE=post ~/.claude/hooks/whogitit-capture.sh"
+                            }
+                        ]
+                    }
                 ]
             }
         });
         assert!(has_whogitit_hooks(&settings));
+    }
+
+    #[test]
+    fn test_has_whogitit_hooks_requires_both_phases() {
+        let pre_only = json!({
+            "hooks": {
+                "PreToolUse": [
+                    {
+                        "matcher": "Edit|Write|Bash",
+                        "hooks": [
+                            {
+                                "type": "command",
+                                "command": "WHOGITIT_HOOK_PHASE=pre ~/.claude/hooks/whogitit-capture.sh"
+                            }
+                        ]
+                    }
+                ]
+            }
+        });
+        assert!(!has_whogitit_hooks(&pre_only));
     }
 
     #[test]

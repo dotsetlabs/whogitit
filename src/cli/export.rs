@@ -1,7 +1,7 @@
 //! Export command for bulk attribution data export
 
 use anyhow::{Context, Result};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveTime, Utc};
 use serde::Serialize;
 use std::io::Write;
 
@@ -17,11 +17,11 @@ pub struct ExportArgs {
     #[arg(long, value_parser = ["json", "csv"], default_value = "json")]
     pub format: String,
 
-    /// Only include commits after this date (YYYY-MM-DD)
+    /// Only include commits on or after this date (YYYY-MM-DD)
     #[arg(long)]
     pub since: Option<String>,
 
-    /// Only include commits before this date (YYYY-MM-DD)
+    /// Only include commits on or before this date (YYYY-MM-DD)
     #[arg(long)]
     pub until: Option<String>,
 
@@ -123,8 +123,8 @@ pub fn run(args: ExportArgs) -> Result<()> {
     let notes_store = NotesStore::new(&repo)?;
 
     // Parse date filters
-    let since = parse_date(&args.since)?;
-    let until = parse_date(&args.until)?;
+    let since = parse_date(&args.since, DateBoundary::StartOfDay)?;
+    let until = parse_date(&args.until, DateBoundary::EndOfDay)?;
 
     // Validate date range
     if let (Some(ref since_date), Some(ref until_date)) = (&since, &until) {
@@ -207,15 +207,25 @@ pub fn run(args: ExportArgs) -> Result<()> {
     Ok(())
 }
 
-fn parse_date(date_str: &Option<String>) -> Result<Option<DateTime<Utc>>> {
+#[derive(Debug, Clone, Copy)]
+enum DateBoundary {
+    StartOfDay,
+    EndOfDay,
+}
+
+fn parse_date(date_str: &Option<String>, boundary: DateBoundary) -> Result<Option<DateTime<Utc>>> {
     match date_str {
         Some(s) => {
             // Parse YYYY-MM-DD format
             let date = chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d")
                 .with_context(|| format!("Invalid date format '{}'. Use YYYY-MM-DD.", s))?;
-            let datetime = date
-                .and_hms_opt(0, 0, 0)
-                .ok_or_else(|| anyhow::anyhow!("Invalid time for date {}", s))?;
+            let time = match boundary {
+                DateBoundary::StartOfDay => NaiveTime::MIN,
+                DateBoundary::EndOfDay => {
+                    NaiveTime::from_hms_opt(23, 59, 59).expect("23:59:59 should be valid")
+                }
+            };
+            let datetime = date.and_time(time);
             Ok(Some(datetime.and_utc()))
         }
         None => Ok(None),
@@ -248,10 +258,8 @@ fn build_commit_export(
         .map(|p| {
             let text = if args.full_prompts {
                 p.text.clone()
-            } else if p.text.len() > args.prompt_max_len {
-                format!("{}...", &p.text[..args.prompt_max_len])
             } else {
-                p.text.clone()
+                truncate_prompt_for_export(&p.text, args.prompt_max_len)
             };
             PromptExport {
                 index: p.index,
@@ -276,6 +284,16 @@ fn build_commit_export(
         files,
         prompts,
     })
+}
+
+fn truncate_prompt_for_export(text: &str, max_len: usize) -> String {
+    let char_count = text.chars().count();
+    if char_count <= max_len {
+        return text.to_string();
+    }
+
+    let truncated: String = text.chars().take(max_len).collect();
+    format!("{truncated}...")
 }
 
 fn build_summary(commits: &[CommitExport]) -> ExportSummary {
@@ -370,10 +388,10 @@ fn write_csv(data: &ExportData, output: &Option<String>) -> Result<()> {
 }
 
 fn csv_escape(value: &str) -> String {
-    let mut escaped = value.replace('"', "\"\"");
-    escaped = escaped.replace('\r', " ");
-    escaped = escaped.replace('\n', " ");
-    format!("\"{}\"", escaped)
+    let escaped_quotes = value.replace('"', "\"\"");
+    let normalized_newlines = escaped_quotes.replace("\r\n", "\n").replace('\r', "\n");
+    let escaped_single_line = normalized_newlines.replace('\n', " ");
+    format!("\"{}\"", escaped_single_line)
 }
 
 #[cfg(test)]
@@ -384,7 +402,7 @@ mod tests {
 
     #[test]
     fn test_parse_date_valid() {
-        let result = parse_date(&Some("2024-01-15".to_string())).unwrap();
+        let result = parse_date(&Some("2024-01-15".to_string()), DateBoundary::StartOfDay).unwrap();
         assert!(result.is_some());
         let date = result.unwrap();
         assert_eq!(date.format("%Y-%m-%d").to_string(), "2024-01-15");
@@ -392,14 +410,14 @@ mod tests {
 
     #[test]
     fn test_parse_date_none() {
-        let result = parse_date(&None).unwrap();
+        let result = parse_date(&None, DateBoundary::StartOfDay).unwrap();
         assert!(result.is_none());
     }
 
     #[test]
     fn test_parse_date_invalid_format() {
         // Wrong separator
-        let result = parse_date(&Some("2024/01/15".to_string()));
+        let result = parse_date(&Some("2024/01/15".to_string()), DateBoundary::StartOfDay);
         assert!(result.is_err());
         assert!(result
             .unwrap_err()
@@ -410,29 +428,36 @@ mod tests {
     #[test]
     fn test_parse_date_invalid_date() {
         // February 30th doesn't exist
-        let result = parse_date(&Some("2024-02-30".to_string()));
+        let result = parse_date(&Some("2024-02-30".to_string()), DateBoundary::StartOfDay);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_parse_date_partial_format() {
         // Missing day
-        let result = parse_date(&Some("2024-01".to_string()));
+        let result = parse_date(&Some("2024-01".to_string()), DateBoundary::StartOfDay);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_parse_date_leap_year() {
         // February 29th on leap year
-        let result = parse_date(&Some("2024-02-29".to_string())).unwrap();
+        let result = parse_date(&Some("2024-02-29".to_string()), DateBoundary::StartOfDay).unwrap();
         assert!(result.is_some());
     }
 
     #[test]
     fn test_parse_date_non_leap_year() {
         // February 29th on non-leap year
-        let result = parse_date(&Some("2023-02-29".to_string()));
+        let result = parse_date(&Some("2023-02-29".to_string()), DateBoundary::StartOfDay);
         assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_date_end_of_day_boundary() {
+        let result = parse_date(&Some("2024-01-15".to_string()), DateBoundary::EndOfDay).unwrap();
+        let date = result.unwrap();
+        assert_eq!(date.format("%H:%M:%S").to_string(), "23:59:59");
     }
 
     // build_summary tests
@@ -575,6 +600,25 @@ mod tests {
         let author = "John Doe, Jr.";
         let escaped = csv_escape(author);
         assert_eq!(escaped, "\"John Doe, Jr.\"");
+    }
+
+    #[test]
+    fn test_csv_crlf_normalized_to_single_space() {
+        let value = "line1\r\nline2";
+        let escaped = csv_escape(value);
+        assert_eq!(escaped, "\"line1 line2\"");
+    }
+
+    #[test]
+    fn test_truncate_prompt_for_export_ascii() {
+        assert_eq!(truncate_prompt_for_export("hello world", 5), "hello...");
+        assert_eq!(truncate_prompt_for_export("hello", 5), "hello");
+    }
+
+    #[test]
+    fn test_truncate_prompt_for_export_unicode_safe() {
+        assert_eq!(truncate_prompt_for_export("你好世界", 2), "你好...");
+        assert_eq!(truncate_prompt_for_export("🙂🙂🙂", 2), "🙂🙂...");
     }
 
     // ExportData structure tests

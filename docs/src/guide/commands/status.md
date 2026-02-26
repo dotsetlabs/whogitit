@@ -22,7 +22,7 @@ whogitit status
 
 Output:
 
-```
+```text
 Pending AI attribution:
   Session: 7f3a-4b2c-9d1e-8a7b
   Files: 3
@@ -41,7 +41,7 @@ whogitit status
 
 Output:
 
-```
+```text
 No pending AI attribution.
 ```
 
@@ -50,7 +50,7 @@ No pending AI attribution.
 If the pending buffer is older than the configured threshold
 (`analysis.max_pending_age_hours`, default 24), a warning is displayed:
 
-```
+```text
 Pending AI attribution:
   Session: 7f3a-4b2c-9d1e-8a7b
   Files: 3

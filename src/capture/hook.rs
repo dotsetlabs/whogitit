@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::env;
 use std::path::Path;
 
@@ -5,7 +6,7 @@ use anyhow::{Context, Result};
 use git2::{Delta, DiffFindOptions, DiffOptions, Repository};
 use serde::{Deserialize, Serialize};
 
-use crate::capture::pending::{PendingBuffer, PendingStore};
+use crate::capture::pending::{PendingBuffer, PendingStore, PromptRecord};
 use crate::capture::threeway::ThreeWayAnalyzer;
 use crate::core::attribution::{AIAttribution, PromptInfo, SessionMetadata};
 use crate::privacy::{Redactor, RetentionConfig, WhogititConfig};
@@ -166,8 +167,9 @@ impl CaptureHook {
                 .any(|c| matches!(c, std::path::Component::Prefix(_)))
         {
             anyhow::bail!(
-                "Absolute path not allowed: '{}'. Paths must be relative to repository root.",
-                relative_path
+                "Path '{}' is outside repository root '{}'. Use a repository-relative path.",
+                relative_path,
+                self.repo_root.display()
             );
         }
 
@@ -317,7 +319,7 @@ impl CaptureHook {
         let store = PendingStore::new(&self.repo_root);
 
         // Load pending buffer
-        let buffer = match store.load()? {
+        let mut buffer = match store.load()? {
             Some(b) if b.has_changes() => b,
             _ => return Ok(None),
         };
@@ -330,59 +332,89 @@ impl CaptureHook {
             .peel_to_commit()
             .context("Failed to get HEAD commit")?;
 
-        // Build rename map (old -> new) to preserve attribution across moves
-        let rename_map = build_rename_map(&repo, &head)?;
-
-        // Analyze each file with three-way diff against committed content
-        let mut file_results = Vec::new();
         let tree = head.tree()?;
 
-        for (path, history) in &buffer.file_histories {
-            let mut committed_path = path.as_str();
+        // Build rename map (old -> new) to preserve attribution across moves
+        let rename_map = build_rename_map(&repo, &head)?;
+        let changed_paths = build_changed_paths(&repo, &head)?;
 
-            if tree.get_path(std::path::Path::new(path)).is_err() {
-                if let Some(new_path) = rename_map.get(path) {
-                    committed_path = new_path.as_str();
+        // Preserve all prompt records before we split processed vs remaining histories.
+        let all_prompts = buffer.session.prompts.clone();
+
+        let mut file_results = Vec::new();
+        let mut remaining_histories = std::collections::HashMap::new();
+        let mut processed_prompt_indices = HashSet::new();
+        let mut remaining_prompt_indices = HashSet::new();
+        let mut used_plan_mode = false;
+        let mut subagent_count = 0u32;
+
+        for (path, history) in buffer.file_histories.drain() {
+            let Some(committed_path) = resolve_committed_path(&path, &changed_paths, &rename_map)
+            else {
+                for edit in &history.edits {
+                    remaining_prompt_indices.insert(edit.prompt_index);
                 }
-            }
+                remaining_histories.insert(path, history);
+                continue;
+            };
 
             // Get the committed content for this file
-            let committed_content = match tree.get_path(std::path::Path::new(committed_path)) {
+            let committed_content = match tree.get_path(std::path::Path::new(&committed_path)) {
                 Ok(entry) => {
                     let blob = repo.find_blob(entry.id())?;
                     String::from_utf8_lossy(blob.content()).to_string()
                 }
                 Err(_) => {
-                    // File might have been deleted or not staged
+                    // File was part of commit metadata but does not exist in final tree
+                    // (for example, deleted file). Consume it from pending state.
                     continue;
                 }
             };
 
             // Perform three-way analysis
             let mut result = ThreeWayAnalyzer::analyze_with_diff_with_threshold(
-                history,
+                &history,
                 &committed_content,
                 self.similarity_threshold,
             );
-            if committed_path != path.as_str() {
-                result.path = committed_path.to_string();
+            if committed_path != path {
+                result.path = committed_path;
             }
             file_results.push(result);
+
+            for edit in &history.edits {
+                processed_prompt_indices.insert(edit.prompt_index);
+                if edit.context.plan_mode {
+                    used_plan_mode = true;
+                }
+                if edit.context.agent_depth > 0 {
+                    subagent_count += 1;
+                }
+            }
         }
 
-        // Compute extended session metadata
-        let used_plan_mode = buffer
-            .file_histories
-            .values()
-            .flat_map(|h| h.edits.iter())
-            .any(|e| e.context.plan_mode);
+        // Nothing attributable for this commit; only update pending state.
+        if file_results.is_empty() {
+            if remaining_histories.is_empty() {
+                store.delete()?;
+            } else {
+                buffer.file_histories = remaining_histories;
+                buffer.session.prompts =
+                    filter_prompt_records(&all_prompts, &remaining_prompt_indices);
+                buffer.session.prompt_count = buffer.session.prompts.len() as u32;
+                buffer.prompt_counter = next_prompt_index(&buffer.session.prompts);
+                buffer.total_redactions = buffer
+                    .session
+                    .prompts
+                    .iter()
+                    .map(|p| p.redaction_events.len() as u32)
+                    .sum();
+                store.save(&buffer)?;
+            }
+            return Ok(None);
+        }
 
-        let subagent_count = buffer
-            .file_histories
-            .values()
-            .flat_map(|h| h.edits.iter())
-            .filter(|e| e.context.agent_depth > 0)
-            .count() as u32;
+        let attribution_prompts = filter_prompt_records(&all_prompts, &processed_prompt_indices);
 
         // Create attribution with full analysis
         let attribution = AIAttribution {
@@ -391,13 +423,11 @@ impl CaptureHook {
                 session_id: buffer.session.session_id.clone(),
                 model: buffer.session.model.clone(),
                 started_at: buffer.session.started_at.clone(),
-                prompt_count: buffer.session.prompt_count,
+                prompt_count: attribution_prompts.len() as u32,
                 used_plan_mode,
                 subagent_count,
             },
-            prompts: buffer
-                .session
-                .prompts
+            prompts: attribution_prompts
                 .iter()
                 .map(|p| PromptInfo {
                     index: p.index,
@@ -425,8 +455,22 @@ impl CaptureHook {
             }
         }
 
-        // Clean up pending file
-        store.delete()?;
+        // Persist any remaining pending edits only after attribution note is safely stored.
+        if remaining_histories.is_empty() {
+            store.delete()?;
+        } else {
+            buffer.file_histories = remaining_histories;
+            buffer.session.prompts = filter_prompt_records(&all_prompts, &remaining_prompt_indices);
+            buffer.session.prompt_count = buffer.session.prompts.len() as u32;
+            buffer.prompt_counter = next_prompt_index(&buffer.session.prompts);
+            buffer.total_redactions = buffer
+                .session
+                .prompts
+                .iter()
+                .map(|p| p.redaction_events.len() as u32)
+                .sum();
+            store.save(&buffer)?;
+        }
 
         // Log summary
         let total_ai = attribution
@@ -452,18 +496,31 @@ impl CaptureHook {
 
     /// Make a path relative to the repo root
     fn make_relative_path(&self, path: &str) -> Result<String> {
-        let abs_path = if Path::new(path).is_absolute() {
-            Path::new(path).to_path_buf()
-        } else {
-            self.repo_root.join(path)
-        };
+        let input_path = Path::new(path);
+        if !input_path.is_absolute() {
+            return Ok(path.to_string());
+        }
 
-        let relative = abs_path
-            .strip_prefix(&self.repo_root)
-            .map(|p| p.to_string_lossy().to_string())
-            .unwrap_or_else(|_| path.to_string());
+        // Fast path: exact prefix match against the repo root.
+        if let Ok(relative) = input_path.strip_prefix(&self.repo_root) {
+            return Ok(relative.to_string_lossy().to_string());
+        }
 
-        Ok(relative)
+        // Handle aliased absolute paths (e.g. /var vs /private/var on macOS)
+        // by canonicalizing both paths before prefix comparison.
+        let canonical_repo =
+            canonicalize_for_prefix(&self.repo_root).unwrap_or_else(|| self.repo_root.clone());
+        if let Some(canonical_input) = canonicalize_for_prefix(input_path) {
+            if let Ok(relative) = canonical_input.strip_prefix(&canonical_repo) {
+                return Ok(relative.to_string_lossy().to_string());
+            }
+        }
+
+        anyhow::bail!(
+            "Absolute path '{}' could not be mapped under repository root '{}'.",
+            path,
+            self.repo_root.display()
+        )
     }
 
     /// Get current pending status
@@ -514,6 +571,32 @@ impl CaptureHook {
     }
 }
 
+/// Canonicalize a path for prefix comparison.
+///
+/// If the full path doesn't exist yet, this resolves the deepest existing ancestor
+/// and re-appends the missing suffix so new files can still be matched reliably.
+fn canonicalize_for_prefix(path: &Path) -> Option<std::path::PathBuf> {
+    if let Ok(canonical) = std::fs::canonicalize(path) {
+        return Some(canonical);
+    }
+
+    let mut current = path;
+    let mut missing_components = Vec::new();
+
+    while !current.exists() {
+        let file_name = current.file_name()?;
+        missing_components.push(file_name.to_os_string());
+        current = current.parent()?;
+    }
+
+    let mut canonical_base = std::fs::canonicalize(current).ok()?;
+    for component in missing_components.iter().rev() {
+        canonical_base.push(component);
+    }
+
+    Some(canonical_base)
+}
+
 fn build_rename_map(
     repo: &Repository,
     head: &git2::Commit,
@@ -555,6 +638,86 @@ fn build_rename_map(
     }
 
     Ok(map)
+}
+
+fn build_changed_paths(repo: &Repository, head: &git2::Commit) -> Result<HashSet<String>> {
+    let mut changed = HashSet::new();
+    let new_tree = head.tree()?;
+
+    if head.parent_count() == 0 {
+        collect_changed_paths(repo, None, &new_tree, &mut changed)?;
+        return Ok(changed);
+    }
+
+    for parent_idx in 0..head.parent_count() {
+        let parent = match head.parent(parent_idx) {
+            Ok(p) => p,
+            Err(_) => continue,
+        };
+        let old_tree = parent.tree()?;
+        collect_changed_paths(repo, Some(&old_tree), &new_tree, &mut changed)?;
+    }
+
+    Ok(changed)
+}
+
+fn collect_changed_paths(
+    repo: &Repository,
+    old_tree: Option<&git2::Tree<'_>>,
+    new_tree: &git2::Tree<'_>,
+    changed: &mut HashSet<String>,
+) -> Result<()> {
+    let mut opts = DiffOptions::new();
+    let diff = repo.diff_tree_to_tree(old_tree, Some(new_tree), Some(&mut opts))?;
+
+    for delta in diff.deltas() {
+        if let Some(path) = delta.old_file().path() {
+            changed.insert(path.to_string_lossy().to_string());
+        }
+        if let Some(path) = delta.new_file().path() {
+            changed.insert(path.to_string_lossy().to_string());
+        }
+    }
+
+    Ok(())
+}
+
+fn resolve_committed_path(
+    path: &str,
+    changed_paths: &HashSet<String>,
+    rename_map: &std::collections::HashMap<String, String>,
+) -> Option<String> {
+    if let Some(new_path) = rename_map.get(path) {
+        if changed_paths.contains(path) || changed_paths.contains(new_path) {
+            return Some(new_path.clone());
+        }
+    }
+
+    if changed_paths.contains(path) {
+        return Some(path.to_string());
+    }
+
+    None
+}
+
+fn filter_prompt_records(
+    prompts: &[PromptRecord],
+    prompt_indices: &HashSet<u32>,
+) -> Vec<PromptRecord> {
+    prompts
+        .iter()
+        .filter(|p| prompt_indices.contains(&p.index))
+        .cloned()
+        .collect()
+}
+
+fn next_prompt_index(prompts: &[PromptRecord]) -> u32 {
+    prompts
+        .iter()
+        .map(|p| p.index)
+        .max()
+        .map(|idx| idx.saturating_add(1))
+        .unwrap_or(0)
 }
 
 /// Status of pending changes
@@ -801,6 +964,139 @@ mod tests {
         let attribution = hook.on_post_commit().unwrap().unwrap();
         assert_eq!(attribution.files.len(), 1);
         assert_eq!(attribution.files[0].path, "new.rs");
+    }
+
+    #[test]
+    fn test_post_commit_preserves_pending_for_uncommitted_files() {
+        let (dir, repo) = create_test_repo();
+        let repo_root = dir.path();
+
+        // Add baseline files and commit them.
+        std::fs::write(repo_root.join("a.rs"), "a0\n").unwrap();
+        std::fs::write(repo_root.join("b.rs"), "b0\n").unwrap();
+        {
+            let mut index = repo.index().unwrap();
+            index.add_path(std::path::Path::new("a.rs")).unwrap();
+            index.add_path(std::path::Path::new("b.rs")).unwrap();
+            index.write().unwrap();
+            let tree_id = index.write_tree().unwrap();
+            let tree = repo.find_tree(tree_id).unwrap();
+            let sig = Signature::now("Test", "test@test.com").unwrap();
+            let head = repo.head().unwrap().peel_to_commit().unwrap();
+            repo.commit(
+                Some("HEAD"),
+                &sig,
+                &sig,
+                "Add baseline files",
+                &tree,
+                &[&head],
+            )
+            .unwrap();
+        }
+
+        let hook = CaptureHook::new(repo_root).unwrap();
+
+        // Capture edits for both files.
+        hook.on_file_change(HookInput {
+            tool: "Edit".to_string(),
+            file_path: "a.rs".to_string(),
+            prompt: "Update a".to_string(),
+            old_content: Some("a0\n".to_string()),
+            old_content_present: true,
+            new_content: "a1\n".to_string(),
+            context: None,
+        })
+        .unwrap();
+
+        hook.on_file_change(HookInput {
+            tool: "Edit".to_string(),
+            file_path: "b.rs".to_string(),
+            prompt: "Update b".to_string(),
+            old_content: Some("b0\n".to_string()),
+            old_content_present: true,
+            new_content: "b1\n".to_string(),
+            context: None,
+        })
+        .unwrap();
+
+        std::fs::write(repo_root.join("a.rs"), "a1\n").unwrap();
+        std::fs::write(repo_root.join("b.rs"), "b1\n").unwrap();
+
+        // Commit only a.rs.
+        {
+            let mut index = repo.index().unwrap();
+            index.add_path(std::path::Path::new("a.rs")).unwrap();
+            index.write().unwrap();
+            let tree_id = index.write_tree().unwrap();
+            let tree = repo.find_tree(tree_id).unwrap();
+            let sig = Signature::now("Test", "test@test.com").unwrap();
+            let head = repo.head().unwrap().peel_to_commit().unwrap();
+            repo.commit(
+                Some("HEAD"),
+                &sig,
+                &sig,
+                "Commit only a.rs",
+                &tree,
+                &[&head],
+            )
+            .unwrap();
+        }
+
+        let attribution = hook.on_post_commit().unwrap().unwrap();
+        assert_eq!(attribution.files.len(), 1);
+        assert_eq!(attribution.files[0].path, "a.rs");
+
+        // b.rs should remain pending for a later commit.
+        let store = PendingStore::new(repo_root);
+        let remaining = store.load_quiet().unwrap().unwrap();
+        assert!(remaining.get_file_history("a.rs").is_none());
+        assert!(remaining.get_file_history("b.rs").is_some());
+
+        let status = hook.status().unwrap();
+        assert!(status.has_pending);
+        assert_eq!(status.file_count, 1);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_make_relative_path_accepts_symlinked_absolute_path() {
+        let (dir, _repo) = create_test_repo();
+        let repo_root = dir.path();
+        let hook = CaptureHook::new(repo_root).unwrap();
+
+        let alias_parent = TempDir::new().unwrap();
+        let alias_root = alias_parent.path().join("repo-alias");
+        std::os::unix::fs::symlink(repo_root, &alias_root).unwrap();
+
+        let file_via_alias = alias_root.join("src").join("main.rs");
+        std::fs::create_dir_all(file_via_alias.parent().unwrap()).unwrap();
+        std::fs::write(&file_via_alias, "fn main() {}\n").unwrap();
+
+        let relative = hook
+            .make_relative_path(file_via_alias.to_str().unwrap())
+            .unwrap();
+        assert_eq!(relative, "src/main.rs");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_make_relative_path_accepts_nonexistent_file_under_symlinked_root() {
+        let (dir, _repo) = create_test_repo();
+        let repo_root = dir.path();
+        let hook = CaptureHook::new(repo_root).unwrap();
+
+        let alias_parent = TempDir::new().unwrap();
+        let alias_root = alias_parent.path().join("repo-alias");
+        std::os::unix::fs::symlink(repo_root, &alias_root).unwrap();
+
+        let nested_dir = alias_root.join("newdir");
+        std::fs::create_dir_all(&nested_dir).unwrap();
+        let missing_file_via_alias = nested_dir.join("created_later.rs");
+
+        let relative = hook
+            .make_relative_path(missing_file_via_alias.to_str().unwrap())
+            .unwrap();
+        assert_eq!(relative, "newdir/created_later.rs");
     }
 
     #[test]

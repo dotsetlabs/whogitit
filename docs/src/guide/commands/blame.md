@@ -41,7 +41,7 @@ whogitit blame src/main.rs
 
 Output:
 
-```
+```text
  LINE   │ COMMIT  │ AUTHOR     │ SRC │ CODE
 ─────────────────────────────────────────────────────────────────────────────────────
     1   │ a1b2c3d │ Greg King  │  ─  │ use std::io;
@@ -76,25 +76,57 @@ Output:
 
 ```json
 {
+  "schema_version": 1,
+  "schema": "whogitit.blame.v1",
   "file": "src/main.rs",
   "revision": "a1b2c3d",
   "lines": [
     {
       "line_number": 1,
-      "commit": "a1b2c3d",
-      "author": "Greg King",
-      "source": "Original",
+      "line": 1,
+      "commit": {
+        "id": "a1b2c3d4e5f6g7h8i9j0k",
+        "short": "a1b2c3d",
+        "author": "Greg King"
+      },
+      "source": {
+        "type": "original"
+      },
+      "flags": {
+        "is_ai": false,
+        "is_human": true
+      },
+      "prompt": {
+        "index": null,
+        "preview": null
+      },
       "content": "use std::io;"
     },
     {
       "line_number": 2,
-      "commit": "d4e5f6g",
-      "author": "Greg King",
-      "source": "AI",
+      "line": 2,
+      "commit": {
+        "id": "d4e5f6g7h8i9j0k1l2m3n",
+        "short": "d4e5f6g",
+        "author": "Greg King"
+      },
+      "source": {
+        "type": "ai",
+        "edit_id": "8f5c3d6a-4f95-4fa9-8d11-2d54f12e6f01"
+      },
+      "flags": {
+        "is_ai": true,
+        "is_human": false
+      },
+      "prompt": {
+        "index": 0,
+        "preview": "Add anyhow::Result and standard error handling..."
+      },
       "content": "use anyhow::Result;"
     }
   ],
   "summary": {
+    "total_lines": 5,
     "ai_lines": 2,
     "ai_modified_lines": 1,
     "human_lines": 1,

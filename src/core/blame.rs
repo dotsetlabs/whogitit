@@ -187,7 +187,7 @@ impl<'a> AIBlamer<'a> {
 mod tests {
     use super::*;
     use crate::capture::snapshot::{AttributionSummary, FileAttributionResult, LineAttribution};
-    use crate::core::attribution::{ModelInfo, PromptInfo, SessionMetadata};
+    use crate::core::attribution::{ModelInfo, PromptInfo, SessionMetadata, SCHEMA_VERSION};
     use git2::Signature;
     use std::fs;
     use tempfile::TempDir;
@@ -286,7 +286,7 @@ mod tests {
         // Store attribution for this commit
         let notes_store = NotesStore::new(&repo).unwrap();
         let attribution = AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: "test-session".to_string(),
                 model: ModelInfo::claude("test-model"),
@@ -376,7 +376,7 @@ mod tests {
         // Store attribution
         let notes_store = NotesStore::new(&repo).unwrap();
         let attribution = AIAttribution {
-            version: 2,
+            version: SCHEMA_VERSION,
             session: SessionMetadata {
                 session_id: "cache-test".to_string(),
                 model: ModelInfo::claude("test-model"),

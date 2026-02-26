@@ -26,7 +26,7 @@ The `show` command displays a detailed summary of AI attribution for a commit, i
 
 | Option | Description |
 |--------|-------------|
-| `--format <FORMAT>` | Output format: `pretty` (default), `json`, `markdown` |
+| `--format <FORMAT>` | Output format: `pretty` (default), `json` |
 
 ## Examples
 
@@ -38,7 +38,7 @@ whogitit show HEAD
 
 Output:
 
-```
+```text
 Commit: d4e5f6g
 Session: 7f3a-4b2c-9d1e-8a7b
 Model: claude-opus-4-5-20251101
@@ -75,7 +75,12 @@ Output:
 
 ```json
 {
+  "schema_version": 1,
+  "schema": "whogitit.show.v1",
+  "has_attribution": true,
   "commit": "d4e5f6gabcdef1234567890",
+  "commit_short": "d4e5f6g",
+  "attribution_version": 3,
   "session": {
     "session_id": "7f3a-4b2c-9d1e-8a7b",
     "model": {
@@ -94,11 +99,22 @@ Output:
   "files": [
     {
       "path": "src/auth.rs",
-      "ai_lines": 25,
-      "ai_modified_lines": 3,
-      "human_lines": 2,
-      "original_lines": 15,
-      "total_lines": 45
+      "lines": [
+        {
+          "line_number": 10,
+          "content": "    let token = ...",
+          "source": { "type": "ai", "edit_id": "8f5c..." },
+          "prompt_index": 0
+        }
+      ],
+      "summary": {
+        "total_lines": 45,
+        "ai_lines": 25,
+        "ai_modified_lines": 3,
+        "human_lines": 2,
+        "original_lines": 15,
+        "unknown_lines": 0
+      }
     }
   ],
   "summary": {
@@ -109,14 +125,6 @@ Output:
   }
 }
 ```
-
-### Markdown Output
-
-```bash
-whogitit show --format markdown HEAD
-```
-
-Useful for including in documentation or PR descriptions.
 
 ## Output Details
 
@@ -139,7 +147,8 @@ Lists all prompts used during the session, with:
 
 For each file with AI changes:
 - File path
-- Line counts by attribution type
+- Line-level attributions (`files[].lines`)
+- Aggregated line counts (`files[].summary`)
 - Total lines
 
 ### Summary Section
@@ -152,7 +161,7 @@ Aggregate statistics across all files:
 
 ## Notes
 
-- If a commit has no AI attribution, the command will indicate this
+- If a commit has no AI attribution, JSON output includes `"has_attribution": false`
 - Prompts are shown truncated; use `whogitit prompt` for full text
 - The commit can be specified as SHA, branch name, tag, or any git revision
 

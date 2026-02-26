@@ -18,7 +18,7 @@ The output focuses on **additions** (lines added in the commit range), making it
 
 | Option | Description |
 |--------|-------------|
-| `--base <REF>` | Base branch/commit to compare against (default: `main`) |
+| `--base <REF>` | Base branch/commit to compare against (default: first commit in repo) |
 | `--head <REF>` | Head branch/commit (default: `HEAD`) |
 | `--format <FORMAT>` | Output format: `pretty` (default), `json`, `markdown` |
 
@@ -32,7 +32,7 @@ whogitit summary --base main
 
 Output:
 
-```
+```text
 AI Attribution Summary
 ======================
 
@@ -100,6 +100,8 @@ whogitit summary --base main --format json
 
 ```json
 {
+  "schema_version": 1,
+  "schema": "whogitit.summary.v1",
   "commits_analyzed": 5,
   "commits_with_ai": 3,
   "additions": {

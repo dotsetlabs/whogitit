@@ -4,7 +4,7 @@ whogitit uses two hook systems: Claude Code hooks for capturing changes, and git
 
 ## Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Claude Code Hooks                          │
 │                                                                 │
@@ -109,7 +109,7 @@ The capture script (`hooks/whogitit-capture.sh`) handles:
 
 ### PreToolUse Flow
 
-```
+```text
 1. Hook receives JSON with tool_name and file_path
 2. If Edit/Write: save current file content as "before" snapshot
 3. If Bash: snapshot all dirty files in repo
@@ -117,7 +117,7 @@ The capture script (`hooks/whogitit-capture.sh`) handles:
 
 ### PostToolUse Flow
 
-```
+```text
 1. Hook receives JSON with tool_name, file_path, transcript_path
 2. If Edit/Write: save file content as "after" snapshot
 3. If Bash: compare file states, detect which changed

@@ -35,7 +35,7 @@ whogitit uses a sophisticated three-way diff algorithm to accurately attribute l
 
 ### How It Works
 
-```
+```text
 Original Content          AI Generates           You Modify            Final Commit
       │                        │                      │                      │
       ▼                        ▼                      ▼                      ▼
@@ -108,7 +108,7 @@ Before a commit, whogitit stores captured changes in a **pending buffer** (`.who
 
 ### Pending Buffer Lifecycle
 
-```
+```text
 Claude Code Edit
        │
        ▼

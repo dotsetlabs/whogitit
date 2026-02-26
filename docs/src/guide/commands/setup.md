@@ -26,7 +26,7 @@ The `setup` command performs one-time global configuration to integrate whogitit
 
 ## Example Output
 
-```
+```text
 Setting up whogitit for Claude Code...
 
   Installed capture hook to ~/.claude/hooks/whogitit-capture.sh

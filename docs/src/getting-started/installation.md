@@ -53,8 +53,8 @@ whogitit --version
 
 You should see output like:
 
-```
-whogitit 0.2.0
+```text
+whogitit 1.0.0
 ```
 
 ## Quick Setup (Recommended)
@@ -94,7 +94,7 @@ whogitit doctor
 
 This checks all configuration and shows any issues:
 
-```
+```text
 [OK] whogitit binary: Installed and running
 [OK] Capture hook: Installed at ~/.claude/hooks/whogitit-capture.sh
 [OK] Hook permissions: Executable

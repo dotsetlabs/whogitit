@@ -2,13 +2,25 @@
 
 This document describes the JSON schemas used by whogitit.
 
+## Versioning
+
+whogitit uses two versioning mechanisms:
+
+- `version` in git-note attribution payloads (`AIAttribution`)
+- `schema_version` in machine-readable CLI command output
+
+Current values:
+
+- `AIAttribution.version = 3`
+- CLI machine output `schema_version = 1`
+
 ## AIAttribution (Git Notes)
 
-The primary data structure stored in git notes:
+Attribution attached to commits in `refs/notes/whogitit`:
 
 ```json
 {
-  "schema_version": 2,
+  "version": 3,
   "session": {
     "session_id": "7f3a4b2c-9d1e-8a7b-c3d4-e5f6a7b8c9d0",
     "model": {
@@ -16,80 +28,75 @@ The primary data structure stored in git notes:
       "provider": "anthropic"
     },
     "started_at": "2026-01-30T14:23:17Z",
-    "cwd": "/path/to/project"
+    "prompt_count": 2,
+    "used_plan_mode": false,
+    "subagent_count": 0
   },
   "prompts": [
     {
       "index": 0,
       "text": "Add user authentication with bcrypt...",
-      "affected_files": ["src/auth.rs", "src/main.rs"],
-      "timestamp": "2026-01-30T14:23:45Z"
+      "timestamp": "2026-01-30T14:23:45Z",
+      "affected_files": ["src/auth.rs", "src/main.rs"]
     }
   ],
   "files": [
     {
       "path": "src/auth.rs",
       "lines": [
-        {"line_number": 1, "source": "AI", "prompt_index": 0},
-        {"line_number": 2, "source": "AI", "prompt_index": 0},
-        {"line_number": 3, "source": "AIModified", "prompt_index": 0},
-        {"line_number": 4, "source": "Human", "prompt_index": null},
-        {"line_number": 5, "source": "Original", "prompt_index": null}
+        {
+          "line_number": 1,
+          "content": "use anyhow::Result;",
+          "source": {
+            "type": "AI",
+            "edit_id": "8f5c3d6a-4f95-4fa9-8d11-2d54f12e6f01"
+          },
+          "edit_id": "8f5c3d6a-4f95-4fa9-8d11-2d54f12e6f01",
+          "prompt_index": 0,
+          "confidence": 1.0
+        }
       ],
       "summary": {
-        "ai_lines": 2,
-        "ai_modified_lines": 1,
-        "human_lines": 1,
-        "original_lines": 1
+        "total_lines": 45,
+        "ai_lines": 25,
+        "ai_modified_lines": 3,
+        "human_lines": 2,
+        "original_lines": 15,
+        "unknown_lines": 0
       }
     }
   ]
 }
 ```
 
-### Schema Fields
+### AIAttribution fields
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `schema_version` | number | Format version (currently 2) |
-| `session` | object | AI session information |
-| `prompts` | array | Prompts used in this commit |
+| `version` | number | Attribution schema version (current: 3) |
+| `session` | object | Session metadata |
+| `prompts` | array | Prompt records |
 | `files` | array | Per-file attribution |
 
-### Session Object
+### Line source in git notes
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `session_id` | string | Unique session identifier |
-| `model.id` | string | Model identifier |
-| `model.provider` | string | Model provider |
-| `started_at` | string | ISO 8601 timestamp |
-| `cwd` | string | Working directory |
+Line source is serialized as a tagged enum:
 
-### Prompt Object
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `index` | number | Order within session |
-| `text` | string | Prompt text (may be redacted) |
-| `affected_files` | array | Files changed by this prompt |
-| `timestamp` | string | When prompt was given |
-
-### LineAttribution Object
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `line_number` | number | 1-indexed line number |
-| `source` | string | `AI`, `AIModified`, `Human`, `Original`, `Unknown` |
-| `prompt_index` | number\|null | Index of generating prompt |
+| `source.type` | Extra fields |
+|---------------|--------------|
+| `Original` | none |
+| `AI` | `edit_id` |
+| `AIModified` | `edit_id`, `similarity` |
+| `Human` | none |
+| `Unknown` | none |
 
 ## PendingBuffer
 
-Temporary storage during editing session:
+Temporary attribution buffer stored in `.whogitit-pending.json`:
 
 ```json
 {
-  "schema_version": 2,
+  "version": 3,
   "session": {
     "session_id": "7f3a4b2c-9d1e-8a7b-c3d4-e5f6a7b8c9d0",
     "model": {
@@ -97,57 +104,116 @@ Temporary storage during editing session:
       "provider": "anthropic"
     },
     "started_at": "2026-01-30T14:23:17Z",
-    "cwd": "/path/to/project"
+    "prompt_count": 1,
+    "prompts": [
+      {
+        "index": 0,
+        "text": "Refactor auth middleware",
+        "timestamp": "2026-01-30T14:23:45Z",
+        "affected_files": ["src/auth.rs"],
+        "redaction_events": []
+      }
+    ]
   },
-  "files": {
+  "file_histories": {
     "src/auth.rs": {
-      "original_content": "// Original file content\n...",
+      "path": "src/auth.rs",
+      "original": {
+        "content": "old content",
+        "content_hash": "4f9e5f2c...",
+        "timestamp": "2026-01-30T14:23:44Z",
+        "line_count": 10
+      },
       "edits": [
         {
-          "content": "// After first AI edit\n...",
+          "edit_id": "8f5c3d6a-4f95-4fa9-8d11-2d54f12e6f01",
+          "prompt": "Refactor auth middleware",
           "prompt_index": 0,
+          "tool": "Edit",
+          "before": { "content": "old content", "content_hash": "4f9e5f2c...", "timestamp": "2026-01-30T14:23:44Z", "line_count": 10 },
+          "after": { "content": "new content", "content_hash": "12ab34cd...", "timestamp": "2026-01-30T14:23:45Z", "line_count": 12 },
           "timestamp": "2026-01-30T14:23:45Z",
-          "tool": "Edit"
-        },
-        {
-          "content": "// After second AI edit\n...",
-          "prompt_index": 1,
-          "timestamp": "2026-01-30T14:25:00Z",
-          "tool": "Write"
+          "context": {
+            "plan_mode": false,
+            "agent_depth": 0
+          }
         }
-      ]
+      ],
+      "was_new_file": false
     }
   },
-  "prompts": [
-    {
-      "index": 0,
-      "text": "Add user authentication...",
-      "affected_files": ["src/auth.rs"],
-      "timestamp": "2026-01-30T14:23:45Z"
-    }
-  ]
+  "prompt_counter": 1,
+  "audit_logging_enabled": false,
+  "total_redactions": 0
 }
 ```
 
-### FileEditHistory
+## Machine CLI Output Schemas
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `original_content` | string | File content before AI session |
-| `edits` | array | Sequence of AI edits |
+Machine output is versioned with:
 
-### AIEdit
+```json
+{
+  "schema_version": 1,
+  "schema": "whogitit.<command>.v1"
+}
+```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `content` | string | File content after this edit |
-| `prompt_index` | number | Which prompt triggered this |
-| `timestamp` | string | When edit occurred |
-| `tool` | string | `Edit` or `Write` |
+### `blame --format json` (`whogitit.blame.v1`)
 
-## Export Format
+Top-level fields:
 
-Output of `whogitit export`:
+- `schema_version`, `schema`
+- `file`, `revision`
+- `lines[]`
+- `summary`
+
+`lines[].source` uses a stable, lowercase tagged format:
+
+| `source.type` | Extra fields |
+|---------------|--------------|
+| `original` | none |
+| `ai` | `edit_id` |
+| `ai_modified` | `edit_id`, `similarity` |
+| `human` | none |
+| `unknown` | none |
+
+### `prompt --format json` (`whogitit.prompt.v1`)
+
+Top-level fields:
+
+- `schema_version`, `schema`
+- `query` (input reference + resolved file/line/revision)
+- `line` (resolved line attribution)
+- `commit`
+- `prompt` (nullable)
+- `session`
+
+### `show --format json` (`whogitit.show.v1`)
+
+Top-level fields:
+
+- `schema_version`, `schema`
+- `has_attribution`
+- `commit`, `commit_short`
+- `attribution_version` (present when attribution exists)
+- `session`, `prompts`, `files`
+- `summary` (totals)
+
+### `summary --format json` (`whogitit.summary.v1`)
+
+Top-level fields:
+
+- `schema_version`, `schema`
+- `commits_analyzed`, `commits_with_ai`
+- `additions` (AI/AI-modified/human totals)
+- `ai_percentage`
+- `files`
+- `models`
+
+### `export --format json`
+
+`export` uses `export_version`:
 
 ```json
 {
@@ -157,185 +223,33 @@ Output of `whogitit export`:
     "since": "2026-01-01",
     "until": "2026-01-31"
   },
-  "commits": [
-    {
-      "commit_id": "abc123def456789...",
-      "commit_short": "abc123d",
-      "message": "Add user authentication",
-      "author": "Greg King",
-      "committed_at": "2026-01-30T14:30:00Z",
-      "session_id": "7f3a4b2c-9d1e-8a7b-c3d4-e5f6a7b8c9d0",
-      "model": "claude-opus-4-5-20251101",
-      "ai_lines": 145,
-      "ai_modified_lines": 12,
-      "human_lines": 43,
-      "original_lines": 50,
-      "files": ["src/auth.rs", "src/main.rs"],
-      "prompts": [
-        {
-          "index": 0,
-          "text": "Add user authentication...",
-          "affected_files": ["src/auth.rs"]
-        }
-      ]
-    }
-  ],
-  "summary": {
-    "total_commits": 10,
-    "commits_with_ai": 7,
-    "total_ai_lines": 523,
-    "total_ai_modified_lines": 45,
-    "total_human_lines": 128,
-    "total_original_lines": 89,
-    "total_prompts": 15
-  }
+  "commits": [],
+  "summary": {}
 }
 ```
 
-## Annotations Output Format
+### `annotations --format json`
 
-Output of `whogitit annotations --format github-checks`:
+Top-level fields:
 
-```json
-{
-  "annotations": [
-    {
-      "path": "src/main.rs",
-      "start_line": 42,
-      "end_line": 48,
-      "annotation_level": "notice",
-      "title": "AI Generated (7 lines)",
-      "message": "Model: claude-opus-4-5-20251101 | Session: 2024-01-15\n\n**Breakdown:** 5 AI, 2 AI-modified, 0 human, 0 original\n\n**Prompt:** Add error handling...",
-      "raw_details": "Add error handling with retry logic..."
-    }
-  ],
-  "summary": {
-    "files_analyzed": 5,
-    "models": ["claude-opus-4-5-20251101", "claude-sonnet-4-20250514"],
-    "session_range": "2024-01-15 to 2024-01-20"
-  }
-}
-```
-
-### Annotation Object
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `path` | string | File path relative to repository root |
-| `start_line` | number | Starting line number (1-indexed) |
-| `end_line` | number | Ending line number (inclusive) |
-| `annotation_level` | string | Always `notice` for AI attribution |
-| `title` | string | Short title (e.g., "AI Generated (7 lines)") |
-| `message` | string | Detailed message with model, breakdown, and prompt |
-| `raw_details` | string\|null | Full prompt text (optional) |
-
-### Summary Object
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `files_analyzed` | number | Number of files with AI attribution |
-| `models` | array | All AI models used across the commits |
-| `session_range` | string\|null | Date range (e.g., "2024-01-15 to 2024-01-20") |
-
-### Annotation Title Formats
-
-| Source Type | Title Format |
-|-------------|--------------|
-| AI | "AI Generated (N lines)" |
-| AIModified | "AI Modified (N lines)" |
-| AIRelated (grouped) | "AI Related (N lines: X AI, Y AI-modified)" |
-| File-level (new) | "New file (N lines) generated by AI" |
-| File-level (existing) | "X% AI-generated (N of M lines)" |
+- `schema_version`, `schema` (`whogitit.annotations.v1`)
+- `annotations[]`
+- `summary`
 
 ## Audit Log Format
 
-Each line in `.whogitit/audit.jsonl` is a JSON object, including `prev_hash` and
-`event_hash` fields for tamper‑evident chaining:
+Each line in `.whogitit/audit.jsonl` is a JSON object.
 
-`event_hash` is computed over the event content including `prev_hash`, so any
-reordering or tampering breaks the chain. Malformed lines cause verification
-to fail.
+Example:
 
 ```json
-{"timestamp":"2026-01-30T14:23:15Z","event":"Delete","details":{"commit":"abc123d","user":"greg","reason":"Retention policy"}}
-{"timestamp":"2026-01-28T10:15:00Z","event":"Export","details":{"commit_count":45,"format":"json","user":"greg"}}
-{"timestamp":"2026-01-25T09:00:00Z","event":"RetentionApply","details":{"commits":12,"user":"greg","reason":"Quarterly"}}
-{"timestamp":"2026-01-20T16:30:00Z","event":"ConfigChange","details":{"user":"greg","field":"max_age_days"}}
-{"timestamp":"2026-01-15T11:45:00Z","event":"Redaction","details":{"pattern_name":"API_KEY","redaction_count":3}}
+{"timestamp":"2026-01-30T14:23:15Z","event":"delete","commit":"abc123d","reason":"Retention policy","user":"greg","prev_hash":"1a2b3c4d","event_hash":"5e6f7a8b"}
 ```
 
-### Event Types
+Current event types:
 
-| Type | Description | Details Fields |
-|------|-------------|----------------|
-| `Delete` | Attribution deleted | `commit`, `user`, `reason` |
-| `Export` | Data exported | `commit_count`, `format`, `user` |
-| `RetentionApply` | Retention policy applied | `commits`, `user`, `reason` |
-| `ConfigChange` | Configuration changed | `user`, `field` |
-| `Redaction` | Sensitive data redacted | `pattern_name`, `redaction_count` |
-
-## Configuration Format
-
-`.whogitit.toml`:
-
-```toml
-[privacy]
-enabled = true
-use_builtin_patterns = true
-disabled_patterns = ["EMAIL"]
-audit_log = true
-
-[[privacy.custom_patterns]]
-name = "INTERNAL_ID"
-pattern = "INT-[A-Z0-9]{8}"
-description = "Internal IDs"
-
-[retention]
-max_age_days = 365
-auto_purge = false
-retain_refs = ["refs/heads/main"]
-min_commits = 100
-```
-
-See [Configuration](../guide/configuration.md) for full reference.
-
-## Hook Input Format
-
-JSON passed to hooks via stdin:
-
-```json
-{
-  "tool_name": "Edit",
-  "tool_input": {
-    "file_path": "/path/to/file.rs",
-    "old_string": "...",
-    "new_string": "..."
-  },
-  "transcript_path": "/tmp/claude-transcript-xyz.jsonl"
-}
-```
-
-For `Write` tool:
-
-```json
-{
-  "tool_name": "Write",
-  "tool_input": {
-    "file_path": "/path/to/file.rs",
-    "content": "..."
-  },
-  "transcript_path": "/tmp/claude-transcript-xyz.jsonl"
-}
-```
-
-## Version History
-
-| Version | Changes |
-|---------|---------|
-| 2 | Current version. Full content snapshots. |
-| 1 | Initial version. Diff-based storage. (deprecated) |
-
-## See Also
-
-- [Architecture](./architecture.md) - System design
-- [Git Notes Storage](./git-notes.md) - Notes implementation
+- `delete`
+- `export`
+- `retention_apply`
+- `config_change`
+- `redaction`

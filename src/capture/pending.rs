@@ -141,18 +141,7 @@ impl PendingBuffer {
             None => (prompt.to_string(), Vec::new()),
         };
 
-        let prompt_index = self.prompt_counter;
-        self.prompt_counter += 1;
-        self.session.prompt_count = self.prompt_counter;
-
-        // Record the prompt with optional redaction events
-        self.session.prompts.push(PromptRecord {
-            index: prompt_index,
-            text: redacted_prompt.clone(),
-            timestamp: Utc::now().to_rfc3339(),
-            affected_files: vec![path.to_string()],
-            redaction_events,
-        });
+        let prompt_index = self.record_prompt(path, redacted_prompt.clone(), redaction_events);
 
         // Get or create file history
         let history = self
@@ -204,18 +193,7 @@ impl PendingBuffer {
             None => (prompt.to_string(), Vec::new()),
         };
 
-        let prompt_index = self.prompt_counter;
-        self.prompt_counter += 1;
-        self.session.prompt_count = self.prompt_counter;
-
-        // Record the prompt with optional redaction events
-        self.session.prompts.push(PromptRecord {
-            index: prompt_index,
-            text: redacted_prompt.clone(),
-            timestamp: Utc::now().to_rfc3339(),
-            affected_files: vec![path.to_string()],
-            redaction_events,
-        });
+        let prompt_index = self.record_prompt(path, redacted_prompt.clone(), redaction_events);
 
         // Get or create file history
         let history = self
@@ -299,6 +277,9 @@ impl PendingBuffer {
     pub fn clear(&mut self) {
         self.file_histories.clear();
         self.session.prompts.clear();
+        self.session.prompt_count = 0;
+        self.prompt_counter = 0;
+        self.total_redactions = 0;
     }
 
     /// Get a prompt by index
@@ -367,6 +348,42 @@ impl PendingBuffer {
         }
 
         Ok(())
+    }
+
+    /// Record a prompt in the session, de-duplicating consecutive identical prompts.
+    ///
+    /// Claude hooks can fire multiple times for the same user prompt. Reusing the last prompt
+    /// keeps note payloads smaller and associates all affected files with one prompt record.
+    fn record_prompt(
+        &mut self,
+        path: &str,
+        prompt_text: String,
+        redaction_events: Vec<RedactionEvent>,
+    ) -> u32 {
+        if let Some(last) = self.session.prompts.last_mut() {
+            if last.text == prompt_text {
+                if !last.affected_files.iter().any(|f| f == path) {
+                    last.affected_files.push(path.to_string());
+                }
+                if !redaction_events.is_empty() {
+                    last.redaction_events.extend(redaction_events);
+                }
+                return last.index;
+            }
+        }
+
+        let prompt_index = self.prompt_counter;
+        self.prompt_counter = self.prompt_counter.saturating_add(1);
+
+        self.session.prompts.push(PromptRecord {
+            index: prompt_index,
+            text: prompt_text,
+            timestamp: Utc::now().to_rfc3339(),
+            affected_files: vec![path.to_string()],
+            redaction_events,
+        });
+        self.session.prompt_count = self.session.prompts.len() as u32;
+        prompt_index
     }
 }
 
@@ -746,6 +763,25 @@ mod tests {
         assert_eq!(buffer.session.prompts.len(), 2);
         assert_eq!(buffer.session.prompts[0].text, "prompt 1");
         assert_eq!(buffer.session.prompts[1].text, "prompt 2");
+    }
+
+    #[test]
+    fn test_prompt_tracking_dedupes_consecutive_same_prompt() {
+        let mut buffer = PendingBuffer::new("test-session", "claude-opus-4-5-20251101");
+
+        buffer.record_edit("a.rs", None, "a\n", "Write", "shared prompt", None);
+        buffer.record_edit("b.rs", None, "b\n", "Write", "shared prompt", None);
+
+        assert_eq!(buffer.session.prompt_count, 1);
+        assert_eq!(buffer.session.prompts.len(), 1);
+        assert_eq!(buffer.session.prompts[0].affected_files.len(), 2);
+
+        let history_a = buffer.get_file_history("a.rs").unwrap();
+        let history_b = buffer.get_file_history("b.rs").unwrap();
+        assert_eq!(
+            history_a.edits[0].prompt_index,
+            history_b.edits[0].prompt_index
+        );
     }
 
     #[test]

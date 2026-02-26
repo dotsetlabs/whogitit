@@ -13,10 +13,13 @@ use git2::Repository;
 use serde::Serialize;
 
 use crate::capture::snapshot::LineSource;
+use crate::cli::output::MACHINE_OUTPUT_SCHEMA_VERSION;
 use crate::core::attribution::BlameLineResult;
 use crate::core::blame::AIBlamer;
 use crate::storage::notes::NotesStore;
 use crate::utils::truncate_prompt;
+
+const ANNOTATIONS_MACHINE_SCHEMA: &str = "whogitit.annotations.v1";
 
 /// Output format for annotations
 #[derive(Debug, Clone, Copy, Default, ValueEnum)]
@@ -24,7 +27,7 @@ pub enum AnnotationsFormat {
     /// GitHub Checks API format
     #[default]
     GithubChecks,
-    /// Plain JSON array
+    /// Machine-readable JSON output
     Json,
 }
 
@@ -495,16 +498,18 @@ pub fn run(args: AnnotationsArgs) -> Result<()> {
         .map(|c| c.annotation)
         .collect();
 
+    let summary = GithubChecksSummary {
+        files_analyzed: files_to_annotate.len(),
+        models,
+        session_range,
+    };
+
     // Output based on format
     match args.format {
         AnnotationsFormat::GithubChecks => {
             let output = GithubChecksOutput {
                 annotations,
-                summary: GithubChecksSummary {
-                    files_analyzed: files_to_annotate.len(),
-                    models,
-                    session_range,
-                },
+                summary,
             };
             println!(
                 "{}",
@@ -512,9 +517,15 @@ pub fn run(args: AnnotationsArgs) -> Result<()> {
             );
         }
         AnnotationsFormat::Json => {
+            let output = AnnotationsJsonOutput {
+                schema_version: MACHINE_OUTPUT_SCHEMA_VERSION,
+                schema: ANNOTATIONS_MACHINE_SCHEMA,
+                annotations,
+                summary,
+            };
             println!(
                 "{}",
-                serde_json::to_string_pretty(&annotations).unwrap_or_else(|_| "[]".to_string())
+                serde_json::to_string_pretty(&output).unwrap_or_else(|_| "{}".to_string())
             );
         }
     }
@@ -799,7 +810,7 @@ struct GithubChecksOutput {
     summary: GithubChecksSummary,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 struct GithubChecksSummary {
     files_analyzed: usize,
     /// All models used across the analyzed commits
@@ -807,6 +818,15 @@ struct GithubChecksSummary {
     /// Session time range (e.g., "2024-01-15 to 2024-01-20")
     #[serde(skip_serializing_if = "Option::is_none")]
     session_range: Option<String>,
+}
+
+/// Stable machine output for `annotations --format json`.
+#[derive(Debug, Serialize)]
+struct AnnotationsJsonOutput {
+    schema_version: u8,
+    schema: &'static str,
+    annotations: Vec<CheckAnnotation>,
+    summary: GithubChecksSummary,
 }
 
 /// Grouped annotations for a contiguous range of AI lines
@@ -1312,5 +1332,36 @@ mod tests {
         assert!(json.contains("\"files_analyzed\":3"));
         // session_range should be omitted when None
         assert!(!json.contains("session_range"));
+    }
+
+    #[test]
+    fn test_annotations_json_output_has_schema_metadata() {
+        let output = AnnotationsJsonOutput {
+            schema_version: MACHINE_OUTPUT_SCHEMA_VERSION,
+            schema: ANNOTATIONS_MACHINE_SCHEMA,
+            annotations: vec![CheckAnnotation {
+                path: "src/main.rs".to_string(),
+                start_line: 1,
+                end_line: 1,
+                annotation_level: AnnotationLevel::Notice,
+                title: "AI Generated (1 line)".to_string(),
+                message: "Model: claude-opus-4-5-20251101".to_string(),
+                raw_details: None,
+            }],
+            summary: GithubChecksSummary {
+                files_analyzed: 1,
+                models: vec!["claude-opus-4-5-20251101".to_string()],
+                session_range: Some("2024-01-15".to_string()),
+            },
+        };
+
+        let json = serde_json::to_value(&output).unwrap();
+        assert_eq!(
+            json["schema_version"],
+            serde_json::Value::from(MACHINE_OUTPUT_SCHEMA_VERSION)
+        );
+        assert_eq!(json["schema"], ANNOTATIONS_MACHINE_SCHEMA);
+        assert!(json["annotations"].is_array());
+        assert!(json["summary"].is_object());
     }
 }

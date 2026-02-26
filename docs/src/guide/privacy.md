@@ -7,12 +7,12 @@ whogitit automatically redacts sensitive information from prompts before storing
 When a prompt is captured, whogitit scans it against a set of patterns and replaces matches with `[REDACTED]`:
 
 **Before:**
-```
+```text
 Add authentication using api_key = sk-12345abcdef
 ```
 
 **After (stored):**
-```
+```text
 Add authentication using api_key = [REDACTED]
 ```
 
@@ -54,7 +54,7 @@ whogitit redact-test "Connect using api_key=sk-secret123 and email user@example.
 
 Output:
 
-```
+```text
 Original:
   Connect using api_key=sk-secret123 and email user@example.com
 
@@ -163,7 +163,7 @@ whogitit audit --event-type redaction
 
 Output:
 
-```
+```text
 2026-01-30 14:23:15 redaction pattern:API_KEY redactions:2
 2026-01-30 14:20:00 redaction pattern:EMAIL redactions:1
 ```
@@ -205,12 +205,12 @@ If certain patterns are matching frequently, they're working. If sensitive data 
 Instead of including secrets in prompts, reference environment variables:
 
 **Instead of:**
-```
+```text
 Connect to postgres://user:password@host/db
 ```
 
 **Use:**
-```
+```text
 Connect using the DATABASE_URL environment variable
 ```
 

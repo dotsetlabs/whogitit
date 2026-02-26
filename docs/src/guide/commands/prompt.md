@@ -5,7 +5,7 @@ View the prompt that generated specific lines of code.
 ## Synopsis
 
 ```bash
-whogitit prompt [OPTIONS] <FILE:LINE>
+whogitit prompt [OPTIONS] <REFERENCE>
 ```
 
 ## Description
@@ -16,7 +16,7 @@ The `prompt` command retrieves and displays the prompt that was used to generate
 
 | Argument | Description |
 |----------|-------------|
-| `<FILE:LINE>` | File path and line number (e.g., `src/main.rs:42`) |
+| `<REFERENCE>` | File path, optionally with line number (e.g., `src/main.rs:42` or `src/main.rs`) |
 
 ## Options
 
@@ -24,6 +24,7 @@ The `prompt` command retrieves and displays the prompt that was used to generate
 |--------|-------------|
 | `--revision <REF>` | Look up prompt at a specific revision (default: HEAD) |
 | `--format <FORMAT>` | Output format: `pretty` (default), `json` |
+| `--json` | Output as JSON (legacy alias for `--format json`) |
 
 ## Examples
 
@@ -35,7 +36,7 @@ whogitit prompt src/main.rs:42
 
 Output:
 
-```
+```text
 ╔════════════════════════════════════════════════════════════════════╗
 ║  PROMPT #2 in session 7f3a-4b2c-9d1e...                            ║
 ║  Model: claude-opus-4-5-20251101 | 2026-01-30T14:23:17Z            ║
@@ -66,21 +67,38 @@ Output:
 
 ```json
 {
-  "prompt": {
-    "index": 2,
-    "text": "Add JWT token generation with 24-hour expiration. Use the jsonwebtoken crate. The function should take a user_id and return a Result<String>.",
-    "affected_files": ["src/auth.rs", "src/main.rs"]
+  "schema_version": 1,
+  "schema": "whogitit.prompt.v1",
+  "query": {
+    "reference": "src/main.rs:42",
+    "file": "src/main.rs",
+    "line_number": 42,
+    "revision": "HEAD"
+  },
+  "line": {
+    "line_number": 42,
+    "content": "    let token = generate_jwt(user_id)?;",
+    "source": {
+      "type": "ai",
+      "edit_id": "8f5c3d6a-4f95-4fa9-8d11-2d54f12e6f01"
+    },
+    "prompt_index": 2
+  },
+  "commit": {
+    "id": "d4e5f6gabcdef1234567890",
+    "short": "d4e5f6g",
+    "author": "Greg King"
   },
   "session": {
-    "session_id": "7f3a-4b2c-9d1e-8a7b",
+    "id": "7f3a-4b2c-9d1e-8a7b",
     "model": "claude-opus-4-5-20251101",
     "started_at": "2026-01-30T14:23:17Z"
   },
-  "line": {
-    "file": "src/main.rs",
-    "line_number": 42,
-    "source": "AI",
-    "content": "    let token = generate_jwt(user_id)?;"
+  "prompt": {
+    "index": 2,
+    "text": "Add JWT token generation with 24-hour expiration. Use the jsonwebtoken crate. The function should take a user_id and return a Result<String>.",
+    "timestamp": "2026-01-30T14:23:45Z",
+    "affected_files": ["src/auth.rs", "src/main.rs"]
   }
 }
 ```

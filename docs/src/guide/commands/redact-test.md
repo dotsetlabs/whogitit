@@ -49,7 +49,7 @@ whogitit redact-test --text "My API key is api_key=sk-1234567890"
 ```
 
 Output:
-```
+```text
 Redacted output:
 My API key is api_key=[REDACTED]
 ```
@@ -67,7 +67,7 @@ whogitit redact-test --list-patterns
 ```
 
 Output:
-```
+```text
 Available Redaction Patterns
 ==================================================
 API_KEY          Generic API key patterns
@@ -85,7 +85,7 @@ whogitit redact-test --text "email: user@example.com, key: sk-123" --matches-onl
 ```
 
 Output:
-```
+```text
 Sensitive data 2 found:
 
   EMAIL            user@example.com
@@ -101,7 +101,7 @@ whogitit redact-test --text "password=secret123" --audit
 ```
 
 Output:
-```
+```text
 Audit Trail: 1 redactions made:
 
   Pattern: PASSWORD  Range: (9, 18)  Preview: secret123

@@ -15,6 +15,13 @@ Track AI-generated code at line-level granularity. Know exactly which lines were
 - **Audit logging** - Track deletions, exports, and configuration changes
 - **Export capabilities** - Bulk export attribution data as JSON or CSV
 
+## Release Notes
+
+- Current release: **1.0.0**
+- Upgrade notes: [docs/src/appendix/migrating-to-1.0.md](docs/src/appendix/migrating-to-1.0.md)
+- Full changelog: [CHANGELOG.md](CHANGELOG.md)
+- Release process: [RELEASE.md](RELEASE.md)
+
 ## Installation
 
 ### Quick Install (Recommended)
@@ -212,8 +219,8 @@ whogitit export --full-prompts            # Include full prompt text
 
 Options:
 - `--format json|csv` - Output format (default: json)
-- `--since <date>` - Only commits after date (YYYY-MM-DD)
-- `--until <date>` - Only commits before date
+- `--since <date>` - Only commits on or after date (YYYY-MM-DD)
+- `--until <date>` - Only commits on or before date
 - `-o, --output <file>` - Output file (default: stdout)
 - `--full-prompts` - Include full prompt text (default: truncated)
 

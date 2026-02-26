@@ -63,14 +63,8 @@ pub fn run(args: AuditArgs) -> Result<()> {
 
     // Filter by event type
     if let Some(event_type_str) = &args.event_type {
-        let event_type = match event_type_str.as_str() {
-            "delete" => AuditEventType::Delete,
-            "export" => AuditEventType::Export,
-            "retention_apply" => AuditEventType::RetentionApply,
-            "config_change" => AuditEventType::ConfigChange,
-            "redaction" => AuditEventType::Redaction,
-            _ => anyhow::bail!("Unknown event type: {}", event_type_str),
-        };
+        let event_type = parse_event_type(event_type_str)
+            .ok_or_else(|| anyhow::anyhow!("Unknown event type: {}", event_type_str))?;
         events.retain(|e| e.event == event_type);
     }
 
@@ -136,6 +130,9 @@ fn print_events(events: &[crate::storage::audit::AuditEvent]) -> Result<()> {
         if let Some(count) = details.redaction_count {
             detail_parts.push(format!("redactions:{}", count));
         }
+        if let Some(field) = &details.field {
+            detail_parts.push(format!("field:{}", field));
+        }
         if let Some(user) = &details.user {
             detail_parts.push(format!("user:{}", user));
         }
@@ -155,7 +152,6 @@ fn print_events(events: &[crate::storage::audit::AuditEvent]) -> Result<()> {
 }
 
 /// Parse event type string to AuditEventType
-#[allow(dead_code)]
 fn parse_event_type(s: &str) -> Option<AuditEventType> {
     match s {
         "delete" => Some(AuditEventType::Delete),

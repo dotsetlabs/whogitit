@@ -145,7 +145,7 @@ This PR contains **3** of **5** commits with AI-assisted changes.
 <details>
 <summary>Add user authentication with bcrypt password hashing...</summary>
 
-```
+```text
 Add user authentication with bcrypt password hashing. Create a User struct
 with email and password_hash fields. Implement register and login functions
 that return Result types.
