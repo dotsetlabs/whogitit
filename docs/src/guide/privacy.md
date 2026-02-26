@@ -24,14 +24,22 @@ whogitit includes patterns for common sensitive data:
 
 | Pattern | Examples |
 |---------|----------|
-| **API_KEY** | `api_key=xxx`, `apikey: xxx`, `secret=xxx` |
-| **AWS_ACCESS_KEY** | `AKIA...` (20 chars) |
-| **AWS_SECRET_KEY** | 40-character base64 strings |
-| **BEARER_TOKEN** | `Bearer eyJ...`, `Authorization: Bearer` |
+| **API_KEY** | `api_key=xxx`, `apikey: xxx`, `token=xxx` |
+| **AWS_KEY** | `AKIA...` and matching AWS secret keys |
+| **BEARER_TOKEN** | `Bearer eyJ...`, `Authorization: Bearer ...` |
 | **GITHUB_TOKEN** | `ghp_xxx`, `gho_xxx`, `ghs_xxx`, `ghr_xxx` |
-| **GOOGLE_API_KEY** | `AIza...` |
-| **SLACK_TOKEN** | `xoxb-xxx`, `xoxp-xxx` |
-| **JWT** | `eyJ...` JSON Web Tokens |
+| **GENERIC_SECRET** | Generic `secret=...`, `credential=...` assignments |
+| **DB_CONNECTION** | `postgres://user:pass@host/db`, similar DSNs |
+| **SLACK_TOKEN** | `xoxb-xxx`, `xoxp-xxx`, `xoxa-xxx` |
+| **STRIPE_KEY** | `sk_live_...`, `pk_test_...`, `rk_live_...` |
+| **JWT_TOKEN** | `eyJ...` JSON Web Tokens |
+| **GOOGLE_OAUTH** | `1//...` Google refresh tokens |
+| **MICROSOFT_OAUTH** | `0.A...` Microsoft/Azure refresh tokens |
+| **DOCKER_REGISTRY** | Docker registry `user:pass@registry` credentials |
+| **K8S_SECRET** | Kubernetes secret declarations/commands |
+| **BASE64_SECRET** | Long base64 values tied to secret-like keys |
+| **NPM_TOKEN** | `npm_...` authentication tokens |
+| **PYPI_TOKEN** | `pypi-AgEI...` API tokens |
 | **PASSWORD** | `password=xxx`, `passwd: xxx` |
 | **PRIVATE_KEY** | `-----BEGIN.*PRIVATE KEY-----` blocks |
 
@@ -49,22 +57,17 @@ whogitit includes patterns for common sensitive data:
 Use `redact-test` to see how your text would be redacted:
 
 ```bash
-whogitit redact-test "Connect using api_key=sk-secret123 and email user@example.com"
+whogitit redact-test --text "Connect using api_key=sk-secret123 and email user@example.com"
 ```
 
 Output:
 
 ```text
-Original:
-  Connect using api_key=sk-secret123 and email user@example.com
-
-Redacted:
-  Connect using api_key=[REDACTED] and email [REDACTED]
-
-Patterns matched:
-  - API_KEY (1 match)
-  - EMAIL (1 match)
+Redacted output:
+Connect using [REDACTED] and email [REDACTED]
 ```
+
+Use `--matches-only` to list exact pattern matches without printing redacted output.
 
 ### Testing Files
 
@@ -116,7 +119,7 @@ Patterns use Rust regex syntax (similar to PCRE):
 After adding patterns, verify they work:
 
 ```bash
-whogitit redact-test "Reference INT-ABC12345 for employee EMP123456"
+whogitit redact-test --text "Reference INT-ABC12345 for employee EMP123456"
 ```
 
 ## Disabling Patterns
@@ -176,7 +179,7 @@ Before enabling whogitit on a project, test redaction with representative prompt
 
 ```bash
 # Test various scenarios
-whogitit redact-test "Your typical prompt with api_key=xxx"
+whogitit redact-test --text "Your typical prompt with api_key=xxx"
 ```
 
 ### 2. Add Organization Patterns

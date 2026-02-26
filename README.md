@@ -223,6 +223,7 @@ Options:
 - `--until <date>` - Only commits on or before date
 - `-o, --output <file>` - Output file (default: stdout)
 - `--full-prompts` - Include full prompt text (default: truncated)
+- `--prompt-max-len <n>` - Max prompt length when not using `--full-prompts` (default: 100)
 
 ### `whogitit retention`
 

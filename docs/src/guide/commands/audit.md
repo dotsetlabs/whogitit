@@ -86,21 +86,21 @@ Output:
 [
   {
     "timestamp": "2026-01-30T14:23:15Z",
-    "event": "Delete",
-    "details": {
-      "commit": "abc123def456...",
-      "user": "greg",
-      "reason": "Retention policy"
-    }
+    "event": "delete",
+    "commit": "abc123def456...",
+    "reason": "Retention policy",
+    "user": "greg",
+    "prev_hash": null,
+    "event_hash": "5e6f7a8b9c0d1e2f5e6f7a8b9c0d1e2f"
   },
   {
     "timestamp": "2026-01-28T10:15:00Z",
-    "event": "Export",
-    "details": {
-      "commit_count": 45,
-      "format": "json",
-      "user": "greg"
-    }
+    "event": "export",
+    "format": "json",
+    "commit_count": 45,
+    "user": "greg",
+    "prev_hash": "5e6f7a8b9c0d1e2f5e6f7a8b9c0d1e2f",
+    "event_hash": "9a0b1c2d3e4f5a6b9a0b1c2d3e4f5a6b"
   }
 ]
 ```
@@ -119,8 +119,10 @@ whogitit audit --limit 100
 |-------|-------------|
 | Timestamp | When the event occurred |
 | Event type | Category of event (color-coded) |
-| Details | Event-specific information |
+| Event fields | Event-specific metadata (commit, format, field, etc.) |
 | Reason | User-provided reason (if any) |
+| Prev hash | Hash of previous event (tamper-evident chain) |
+| Event hash | Hash of this event (32 hex chars) |
 
 ### Event-Specific Details
 
@@ -135,13 +137,14 @@ whogitit audit --limit 100
 - `user`: Who performed the export
 
 **Retention events:**
-- `commits`: Number of commits affected
+- `commit_count`: Number of commits affected
 - `user`: Who applied the policy
 - `reason`: Provided reason
 
 **Config events:**
+- `field`: Configuration field that changed
 - `user`: Who changed the config
-- Details of what changed
+- `reason`: Why it changed
 
 **Redaction events:**
 - `pattern_name`: Which pattern matched

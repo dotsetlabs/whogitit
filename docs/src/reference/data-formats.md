@@ -243,8 +243,10 @@ Each line in `.whogitit/audit.jsonl` is a JSON object.
 Example:
 
 ```json
-{"timestamp":"2026-01-30T14:23:15Z","event":"delete","commit":"abc123d","reason":"Retention policy","user":"greg","prev_hash":"1a2b3c4d","event_hash":"5e6f7a8b"}
+{"timestamp":"2026-01-30T14:23:15Z","event":"config_change","field":"retention.max_age_days","reason":"Set retention to 365 days","user":"greg","prev_hash":"1a2b3c4d5e6f70811a2b3c4d5e6f7081","event_hash":"5e6f7a8b9c0d1e2f5e6f7a8b9c0d1e2f"}
 ```
+
+`prev_hash` and `event_hash` are 32-hex-character chain links (128 bits) used for tamper-evident integrity checks.
 
 Current event types:
 

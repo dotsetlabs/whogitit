@@ -118,20 +118,28 @@ Disable specific built-in patterns by name. Available patterns:
 
 | Name | Description |
 |------|-------------|
-| `API_KEY` | Generic API keys |
-| `AWS_ACCESS_KEY` | AWS access key IDs |
-| `AWS_SECRET_KEY` | AWS secret access keys |
-| `BEARER_TOKEN` | Bearer tokens in headers |
-| `CREDIT_CARD` | Credit card numbers |
+| `API_KEY` | API key and token assignments |
 | `EMAIL` | Email addresses |
+| `PASSWORD` | Password assignments |
+| `AWS_KEY` | AWS access keys and secret keys |
+| `PRIVATE_KEY` | PEM private key headers |
+| `BEARER_TOKEN` | Bearer authorization tokens |
 | `GITHUB_TOKEN` | GitHub personal access tokens |
-| `GOOGLE_API_KEY` | Google API keys |
-| `JWT` | JSON Web Tokens |
-| `PASSWORD` | Password patterns |
-| `PHONE` | Phone numbers |
-| `PRIVATE_KEY` | Private key blocks |
-| `SLACK_TOKEN` | Slack tokens |
-| `SSN` | Social Security Numbers |
+| `GENERIC_SECRET` | Generic secret/credential assignments |
+| `SSN` | US Social Security numbers |
+| `CREDIT_CARD` | Credit card numbers |
+| `PHONE` | US phone numbers |
+| `DB_CONNECTION` | Database connection strings |
+| `SLACK_TOKEN` | Slack API tokens |
+| `STRIPE_KEY` | Stripe API keys |
+| `JWT_TOKEN` | JWT tokens |
+| `GOOGLE_OAUTH` | Google OAuth refresh tokens |
+| `MICROSOFT_OAUTH` | Microsoft/Azure OAuth refresh tokens |
+| `DOCKER_REGISTRY` | Docker registry credentials |
+| `K8S_SECRET` | Kubernetes secret references |
+| `BASE64_SECRET` | Base64-encoded secret values |
+| `NPM_TOKEN` | npm authentication tokens |
+| `PYPI_TOKEN` | PyPI API tokens |
 
 ### audit_log
 
@@ -277,7 +285,7 @@ whogitit retention config
 Test redaction patterns:
 
 ```bash
-whogitit redact-test "Test string with api_key=secret123"
+whogitit redact-test --text "Test string with api_key=secret123"
 ```
 
 ## Environment Variables
